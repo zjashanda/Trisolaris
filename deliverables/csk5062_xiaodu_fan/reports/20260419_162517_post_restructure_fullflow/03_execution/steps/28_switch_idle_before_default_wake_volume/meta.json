@@ -1,0 +1,7 @@
+{
+  "name": "switch_idle_before_default_wake_volume",
+  "log_bytes": 0,
+  "proto_bytes": 0,
+  "mode": "idle_wait",
+  "duration_s": 22.0
+}

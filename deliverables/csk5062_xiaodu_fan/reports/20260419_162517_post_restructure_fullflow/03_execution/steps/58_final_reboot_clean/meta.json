@@ -1,0 +1,9 @@
+{
+  "name": "final_reboot_clean",
+  "log_bytes": 1312,
+  "proto_bytes": 0,
+  "mode": "shell",
+  "command": "reboot",
+  "capture_s": 10.0,
+  "ready_wait_s": 8.0
+}

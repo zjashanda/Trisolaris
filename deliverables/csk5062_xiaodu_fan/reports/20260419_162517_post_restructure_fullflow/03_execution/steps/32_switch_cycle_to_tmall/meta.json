@@ -1,0 +1,67 @@
+{
+  "name": "switch_cycle_to_tmall",
+  "log_bytes": 0,
+  "proto_bytes": 4,
+  "mode": "voice_sequence",
+  "texts": [
+    "小度小度",
+    "切换唤醒词"
+  ],
+  "audio_items": [
+    {
+      "text": "小度小度",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\wake_xiaodu_4731eaa547.wav",
+      "cached": true
+    },
+    {
+      "text": "切换唤醒词",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_2_a83a5be9e6.wav",
+      "cached": true
+    }
+  ],
+  "playback_output": [
+    {
+      "text": "小度小度",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\wake_xiaodu_4731eaa547.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": null,
+        "serial_bytes_during_playback": 0
+      }
+    },
+    {
+      "text": "切换唤醒词",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_2_a83a5be9e6.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": null,
+        "serial_bytes_during_playback": 0
+      }
+    }
+  ],
+  "between_wait_result": [
+    {
+      "reason": "max_wait",
+      "elapsed_s": 4.502
+    }
+  ],
+  "post_wait_s": 3.0
+}

@@ -1,0 +1,9 @@
+{
+  "name": "voice_invalid_proto",
+  "log_bytes": 0,
+  "proto_bytes": 0,
+  "mode": "protocol",
+  "payload_hex": "A5 FB 0B CC",
+  "pre_wait_s": 0.3,
+  "post_wait_s": 4.0
+}

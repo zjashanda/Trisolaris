@@ -1,0 +1,10 @@
+# Local Python/runtime noise
+__pycache__/
+*.py[cod]
+.venv/
+
+# Ephemeral raw execution workspace
+result/
+
+# Temporary nested repo backup markers used during root publish
+.git_codex_publish_backup/

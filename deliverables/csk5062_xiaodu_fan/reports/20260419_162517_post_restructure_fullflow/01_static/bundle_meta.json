@@ -1,0 +1,10 @@
+{
+  "firmware": "CSK5062小度风扇需求\\fw-csk5062_xiaodu_fan-v1.0.0.bin",
+  "device_key": "VID_8765&PID_5678:8_804B35B_1_0000",
+  "ports": {
+    "proto": "COM36@9600",
+    "log": "COM38@115200",
+    "ctrl": "COM39@115200"
+  },
+  "generated_at": "2026-04-19T16:25:17"
+}

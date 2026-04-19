@@ -1,0 +1,9 @@
+{
+  "name": "assist_reg_reboot",
+  "log_bytes": 1311,
+  "proto_bytes": 0,
+  "mode": "shell",
+  "command": "reboot",
+  "capture_s": 10.0,
+  "ready_wait_s": 8.0
+}

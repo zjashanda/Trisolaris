@@ -1,0 +1,4 @@
+interface:
+  display_name: "ListenAI Play"
+  short_description: "Probe and play on default or keyed devices"
+  default_prompt: "Play audio on the default render device or a specific ListenAI device key, and install laid first if needed."

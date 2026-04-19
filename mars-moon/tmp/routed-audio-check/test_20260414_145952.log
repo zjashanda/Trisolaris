@@ -1,0 +1,9 @@
+[14:59:52.665][INFO] 串口 /dev/ttyACM0 连接成功
+[14:59:54.666][INFO] 优先使用配置声卡播报：VID_8765&PID_5678:12345678
+[14:59:55.768][DEBUG] 串口读取异常: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+[14:59:55.828][DEBUG] 串口读取异常: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+[14:59:56.570][INFO] [listenai-play] Target VID_8765&PID_5678:12345678 -> plughw:2,0 (CSK6012Combo)
+[14:59:56.570][INFO] [listenai-play] Probe succeeded.
+[14:59:56.570][INFO] [listenai-play] Play iteration 1/1
+[14:59:56.570][INFO] [listenai-play] Playback finished.
+[14:59:59.708][INFO] 串口 /dev/ttyACM0 已关闭

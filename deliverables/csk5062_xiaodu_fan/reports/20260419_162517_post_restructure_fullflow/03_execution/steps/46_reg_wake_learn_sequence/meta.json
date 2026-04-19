@@ -1,0 +1,123 @@
+{
+  "name": "reg_wake_learn_sequence",
+  "log_bytes": 225,
+  "proto_bytes": 4,
+  "mode": "voice_sequence",
+  "texts": [
+    "小度小度",
+    "学习唤醒词",
+    "晴空万里",
+    "晴空万里"
+  ],
+  "audio_items": [
+    {
+      "text": "小度小度",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\wake_xiaodu_4731eaa547.wav",
+      "cached": true
+    },
+    {
+      "text": "学习唤醒词",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_2_6e63bf1277.wav",
+      "cached": true
+    },
+    {
+      "text": "晴空万里",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_3_189f8d1b4b.wav",
+      "cached": true
+    },
+    {
+      "text": "晴空万里",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_3_189f8d1b4b.wav",
+      "cached": true
+    }
+  ],
+  "playback_output": [
+    {
+      "text": "小度小度",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\wake_xiaodu_4731eaa547.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": null,
+        "serial_bytes_during_playback": 0
+      }
+    },
+    {
+      "text": "学习唤醒词",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_2_6e63bf1277.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": 1776588249.9111354,
+        "serial_bytes_during_playback": 37
+      }
+    },
+    {
+      "text": "晴空万里",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_3_189f8d1b4b.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": 1776588263.6397521,
+        "serial_bytes_during_playback": 37
+      }
+    },
+    {
+      "text": "晴空万里",
+      "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\dual_3_189f8d1b4b.wav",
+      "cached": true,
+      "output": [
+        "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+        "Probe succeeded.",
+        "Play iteration 1/1",
+        "Playback finished."
+      ],
+      "response_state": {
+        "saw_response": false,
+        "saw_play_start": false,
+        "saw_play_stop": false,
+        "last_data_at": 1776588277.1985846,
+        "serial_bytes_during_playback": 37
+      }
+    }
+  ],
+  "between_wait_result": [
+    {
+      "reason": "max_wait",
+      "elapsed_s": 4.502
+    },
+    {
+      "reason": "max_wait",
+      "elapsed_s": 4.503
+    },
+    {
+      "reason": "max_wait",
+      "elapsed_s": 4.508
+    }
+  ],
+  "post_wait_s": 3.0
+}

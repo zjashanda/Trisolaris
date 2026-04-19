@@ -1,0 +1,11 @@
+[15:05:34.962][INFO] 串口 /dev/ttyACM0 连接成功
+[15:05:36.964][INFO] 优先使用配置声卡播报：VID_8765&PID_5678:12345678
+[15:05:37.348][INFO] [listenai-play] Target VID_8765&PID_5678:12345678 -> plughw:2,0 (CSK6012Combo)
+[15:05:37.348][WARN] [listenai-play] ERROR: ERROR: aplay: main:834: audio open error: Device or resource busy
+[15:05:37.348][WARN] 指定声卡播报失败：VID_8765&PID_5678:12345678 | ERROR: ERROR: aplay: main:834: audio open error: Device or resource busy
+[15:05:37.486][WARN] 回退默认声卡播放：配置声卡不可用：VID_8765&PID_5678:12345678
+[15:05:39.443][INFO] [listenai-play] Target default render device -> ALSA default
+[15:05:39.444][INFO] [listenai-play] Probe succeeded.
+[15:05:39.444][INFO] [listenai-play] Play iteration 1/1
+[15:05:39.444][INFO] [listenai-play] Playback finished.
+[15:05:43.444][INFO] 串口 /dev/ttyACM0 已关闭

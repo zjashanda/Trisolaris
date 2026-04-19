@@ -1,0 +1,24 @@
+[15:08:07.193] __\\__\|_||_|\__/\__|   |___/_| |_|\___\_|_|
+[15:08:07.196] VER: 1.2@Jan 23 2026, Copyright: (c)2020 Listenai Co., Ltd.
+[15:08:07.197] root:/$ [2KSDK: V0.9.1000, Jan 23 2026 11:31:33!
+[15:08:07.197] root:/$
+[15:08:07.197] ============= Running Config =============
+[15:08:07.198] version         :VCC.03.02.00.24
+[15:08:07.198] volume          :           2
+[15:08:07.198] voice           :           1
+[15:08:07.199] work mode       :           0
+[15:08:07.199] wake word       :           0
+[15:08:07.199] curtain type    :           0
+[15:08:07.200] ==========================================
+[15:08:07.201] [2K[D] ADC_PDM_Initialize: ADM/PDM version: API = 0x100, DRV = 0x100
+[15:08:07.201] root:/$ [2KAADC: AGAIN=32dB DGAIN=0dB, CAPLESS=1 PGA=DIFF
+[15:08:07.202] root:/$ [2K[D] CLASSD_Initialize: CLASSD version: API = 0x100, DRV = 0x100
+[15:08:07.202] root:/$ [2KWDT_START
+[15:08:07.202] root:/$ [2KAADC: STEPSAMP=160
+[15:08:07.203] root:/$ [2KRES: From 0x30049b40 to 0x3019abe0, Total 345128 bytes
+[15:08:07.203] root:/$ [E][evs_event # event] algo tick same
+[15:08:07.204] [E][evs_event # event] algo tick same
+[15:08:07.204] [2KAADC: START
+[15:08:07.205] root:/$ vcc_power:5050
+[15:08:11.238] loglevel 4
+[15:08:12.239] root:/$

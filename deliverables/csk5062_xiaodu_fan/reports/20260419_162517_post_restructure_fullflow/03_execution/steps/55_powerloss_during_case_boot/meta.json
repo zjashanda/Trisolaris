@@ -1,0 +1,14 @@
+{
+  "name": "powerloss_during_case_boot",
+  "log_bytes": 1296,
+  "proto_bytes": 0,
+  "mode": "powercycle",
+  "commands": [
+    "uut-switch1.off",
+    "uut-switch2.off",
+    "uut-switch1.on"
+  ],
+  "cmd_delay_s": 0.35,
+  "capture_s": 10.0,
+  "ready_wait_s": 8.0
+}

@@ -1,0 +1,1056 @@
+﻿[BEGIN] 2026/4/17 18:12:33
+[2026/4/17 18:12:33.381] Disconnected from remote host(COM38) at 17:48:41.
+Type `help' to learn how to use Xshell prompt.
+[C:\~]$ 
+Connecting to COM38...
+[2026/4/17 18:12:33.484] Connected.
+[2026/4/17 18:12:33.484] 
+[2026/4/17 18:12:34.059] 
+[2026/4/17 18:12:34.215] root:/$ 
+[2026/4/17 18:12:34.365] root:/$ 
+[2026/4/17 18:12:34.516] root:/$ 
+[2026/4/17 18:12:34.636] root:/$ 
+[2026/4/17 18:12:40.569] root:/$ [D][algo_task # app_msg] type=0 len=354
+[2026/4/17 18:12:40.576] [D][algo_task # algo-task] wake up ready t[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:12:40.583] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":32398,"iresid":2,"ido asr mode
+[2026/4/17 18:12:40.591] [D][algo_task # algo-task] MODE=1
+[2026/4/17 18:12:40.630] uration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":172,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":32438,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:12:40.648] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:12:40.648] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:12:40.666] [D][algo_task # algo-task] play start
+[2026/4/17 18:12:40.685] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:12:40.685] [D][mini_td # mini-player] play id : 8
+[2026/4/17 18:12:41.190] [D][mini_td # algo-task] play stop
+[2026/4/17 18:12:42.898] [D][algo_task # app_msg] type=0 len=345
+[2026/4/17 18:12:42.911] [D][algo_task # algo-task] wake up ready to[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:12:42.929] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":2,"iresid":2,"idurat asr mode
+[2026/4/17 18:12:42.949] ion":40,"nfillerscore":0,"nkeywordscore":0,"ncm":223,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":42,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:12:42.962] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:12:42.962] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:12:42.991] [D][algo_task # algo-task] play start
+[2026/4/17 18:12:43.007] [D][evs_event # event] eD][mini_td # mini-player] play id : 8
+[2026/4/17 18:12:43.007] vt msg -> exit
+[2026/4/17 18:12:43.518] [D][mini_td # algo-task] play stop
+[2026/4/17 18:12:54.463] [D][algo_task # app_msg] type=0 len=348
+[2026/4/17 18:12:54.470] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:12:54.475] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:12:54.517] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":274,"iresid":2,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":184,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":314,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:12:54.526] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:12:54.526] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:12:54.555] [D][algo_task # algo-task] play start
+[2026/4/17 18:12:54.561] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:12:54.561] [D][mini_td # mini-player] play id : 8
+[2026/4/17 18:12:55.083] [D][mini_td # algo-task] play stop
+[2026/4/17 18:12:59.428] 
+[2026/4/17 18:12:59.548] root:/$ 
+[2026/4/17 18:13:00.084] root:/$ [D][algo_task # app_msg] type=0 len=348
+[2026/4/17 18:13:00.093] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:13:00.105] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:00.137] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":398,"iresid":2,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":152,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":438,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:13:00.137] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:13:00.144] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:13:00.177] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:00.184] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:00.184] [D][mini_td # mini-player] play id : 8
+[2026/4/17 18:13:00.706] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:03.940] [D][algo_task # app_msg] type=0 len=348
+[2026/4/17 18:13:03.952] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:13:03.952] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:03.990] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":478,"iresid":2,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":167,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":518,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:13:04.009] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:13:04.010] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:13:04.031] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:04.045] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:04.045] [D][mini_td # mini-player] play id : 7
+[2026/4/17 18:13:04.600] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:09.721] [D][algo_task # app_msg] type=0 len=348
+[2026/4/17 18:13:09.730] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:13:09.737] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:09.774] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":606,"iresid":2,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":165,"ncmThreshold":128,"keyword":"xiao3 du4 xiao3 du4","intentStr":"xiao3 du4 xiao3 du4","nDelayFrame":0,"nThrowFrame":646,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":1,"bAbsorb":0}]}
+[2026/4/17 18:13:09.785] [W][evs_event # app_client] keyword:xiao du xiao du
+[2026/4/17 18:13:09.785] [B][model_config] send msg:: A5 FA 01 BB 
+[2026/4/17 18:13:09.814] [D][algo_task # al[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:09.824] go-task] play start
+[2026/4/17 18:13:09.824] [D][mini_td # mini-player] play id : 7
+[2026/4/17 18:13:10.383] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:14.862] [D][algo_task # app_msg] type=0 len=371
+[2026/4/17 18:13:14.872] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:13:14.880] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:14.916] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":718,"iresid":23,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":212,"ncmThreshold":102,"keyword":"xue2 xi2 ming4 ling4 ci2","intentStr":"xue2 xi2 ming4 ling4 ci2","nRltIdx":4,"nDelayFrame":0,"nThrowFrame":758,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":0,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:13:14.924] [W][evs_event # app_client] keyword:xue xi ming ling ci
+[2026/4/17 18:13:14.935] [D][evs_event # algo-task] cmdlist get[0]: 0->0
+[2026/4/17 18:13:14.942] [D][evs_event # algo-task] Reg info: keyword[26]=da3 kai1 dian4 feng1 shan4, sensitivity=2, type=0, range=[2,10]
+[2026/4/17 18:13:14.964] [D][algo_task # al[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:14.973] go-task] play start
+[2026/4/17 18:13:14.973] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:14.980] [D][mini_td # mini-player] play id : 27
+[2026/4/17 18:13:14.989] AADC: STOPask # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30[2K
+[2026/4/17 18:13:14.995] root:/$ 064d80
+[2026/4/17 18:13:15.006] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:15.006] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:15.015] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:15.015] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:15.024] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:15.031] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:15.040] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:15.040] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:15.048] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:15.048] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:15.056] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:15.056] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:15.065] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:13:15.065] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:15.073] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:15.772] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:15.790] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:15.797] AADC: START
+[2026/4/17 18:13:18.134] root:/$ [D][mini_td # mini-player] play id : 38
+[2026/4/17 18:13:20.382] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:22.883] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:13:22.892] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:13:22.903] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:22.903] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:13:22.915] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 dian4 feng1 shan4,sensitivity=[I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:22.916] 2,type=0,range=[2,10]
+[2026/4/17 18:13:22.916] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:22.924] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:22.944] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:22.944] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:22.944] [D][algo_task # algo-task] ESR MLP [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:22.944] AADC: STOP
+[2026/4/17 18:13:22.952] root:/$ size: 1092384, FLASH, addr = 0x0x30064d[D][mini_td # mini-player] play id : 31
+[2026/4/17 18:13:22.969] 80
+[2026/4/17 18:13:22.970] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:22.970] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:22.981] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:22.981] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:22.981] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:23.012] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:23.019] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:23.046] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:13:23.046] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:23.046] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:23.735] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:23.744] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:23.750] AADC: START
+[2026/4/17 18:13:26.355] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:28.773] [D][algo_task # algo-task] regist_flag: 1, reg success count: 0, save cnt: 0
+[2026/4/17 18:13:28.773] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:13:28.773] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:28.784] [D][evs_event # algo-task] reg again!
+[2026/4/17 18:13:28.784] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:28.789] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:28.806] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:28.806] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:28.806] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:28.821] [D][algo_task # algo-task] ESR MLP size: 109[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:28.821] AADC: STOP
+[2026/4/17 18:13:28.821] root:/$ 2384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:13:28.821] [D][mini_td # mini-player] play id : 28
+[2026/4/17 18:13:28.836] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:28.855] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:28.855] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:28.855] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:28.855] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:28.874] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:28.874] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:28.874] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:28.891] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:28.892] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:28.892] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:28.892] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:28.908] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:13:28.908] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:28.908] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:29.609] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:29.617] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:29.635] AADC: START
+[2026/4/17 18:13:30.822] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:32.386] [D][algo_task # algo-task] regist_flag: 1, reg success count: 1, save cnt: 1
+[2026/4/17 18:13:32.386] [D][algo_task # algo-task] cmp save res idx: 0
+[2026/4/17 18:13:32.393] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:13:32.403] [D][algo_task # algo-task] save new voice.bin: 128->208
+[2026/4/17 18:13:32.408] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:32.419] [D][evs_event # algo-task] reg auto next!
+[2026/4/17 18:13:32.423] [D][evs_event # algo-task] cmdlist get[1]: 0->1
+[2026/4/17 18:13:32.440] [D][evs_event # algo-task] Reg info: key[27]=guan1 bi4 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:13:32.441] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:32.441] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:32.441] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:32.441] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:32.454] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:13:32.454] [D][mini_td # mini-player] play id : 35
+[2026/4/17 18:13:32.461] AADC: STOPask # algo-task] ESR UNET size: 107456, FLASH, addr[2K
+[2026/4/17 18:13:32.461] root:/$  = 0x0x3016f8a0
+[2026/4/17 18:13:32.476] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:32.476] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:32.491] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:32.491] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:32.491] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:32.501] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:32.509] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:32.509] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:32.509] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:32.516] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:32.532] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:32.532] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:32.532] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:32.532] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:33.236] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:33.246] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:33.266] AADC: START
+[2026/4/17 18:13:33.302] root:/$ [D][mini_td # mini-player] play id : 39
+[2026/4/17 18:13:35.551] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:38.573] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:13:38.587] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:13:38.588] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:38.603] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:13:38.603] [D][evs_event # algo-task] Reg info: key[27]=guan1 bi4 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:13:38.604] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:38.604] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:38.615] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:38.634] [D][algo_task # algo-tas[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:38.634] k] play start
+[2026/4/17 18:13:38.634] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:38.634] [D][algo_task # alg[D][mini_td # mini-player] play id : 31
+[2026/4/17 18:13:38.649] AADC: STOP
+[2026/4/17 18:13:38.649] root:/$ o-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:13:38.654] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:38.668] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:38.668] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:38.674] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:38.674] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:38.690] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:38.690] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:38.704] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:38.704] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:38.704] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:38.704] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:38.710] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:38.715] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:38.716] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:38.724] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:39.427] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:39.448] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:39.448] AADC: START
+[2026/4/17 18:13:42.045] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:44.157] [D][algo_task # algo-task] reging wakeup: {"rlt":[{"istart":0,"iresid":5,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":126,"ncmThreshold":102,"keyword":"guan1 bi4 dian4 feng1 shan4","intentStr":"guan1 bi4 dian4 feng1 shan4","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":32,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:13:44.169] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:13:44.175] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:44.183] [D][evs_event # algo-task] reging process keyword: guan bi dian feng shan
+[2026/4/17 18:13:44.202] [D][evs_event # algo-task] Reg info: key[27]=guan1 bi4 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:13:44.227] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:44.236] [I][algo_task # algo-[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:44.236] task] algo restart
+[2026/4/17 18:13:44.243] [D][algo_task # algo-task] ESR MLP size: 1092384, FLAS[D][mini_td # mini-player] play id : 33
+[2026/4/17 18:13:44.266] AADC: STOP
+[2026/4/17 18:13:44.267] root:/$ H, addr = 0x0x30064d80
+[2026/4/17 18:13:44.267] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:44.267] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:44.273] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:44.288] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:44.288] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:44.303] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:44.303] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:44.303] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:44.317] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:44.317] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:44.317] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:44.317] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:44.322] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:44.340] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:44.340] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:45.036] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:45.045] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:45.052] AADC: START
+[2026/4/17 18:13:47.516] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:49.022] [D][algo_task # algo-task] regist_flag: 1, reg success count: 0, save cnt: 0
+[2026/4/17 18:13:49.022] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:13:49.030] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:49.040] [D][evs_event # algo-task] reg again!
+[2026/4/17 18:13:49.040] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:49.055] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:49.055] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:13:49.064] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:49.064] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:49.073] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:49.073] [D][algo_task # algo-task] ESR ML[D][mini_td # mini-player] play id : 28
+[2026/4/17 18:13:49.082] P size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:13:49.082] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:49.102] AADC: STOP
+[2026/4/17 18:13:49.102] root:/$ , addr = 0x0x30189c60
+[2026/4/17 18:13:49.102] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:49.117] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:49.117] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:49.123] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:49.123] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:49.133] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:49.133] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:49.139] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:49.147] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:49.153] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:49.153] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:49.162] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:49.162] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:49.865] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:49.873] AADC: START
+[2026/4/17 18:13:49.885] root:/$ [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:13:51.080] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:52.652] [D][algo_task # algo-task] regist_flag: 1, reg success count: 1, save cnt: 1
+[2026/4/17 18:13:52.652] [D][algo_task # algo-task] cmp save res idx: 0
+[2026/4/17 18:13:52.652] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:13:52.659] [D][algo_task # algo-task] save new voice.bin: 208->288
+[2026/4/17 18:13:52.672] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:52.672] [D][evs_event # algo-task] reg auto next!
+[2026/4/17 18:13:52.672] [D][evs_event # algo-task] cmdlist get[1]: 1->2
+[2026/4/17 18:13:52.687] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:52.687] [E][evs_event # event] algo tick same
+[2026/4/17 18:13:52.687] 
+[2026/4/17 18:13:52.687] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:52.703] [D][evs_event # algo-task] reg cmd over success!
+[2026/4/17 18:13:52.725] [D][algo_task # algo-task] play start
+[2026/4/17 18:13:52.736] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:52.737] [D][algo_task # algo-task] ESR MLP size: 10[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:52.737] AADC: STOP
+[2026/4/17 18:13:52.742] root:/$ 92384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:13:52.753] [D][mini_td # mini-player] play id : 37
+[2026/4/17 18:13:52.759] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:52.773] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:52.774] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:52.784] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:52.788] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:52.808] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:52.808] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:52.808] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:52.808] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:52.808] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:52.815] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:52.818] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:52.826] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:52.826] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:52.840] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:53.534] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:13:53.543] [D][algo_task # algo-task] algo state init, reg status: 3
+[2026/4/17 18:13:53.549] AADC: START
+[2026/4/17 18:13:53.617] root:/$ [D][algo_task # config] refresh config volume=1 voice=1 wakeup=0 reg_flag=1 reg_size=288 reg_cmd_count=2 reg_cmd_status=3
+[2026/4/17 18:13:53.638] [D][mini_td # algo-task] play stop
+[2026/4/17 18:13:53.701] [D][algo_task # config] save config success cfg_ret=20 voice_ret=0
+[2026/4/17 18:13:59.453] [D][algo_task # app_msg] type=0 len=373
+[2026/4/17 18:13:59.461] [D][algo_task # algo-tas[E][evs_event # event] algo tick same
+[2026/4/17 18:13:59.461] 
+[2026/4/17 18:13:59.467] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:13:59.473] [I][evs_event # app_client] Wakeup:k] wake up ready to asr mode
+[2026/4/17 18:13:59.508]  {"rlt":[{"istart":100,"iresid":24,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":195,"ncmThreshold":102,"keyword":"xue2 xi2 huan4 xing3 ci2","intentStr":"xue2 xi2 huan4 xing3 ci2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":140,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:13:59.540] [W][evs_event # app_client] keyword:xue xi huan xing ci
+[2026/4/17 18:13:59.570] [D][evs_event # algo-task] Reg info: keyword[45]=xu1 ni3 yu3 yin1 zhu4 ce4 huan4 xing3 yi4 tu2, sensitivity=2, type=1, range=[3,6]
+[2026/4/17 18:13:59.570] [D][algo_task # [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:13:59.570] algo-task] play start
+[2026/4/17 18:13:59.570] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:13:59.570] [D][mini_td # mini-player] play id : 26
+[2026/4/17 18:13:59.596] AADC: STOPask # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x3[2K
+[2026/4/17 18:13:59.596] root:/$ 0064d80
+[2026/4/17 18:13:59.596] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:13:59.596] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:13:59.620] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:13:59.620] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:13:59.620] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:13:59.636] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:13:59.636] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:13:59.636] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:13:59.654] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:13:59.654] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:13:59.654] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:13:59.654] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:13:59.654] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:13:59.670] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:13:59.670] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:00.366] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:00.377] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:14:00.390] AADC: START
+[2026/4/17 18:14:04.570] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:06.917] [D][algo_task # algo-task] regist_flag: 1, reg success count: 0, save cnt: 0
+[2026/4/17 18:14:06.925] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:14:06.936] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:06.936] [D][evs_event # algo-task] reg again!
+[2026/4/17 18:14:06.936] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:14:06.949] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:14:06.958] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:14:06.958] [D][algo_task # algo-task] p[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:06.958] lay start
+[2026/4/17 18:14:06.967] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:14:06.967] [D][algo_task # algo-ta[D][mini_td # mini-player] play id : 28
+[2026/4/17 18:14:06.975] sk] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:14:06.990] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:06.999] AADC: STOP
+[2026/4/17 18:14:07.003] root:/$  944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:07.003] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:07.022] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:07.022] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:07.022] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:07.037] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:07.037] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:07.037] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:07.037] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:07.051] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:07.051] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:14:07.067] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:14:07.067] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:14:07.067] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:07.764] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:07.777] AADC: START
+[2026/4/17 18:14:07.777] root:/$ [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:14:08.977] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:10.541] [D][algo_task # algo-task] regist_flag: 1, reg success count: 1, save cnt: 1
+[2026/4/17 18:14:10.541] [D][algo_task # algo-task] cmp save res idx: 0
+[2026/4/17 18:14:10.557] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:14:10.557] [D][algo_task # algo-task] save new voice.bin: 288->368
+[2026/4/17 18:14:10.570] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:10.570] [D][evs_event # algo-task] reg success!
+[2026/4/17 18:14:10.570] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:14:10.585] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:14:10.585] [D][algo_task # algo-task] play s[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:10.585] tart
+[2026/4/17 18:14:10.598] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:14:10.598] [D][algo_task # algo-task] E[D][mini_td # mini-player] play id : 37
+[2026/4/17 18:14:10.598] SR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:14:10.604] AADC: STOP
+[2026/4/17 18:14:10.614] root:/$ [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:10.623] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:10.638] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:10.638] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:10.638] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:10.648] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:10.655] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:10.655] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:10.670] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:10.670] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:10.670] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:10.680] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:14:10.680] [D][algo_task # algo-task] Inst Size        = 86496
+[2026/4/17 18:14:10.680] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:14:10.690] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:11.387] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:11.396] [D][algo_task # algo-task] algo state init, reg status: 3
+[2026/4/17 18:14:11.413] AADC: START
+[2026/4/17 18:14:11.477] root:/$ [D][algo_task # config] refresh config volume=1 voice=1 wakeup=0 reg_flag=1 reg_size=368 reg_cmd_count=2 reg_cmd_status=3
+[2026/4/17 18:14:11.495] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:11.554] [D][algo_task # config] save config success cfg_ret=20 voice_ret=0
+[2026/4/17 18:14:13.376] [D][algo_task # app_msg] type=0 len=370
+[2026/4/17 18:14:13.382] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:14:13.389] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:13.429] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":2,"iresid":24,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":227,"ncmThreshold":102,"keyword":"xue2 xi2 huan4 xing3 ci2","intentStr":"xue2 xi2 huan4 xing3 ci2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":42,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:13.441] [W][evs_event # app_client] keyword:xue xi huan xing ci
+[2026/4/17 18:14:13.441] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:13.453] [E][evs_event # event] algo tick same
+[2026/4/17 18:14:13.453] 
+[2026/4/17 18:14:13.468] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:13.468] [D][evs_event # algo-task] reg over!
+[2026/4/17 18:14:13.481] [D][algo_task # a[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:13.490] lgo-task] play start
+[2026/4/17 18:14:13.490] [D][mini_td # mini-player] play id : 34
+[2026/4/17 18:14:15.131] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:16.749] [D][algo_task # app_msg] type=0 len=371
+[2026/4/17 18:14:16.757] [D][algo_task # algo-[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:16.772] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":42,"iresid":23,"idurtask] wake up ready to asr mode
+[2026/4/17 18:14:16.806] ation":40,"nfillerscore":0,"nkeywordscore":0,"ncm":128,"ncmThreshold":102,"keyword":"xue2 xi2 ming4 ling4 ci2","intentStr":"xue2 xi2 ming4 ling4 ci2","nRltIdx":2,"nDelayFrame":0,"nThrowFrame":82,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:16.818] [W][evs_event # app_client] keyword:xue xi ming ling ci
+[2026/4/17 18:14:16.818] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:16.824] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:16.845] [D][evs_event # algo-task] reg over!
+[2026/4/17 18:14:16.851] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:16.857] [D][evs_event # ev[D][mini_td # mini-player] play id : 34
+[2026/4/17 18:14:16.857] ent] evt msg -> exit
+[2026/4/17 18:14:18.503] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:21.567] [D][algo_task # app_msg] type=0 len=361
+[2026/4/17 18:14:21.576] [D][algo_task # algo-task] wak[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:21.588] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":118,"iresid":26,"idue up ready to asr mode
+[2026/4/17 18:14:21.622] ration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":209,"ncmThreshold":102,"keyword":"tui4 chu1 xue2 xi2","intentStr":"tui4 chu1 xue2 xi2","nRltIdx":3,"nDelayFrame":0,"nThrowFrame":158,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:21.625] [W][evs_event # app_client] keyword:tui chu xue xi
+[2026/4/17 18:14:21.641] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:24.859] [D][algo_task # app_msg] type=0 len=377
+[2026/4/17 18:14:24.866] [D][algo_task # algo-task] wake up re[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:24.884] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":200,"iresid":20,"idurady to asr mode
+[2026/4/17 18:14:24.917] ation":40,"nfillerscore":0,"nkeywordscore":0,"ncm":161,"ncmThreshold":102,"keyword":"shan1 chu2 huan4 xing3 ci2","intentStr":"shan1 chu2 huan4 xing3 ci2","nRltIdx":4,"nDelayFrame":0,"nThrowFrame":240,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:24.917] [W][evs_event # app_client] keyword:shan chu huan xing ci
+[2026/4/17 18:14:24.951] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:24.968] [D][evs_event # event] e[D][mini_td # mini-player] play id : 42
+[2026/4/17 18:14:24.968] vt msg -> exit
+[2026/4/17 18:14:25.921] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:27.349] [D][algo_task # app_msg] type=0 len=377
+[2026/4/17 18:14:27.356] [D][algo_task # algo-task] wake up ready t[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:27.367] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":236,"iresid":20,"iduo asr mode
+[2026/4/17 18:14:27.414] ration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":134,"ncmThreshold":102,"keyword":"shan1 chu2 huan4 xing3 ci2","intentStr":"shan1 chu2 huan4 xing3 ci2","nRltIdx":5,"nDelayFrame":0,"nThrowFrame":276,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:27.414] [W][evs_event # app_client] keyword:shan chu huan xing ci
+[2026/4/17 18:14:27.414] [D][evs_event # algo-task] reg del
+[2026/4/17 18:14:27.425] [D][evs_event # algo-task] del voice reg type: 1
+[2026/4/17 18:14:27.438] [D][evs_event # algo-task] save new voice.bin [288] to psram.
+[2026/4/17 18:14:27.452] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:27.472] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:27.472] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:14:27.472] [D][algo_task # algo-task] ESR MLP size: 1092[D][mini_td # mini-player] play id : 43
+[2026/4/17 18:14:27.473] AADC: STOP
+[2026/4/17 18:14:27.489] root:/$ 384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:14:27.489] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:27.489] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:27.501] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:27.508] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:27.508] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:27.522] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:27.522] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:27.522] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:27.533] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:27.534] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:27.539] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:27.539] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:14:27.549] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:14:27.568] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:14:27.568] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:28.259] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:28.268] [D][algo_task # algo-task] algo state init, reg status: 7
+[2026/4/17 18:14:28.278] AADC: START
+[2026/4/17 18:14:28.350] root:/$ [D][algo_task # config] refresh config volume=1 voice=1 wakeup=0 reg_flag=1 reg_size=288 reg_cmd_count=2 reg_cmd_status=3
+[2026/4/17 18:14:28.437] [D][algo_task # config] save config success cfg_ret=20 voice_ret=0
+[2026/4/17 18:14:28.994] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:30.572] [D][algo_task # app_msg] type=0 len=374
+[2026/4/17 18:14:30.586] [D][algo_task # algo-task] wake[E][evs_event # event] algo tick same
+[2026/4/17 18:14:30.586] 
+[2026/4/17 18:14:30.586] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:30.595] [I][evs_event # app_client] Wakeup:  up ready to asr mode
+[2026/4/17 18:14:30.634] {"rlt":[{"istart":0,"iresid":19,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":144,"ncmThreshold":102,"keyword":"shan1 chu2 ming4 ling4 ci2","intentStr":"shan1 chu2 ming4 ling4 ci2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":34,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:30.634] [W][evs_event # app_client] keyword:shan chu ming ling ci
+[2026/4/17 18:14:30.667] [D][algo_task # algo-t[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:30.675] ask] play start
+[2026/4/17 18:14:30.675] [D][mini_td # mini-player] play id : 42
+[2026/4/17 18:14:31.633] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:36.032] [D][algo_task # app_msg] type=0 len=377
+[2026/4/17 18:14:36.041] [D][algo_task # algo-task] wake up ready to[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:36.051] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":104,"iresid":19,"idu asr mode
+[2026/4/17 18:14:36.091] ration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":184,"ncmThreshold":102,"keyword":"shan1 chu2 ming4 ling4 ci2","intentStr":"shan1 chu2 ming4 ling4 ci2","nRltIdx":2,"nDelayFrame":0,"nThrowFrame":144,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:36.091] [W][evs_event # app_client] keyword:shan chu ming ling ci
+[2026/4/17 18:14:36.105] [D][evs_event # algo-task] reg del
+[2026/4/17 18:14:36.118] [D][evs_event # algo-task] del voice reg type: 2
+[2026/4/17 18:14:36.118] [D][evs_event # algo-task] save new voice.bin [128] to psram.
+[2026/4/17 18:14:36.136] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:36.152] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:36.152] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:14:36.153] [D][algo_task # algo-task] ESR MLP size: 10923[D][mini_td # mini-player] play id : 44
+[2026/4/17 18:14:36.159] AADC: STOP
+[2026/4/17 18:14:36.171] root:/$ 84, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:14:36.171] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:36.179] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:36.179] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:36.188] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:36.203] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:36.203] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:36.203] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:36.220] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:36.220] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:36.220] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:36.235] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:36.235] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:14:36.235] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:14:36.235] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:14:36.253] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:36.944] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:36.952] [D][algo_task # algo-task] algo state init, reg status: 7
+[2026/4/17 18:14:36.960] AADC: START
+[2026/4/17 18:14:37.032] root:/$ [D][algo_task # config] refresh config volume=1 voice=1 wakeup=0 reg_flag=1 reg_size=128 reg_cmd_count=2 reg_cmd_status=0
+[2026/4/17 18:14:37.118] [D][algo_task # config] save config success cfg_ret=20 voice_ret=0
+[2026/4/17 18:14:37.747] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:46.160] [D][algo_task # app_msg] type=0 len=365
+[2026/4/17 18:14:46.172] [D][algo_task # algo-task] wake up ready to as[D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:46.185] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":164,"iresid":18,"idurr mode
+[2026/4/17 18:14:46.216] ation":40,"nfillerscore":0,"nkeywordscore":0,"ncm":230,"ncmThreshold":102,"keyword":"quan2 bu4 shan1 chu2","intentStr":"quan2 bu4 shan1 chu2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":204,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:46.216] [W][evs_event # app_client] keyword:quan bu shan chu
+[2026/4/17 18:14:46.251] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:46.263] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:46.263] [D][mini_td # mini-player] play id : 42
+[2026/4/17 18:14:47.222] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:48.408] [D][algo_task # app_msg] type=0 len=365
+[2026/4/17 18:14:48.417] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:14:48.423] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:48.457] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":194,"iresid":25,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":195,"ncmThreshold":102,"keyword":"tui4 chu1 shan1 chu2","intentStr":"tui4 chu1 shan1 chu2","nRltIdx":2,"nDelayFrame":0,"nThrowFrame":234,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:48.469] [W][evs_event # app_client] keyword:tui chu shan chu
+[2026/4/17 18:14:48.499] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:48.506] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:48.506] [D][mini_td # mini-player] play id : 47
+[2026/4/17 18:14:49.721] [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:51.139] [D][algo_task # app_msg] type=0 len=373
+[2026/4/17 18:14:51.155] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:14:51.155] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:51.189] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":230,"iresid":24,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":199,"ncmThreshold":102,"keyword":"xue2 xi2 huan4 xing3 ci2","intentStr":"xue2 xi2 huan4 xing3 ci2","nRltIdx":3,"nDelayFrame":0,"nThrowFrame":270,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:51.206] [W][evs_event # app_client] keyword:xue xi huan xing ci
+[2026/4/17 18:14:51.219] [D][evs_event # algo-task] Reg info: keyword[45]=xu1 ni3 yu3 yin1 zhu4 ce4 huan4 xing3 yi4 tu2, sensitivity=2, type=1, range=[3,6]
+[2026/4/17 18:14:51.240] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:51.247] [I][algo_task # algo-task] algo rest[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:51.247] art
+[2026/4/17 18:14:51.267] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x3[D][mini_td # mini-player] play id : 26
+[2026/4/17 18:14:51.267] AADC: STOP
+[2026/4/17 18:14:51.267] root:/$ 0064d80
+[2026/4/17 18:14:51.284] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:51.284] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:51.290] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:51.290] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:51.297] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:51.303] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:51.319] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:51.319] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:51.319] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:51.325] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:51.325] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:51.337] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:14:51.337] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:14:51.346] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:14:51.347] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:52.048] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:14:52.056] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:14:52.067] AADC: START
+[2026/4/17 18:14:56.265] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:14:59.843] [D][algo_task # algo-task] reging wakeup: {"rlt":[{"istart":26,"iresid":26,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":250,"ncmThreshold":102,"keyword":"tui4 chu1 xue2 xi2","intentStr":"tui4 chu1 xue2 xi2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":66,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:14:59.843] [D][algo_task # algo-task] wake up ready to [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:14:59.859] [D][evs_event # algo-task] reging user quit process keyword: tui chu xue xiasr mode
+[2026/4/17 18:14:59.859] 
+[2026/4/17 18:14:59.881] [D][evs_event # algo-task] Reg info: keyword[45]=xu1 ni3 yu3 yin1 zhu4 ce4 huan4 xing3 yi4 tu2, sensitivity=2, type=1, range=[3,6]
+[2026/4/17 18:14:59.901] [D][algo_task # algo-task] play start
+[2026/4/17 18:14:59.918] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:14:59.918] [D][algo_task # algo-tas[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:14:59.918] AADC: STOP
+[2026/4/17 18:14:59.937] root:/$ k] ESR MLP size: 1092384, FLASH, addr =[D][mini_td # mini-player] play id : 46
+[2026/4/17 18:14:59.937]  0x0x30064d80
+[2026/4/17 18:14:59.937] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:14:59.937] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:14:59.955] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:14:59.955] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:14:59.967] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:14:59.967] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:14:59.985] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:14:59.985] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:14:59.985] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:14:59.985] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:14:59.997] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:14:59.997] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:00.016] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:00.016] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:00.016] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:00.711] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:00.723] AADC: START
+[2026/4/17 18:15:00.725] root:/$  reg status: 6
+[2026/4/17 18:15:01.132] [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:03.082] [D][algo_task # app_msg] type=0 len=370
+[2026/4/17 18:15:03.102] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:15:03.102] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:03.135] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":2,"iresid":23,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":106,"ncmThreshold":102,"keyword":"xue2 xi2 ming4 ling4 ci2","intentStr":"xue2 xi2 ming4 ling4 ci2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":42,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:15:03.141] [W][evs_event # app_client] keyword:xue xi ming ling ci
+[2026/4/17 18:15:03.151] [D][evs_event # algo-task] cmdlist get[0]: 0->0
+[2026/4/17 18:15:03.163] [D][evs_event # algo-task] Reg info: keyword[26]=da3 kai1 dian4 feng1 shan4, sensitivity=2, type=0, range=[2,10]
+[2026/4/17 18:15:03.186] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:03.203] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:03.203] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:03.203] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80[D][mini_td # mini-player] play id : 27
+[2026/4/17 18:15:03.209] AADC: STOP
+[2026/4/17 18:15:03.209] root:/$ 
+[2026/4/17 18:15:03.223] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:03.241] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:03.241] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:03.241] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:03.241] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:03.267] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:03.267] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:03.267] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:03.267] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:03.267] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:03.287] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:03.287] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:03.287] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:03.287] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:03.304] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:03.993] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:04.001] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:04.013] AADC: START
+[2026/4/17 18:15:06.363] root:/$ [D][mini_td # mini-player] play id : 38
+[2026/4/17 18:15:08.612] [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:11.749] [D][algo_task # algo-task] regist_flag: 1, reg success count: 0, save cnt: 0
+[2026/4/17 18:15:11.757] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:15:11.768] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:11.768] [D][evs_event # algo-task] reg again!
+[2026/4/17 18:15:11.775] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:11.787] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:11.798] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:11.798] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:11.798] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:11.805] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:11.805] [D][mini_td # mini-player] play id : 28
+[2026/4/17 18:15:11.825] AADC: STOP
+[2026/4/17 18:15:11.825] root:/$ ddr = 0x0x3016f8a0
+[2026/4/17 18:15:11.825] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:11.837] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:11.851] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:11.851] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:11.866] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:11.866] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:11.866] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:11.866] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:11.873] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:11.889] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:11.890] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:11.890] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:11.890] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:11.907] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:12.595] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:12.604] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:12.626] AADC: START
+[2026/4/17 18:15:13.810] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:15.207] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:15:15.214] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:15:15.221] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:15.235] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:15:15.235] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 di[I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:15.240] an4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:15:15.240] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:15.249] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:15.253] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:15.253] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:15.268] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:15.268] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:15.268] [D][mini_td # mini-player] play id : 31
+[2026/4/17 18:15:15.286] AADC: STOP
+[2026/4/17 18:15:15.286] root:/$  = 0x0x3016f8a0
+[2026/4/17 18:15:15.286] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:15.301] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:15.305] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:15.312] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:15.320] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:15.326] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:15.335] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:15.335] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:15.335] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:15.341] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:15.358] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:15.358] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:15.358] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:15.358] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:16.059] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:16.067] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:16.089] AADC: START
+[2026/4/17 18:15:18.678] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:20.638] [D][algo_task # algo-task] reging wakeup: {"rlt":[{"istart":0,"iresid":4,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":130,"ncmThreshold":102,"keyword":"da3 kai1 dian4 feng1 shan4","intentStr":"da3 kai1 dian4 feng1 shan4","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":28,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:15:20.638] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:15:20.654] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:20.654] [D][evs_event # algo-task] reging process keyword: da kai dian feng shan
+[2026/4/17 18:15:20.667] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:15:20.698] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:20.705] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:20.705] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:20.723] [D][mini_td # mini-player] play id : 33
+[2026/4/17 18:15:20.723] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:20.735] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:20.735] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:20.751] AADC: STOP
+[2026/4/17 18:15:20.751] root:/$ ddr = 0x0x3018a020
+[2026/4/17 18:15:20.751] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:20.765] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:20.765] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:20.786] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:20.787] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:20.787] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:20.787] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:20.787] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:20.805] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:20.805] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:20.805] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:20.805] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:21.506] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:21.516] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:21.524] AADC: START
+[2026/4/17 18:15:23.978] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:25.403] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:15:25.418] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:15:25.418] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:25.434] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:15:25.434] [D][evs_event # algo-task] error cnt > 2
+[2026/4/17 18:15:25.434] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:25.434] [E][evs_event # event] algo tick same
+[2026/4/17 18:15:25.434] 
+[2026/4/17 18:15:25.434] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:25.434] [D][evs_event # algo-task] reg failed!
+[2026/4/17 18:15:25.452] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:25.452] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:25.452] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:25.466] [D][algo_task # alg[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:25.466] o-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:25.485] [D][algo_task # al[D][mini_td # mini-player] play id : 36
+[2026/4/17 18:15:25.485] AADC: STOP
+[2026/4/17 18:15:25.486] root:/$ go-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:25.486] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:25.502] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:25.502] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:25.502] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:25.521] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:25.521] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:25.521] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:25.534] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:25.534] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:25.540] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:25.540] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:25.550] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:25.550] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:25.556] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:26.256] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:26.265] [D][algo_task # algo-task] algo state init, reg status: 4
+[2026/4/17 18:15:26.278] AADC: START
+[2026/4/17 18:15:26.316] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:30.554] [D][algo_task # app_msg] type=0 len=372
+[2026/4/17 18:15:30.567] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:15:30.567] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:30.606] [I][evs_event # app_client] Wakeup: {"rlt":[{"istart":60,"iresid":23,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":190,"ncmThreshold":102,"keyword":"xue2 xi2 ming4 ling4 ci2","intentStr":"xue2 xi2 ming4 ling4 ci2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":100,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:15:30.615] [W][evs_event # app_client] keyword:xue xi ming ling ci
+[2026/4/17 18:15:30.634] [D][evs_event # algo-task] cmdlist get[0]: 0->0
+[2026/4/17 18:15:30.634] [D][evs_event # algo-task] Reg info: keyword[26]=da3 kai1 dian4 feng1 shan4, sensitivity=2, type=0, range=[2,10]
+[2026/4/17 18:15:30.656] [D][algo_task # a[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:30.672] lgo-task] play start
+[2026/4/17 18:15:30.672] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:30.672] [D][mini_td # mini-player] play id : 27
+[2026/4/17 18:15:30.691] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:30.691] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:30.691] AADC: STOP
+[2026/4/17 18:15:30.699] root:/$ o-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:30.713] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:30.714] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:30.714] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:30.730] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:30.730] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:30.731] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:30.731] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:30.750] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:30.750] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:30.750] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:30.750] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:30.758] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:30.772] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:31.463] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:31.481] AADC: START
+[2026/4/17 18:15:31.481] root:/$ [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:33.824] [D][mini_td # mini-player] play id : 38
+[2026/4/17 18:15:36.072] [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:38.251] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:15:38.267] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:15:38.267] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:38.287] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:15:38.287] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 dian4 feng1 shan4,sensitivity=2,typ[I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:38.287] e=0,range=[2,10]
+[2026/4/17 18:15:38.287] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:38.303] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:38.303] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:38.303] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:38.311] [D][algo_task # algo-task] ESR MLP size[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:38.311] AADC: STOP
+[2026/4/17 18:15:38.317] root:/$ : 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:38.317] [D][mini_td # mini-player] play id : 31
+[2026/4/17 18:15:38.340] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:38.340] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:38.340] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:38.355] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:38.355] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:38.371] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:38.371] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:38.371] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:38.383] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:38.383] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:38.383] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:38.389] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:38.407] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:38.407] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:38.407] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:39.104] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:39.112] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:39.119] AADC: START
+[2026/4/17 18:15:41.723] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:43.079] [W][algo_task # algo-task] wIvwRegistWrite fail | ret:31007
+[2026/4/17 18:15:43.087] [D][algo_task # algo-task] wreg write failed: 31007!
+[2026/4/17 18:15:43.096] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:43.096] [D][evs_event # algo-task] reg length error!
+[2026/4/17 18:15:43.116] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 dian4 feng1 shan4,sensitivity=2,type=0,r[I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:43.116] ange=[2,10]
+[2026/4/17 18:15:43.116] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:43.124] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:43.137] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:43.137] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:43.137] [D][algo_task # algo-task] ESR MLP size: 1092[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:43.137] 384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:43.152] [D][algo_task # algo-task] ESR UNET size: 1[D][mini_td # mini-player] play id : 31
+[2026/4/17 18:15:43.152] 07456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:43.158] AADC: STOPask # algo-ta[2K
+[2026/4/17 18:15:43.168] root:/$ sk] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:43.168] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:43.178] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:43.185] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:43.190] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:43.191] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:43.199] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:43.207] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:43.207] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:43.207] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:43.225] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:43.225] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:43.225] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:43.246] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:43.933] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:43.942] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:43.966] AADC: START
+[2026/4/17 18:15:46.560] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:50.651] [D][algo_task # algo-task] regist_flag: 1, reg success count: 0, save cnt: 0
+[2026/4/17 18:15:50.651] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:15:50.657] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:50.673] [D][evs_event # algo-task] reg again!
+[2026/4/17 18:15:50.673] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:50.673] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:50.686] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:50.686] [D][algo_task # algo-t[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:50.686] ask] play start
+[2026/4/17 18:15:50.695] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:50.695] [D][algo_task # a[D][mini_td # mini-player] play id : 28
+[2026/4/17 18:15:50.704] lgo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:50.720] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:50.720] AADC: STOP
+[2026/4/17 18:15:50.720] root:/$ N size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:50.736] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:50.736] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:50.736] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:50.747] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:50.752] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:50.762] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:50.763] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:50.763] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:50.773] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:50.773] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:50.785] [D][algo_task # algo-task] Inst Size        = 86432
+[2026/4/17 18:15:50.785] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:50.785] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:51.489] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:51.496] AADC: START
+[2026/4/17 18:15:51.505] root:/$ [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:52.704] [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:54.348] [D][algo_task # algo-task] regist_flag: 1, reg success count: 1, save cnt: 1
+[2026/4/17 18:15:54.348] [D][algo_task # algo-task] cmp save res idx: 0
+[2026/4/17 18:15:54.354] [I][algo_task # algo-task] wIvwRegistArbitrate success
+[2026/4/17 18:15:54.364] [D][algo_task # algo-task] save new voice.bin: 128->208
+[2026/4/17 18:15:54.371] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:54.381] [D][evs_event # algo-task] reg auto next!
+[2026/4/17 18:15:54.384] [D][evs_event # algo-task] cmdlist get[1]: 0->1
+[2026/4/17 18:15:54.384] [D][evs_event # algo-task] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.388] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.388] Reg info: key[27]=guan1 bi4 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:15:54.401] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.401] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.412] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.421] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.432] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.441] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.451] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.462] [I][algo_task # algo-task] wIvwWrite | ret:31001
+[2026/4/17 18:15:54.472] [D][algo_task # algo-task] p[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:54.472] lay start
+[2026/4/17 18:15:54.485] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:54.485] [D][algo_task # algo-ta[D][mini_td # mini-player] play id : 35
+[2026/4/17 18:15:54.485] AADC: STOP
+[2026/4/17 18:15:54.491] root:/$ sk] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:54.505] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:54.522] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:54.522] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:54.522] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:54.540] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:54.540] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:54.540] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:54.540] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:54.550] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:54.550] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:54.572] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:54.573] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:54.573] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:15:54.573] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:54.573] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:55.274] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:15:55.283] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:15:55.288] AADC: START
+[2026/4/17 18:15:55.334] root:/$ [D][mini_td # mini-player] play id : 39
+[2026/4/17 18:15:57.582] [D][mini_td # algo-task] play stop
+[2026/4/17 18:15:59.767] [D][algo_task # algo-task] reging wakeup: {"rlt":[{"istart":0,"iresid":21,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":227,"ncmThreshold":102,"keyword":"chong2 xin1 xue2 xi2","intentStr":"chong2 xin1 xue2 xi2 shang4 yi2 ge4","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":32,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:15:59.772] [D][algo_task # algo-task] wake up ready to asr mode
+[2026/4/17 18:15:59.782] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:15:59.787] [D][evs_event # algo-task] reging process keyword: chong xin xue xi shang yi ge
+[2026/4/17 18:15:59.798] [D][evs_event # algo-task] cmdlist get[-1]: 1->0
+[2026/4/17 18:15:59.816] [D][evs_event # algo-task] Reg info: key[26]=da3 kai1 dian4 feng1 shan4,sensitivity=2,type=0,range=[2,10]
+[2026/4/17 18:15:59.836] [D][algo_task # algo-task] play start
+[2026/4/17 18:15:59.856] [D][evs_event # event] evt msg -> exit
+[2026/4/17 18:15:59.856] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:15:59.856] [D][algo_task # algo-task] ESR MLP s[D][mini_td # mini-player] play id : 38
+[2026/4/17 18:15:59.856] AADC: STOP
+[2026/4/17 18:15:59.867] root:/$ ize: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:15:59.867] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:15:59.872] [D][algo_task # algo-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:15:59.885] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:15:59.899] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:15:59.899] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:15:59.899] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:15:59.905] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:15:59.919] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:15:59.919] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:15:59.919] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:15:59.932] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:15:59.933] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:15:59.933] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:15:59.954] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:15:59.954] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:16:00.645] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:16:00.653] [D][algo_task # algo-task] algo state init, reg status: 1
+[2026/4/17 18:16:00.660] AADC: START
+[2026/4/17 18:16:02.079] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:16:08.271] [D][algo_task # algo-task] reging wakeup: {"rlt":[{"istart":92,"iresid":26,"iduration":40,"nfillerscore":0,"nkeywordscore":0,"ncm":244,"ncmThreshold":102,"keyword":"tui4 chu1 xue2 xi2","intentStr":"tui4 chu1 xue2 xi2","nRltIdx":1,"nDelayFrame":0,"nThrowFrame":132,"decId":0,"branch":4,"wakeUpType":0,"VadGap":0,"nE2eIntervalFrame":8,"nE2eNodeFrame":2,"nStartStateThreshold":500,"bMain":0,"bAbsorb":0}]}
+[2026/4/17 18:16:08.281] [D][algo_task # algo-task] wake up ready [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:16:08.281] [D][evs_event # algo-task] reging user quit process keyword: tui chu xue xito asr mode
+[2026/4/17 18:16:08.298] 
+[2026/4/17 18:16:08.302] [D][evs_event # algo-task] Reg info: keyword[26]=da3 kai1 dian4 feng1 shan4, sensitivity=2, type=0, range=[2,10]
+[2026/4/17 18:16:08.340] [D][algo_task # config] refresh config volume=1 voice=1 wakeup=0 reg_flag=1 reg_size=208 reg_cmd_count=2 reg_cmd_status=1
+[2026/4/17 18:16:08.415] [D][algo_task # config] save config success cfg_ret=20 voice_ret=0
+[2026/4/17 18:16:08.415] [D][algo_task # a[D][evs_event # event] evt msg -> exit
+[2026/4/17 18:16:08.421] lgo-task] play start
+[2026/4/17 18:16:08.421] [I][algo_task # algo-task] algo restart
+[2026/4/17 18:16:08.432] [D][mini_td # mini-player] play id : 46
+[2026/4/17 18:16:08.443] [D][algo_task # algo-task] ESR MLP size: 1092384, FLASH, addr = 0x0x30064d80
+[2026/4/17 18:16:08.448] [D][algo_task # algo-task] ESR UNET size: 107456, FLASH, addr = 0x0x3016f8a0
+[2026/4/17 18:16:08.456] AADC: STOP
+[2026/4/17 18:16:08.459] root:/$ o-task] ESR MAIN size: 944, FLASH, addr = 0x0x30189c60
+[2026/4/17 18:16:08.479] [D][algo_task # algo-task] ESR CMDS size: 3792, FLASH, addr = 0x0x3018a020
+[2026/4/17 18:16:08.479] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:16:08.479] [D][algo_task # algo-task] Engine info:
+[2026/4/17 18:16:08.479] [D][algo_task # algo-task] Version          = mini-esr-MARS Tag5.1.2.1.7.2_26,Nov 12 2025,16:48:46
+[2026/4/17 18:16:08.487] [D][algo_task # algo-task] MLP TYPE         = 26
+[2026/4/17 18:16:08.504] [D][algo_task # algo-task] Window Frame In  = 8
+[2026/4/17 18:16:08.504] [D][algo_task # algo-task] Window Frame Out = 2
+[2026/4/17 18:16:08.504] [D][algo_task # algo-task] Channel          = 1
+[2026/4/17 18:16:08.504] [D][algo_task # algo-task] Main Keyword     = 1
+[2026/4/17 18:16:08.504] [D][algo_task # algo-task] Asr Keyword      = 1
+[2026/4/17 18:16:08.515] [D][algo_task # algo-task] Inst Size        = 86464
+[2026/4/17 18:16:08.515] [D][algo_task # algo-task] ShareMem Size    = 53312
+[2026/4/17 18:16:08.522] [D][algo_task # algo-task] ====================================================
+[2026/4/17 18:16:09.224] [D][algo_task # algo-task] ai create success!!!
+[2026/4/17 18:16:09.234] [D][algo_task # algo-task] algo state init, reg status: 6
+[2026/4/17 18:16:09.257] AADC: START
+[2026/4/17 18:16:09.638] root:/$ [D][mini_td # algo-task] play stop
+[2026/4/17 18:16:24.848] [I][algo_task # algo-task] TIME_OUT wkchn = -1 -1
+[2026/4/17 18:16:24.864] [D][algo_task # algo-task] MODE=0
+[2026/4/17 18:16:24.864] [D][algo_task # app_msg] type=2 len=0
+[2026/4/17 18:16:24.864] [D][evs_event # event] evt msg -> enter
+[2026/4/17 18:16:24.927] [D][algo_task # algo-task] play start
+[2026/4/17 18:16:24.936] [D][evs_eve[D][mini_td # mini-player] play id : 1
+[2026/4/17 18:16:24.937] nt # event] evt msg -> exit
+[2026/4/17 18:16:27.003] [D][mini_td # algo-task] play stop
+[2026/4/17 18:16:34.993] 
+[2026/4/17 18:16:34.993] Connection closed.
+
+[END] 2026/4/17 18:16:34

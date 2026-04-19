@@ -1,0 +1,23 @@
+{
+  "name": "cfg_wake_timeout_probe",
+  "log_bytes": 0,
+  "proto_bytes": 4,
+  "mode": "wake_timeout_probe",
+  "wake_text": "小度小度",
+  "audio_file": "D:\\revolution4s\\Trisolaris\\audio_cache\\tts\\wake_xiaodu_4731eaa547.wav",
+  "cached": true,
+  "playback_output": [
+    "Target VID_8765&PID_5678:8_804B35B_1_0000 -> 扬声器 (4- ListenAI Audio) (扬声器 (4- ListenAI Audio))",
+    "Probe succeeded.",
+    "Play iteration 1/1",
+    "Playback finished."
+  ],
+  "wait_s": 28.0,
+  "markers": {
+    "wake_enter_s": null,
+    "timeout_marker_s": null,
+    "sleep_tone_s": null,
+    "mode_zero_s": null
+  },
+  "timeout_gap_s": null
+}
