@@ -6,13 +6,18 @@
 - [completed] Delete earlier test data: remove old report bundles and clear the old `result/` raw-history directory while keeping the latest bundle intact.
 - [completed] Verify only the latest report bundle remains and that the current formal outputs no longer depend on deleted external `result/` paths.
 - [completed] Check Git preconditions for publishing the current directory: no root `.git`, GitHub auth is available, and nested repos exist under `mars-moon/` and `tools/audio/listenai-play/`.
-- [in_progress] Initialize `D:\revolution4s\Trisolaris` as a root Git repository while avoiding accidental nested-repo gitlink capture.
-- [pending] Create remote repository `zjashanda/Trisolaris` and push the current root directory.
-- [pending] Restore any temporarily moved nested-repo metadata and re-check final Git status.
+- [completed] Initialize `D:\revolution4s\Trisolaris` as a root Git repository and avoid nested-repo gitlink capture by temporarily moving nested `.git` directories.
+- [completed] Add a minimal root `.gitignore` for local Python/runtime noise and the ephemeral `result/` workspace.
+- [completed] Commit the current root directory as the initial root commit: `f8d1705` / `Initial import of Trisolaris`.
+- [completed] Create the remote GitHub repository `zjashanda/Trisolaris` and push `main` to `origin`.
+- [completed] Restore nested repo metadata for `mars-moon/` and `tools/audio/listenai-play/`, then verify root status is clean and tracking `origin/main`.
+- [in_progress] Add a root `README.md`, switch the GitHub repository visibility to public, and clarify whether `mars-moon/` has been uploaded.
+- [pending] Commit and push the new `README.md` plus the latest `plan.md` update.
 
 ## Current Focus
-- Publish the current `Trisolaris` directory as a Git repository named `Trisolaris`.
-- Keep the root repo self-contained instead of accidentally committing nested repos as gitlinks.
+- The current directory is now published as the Git repository `Trisolaris`.
+- Remote URL: `github-zjashanda:zjashanda/Trisolaris.git`
+- Web URL: `https://github.com/zjashanda/Trisolaris`
 
 ## Execution Rules Still In Force
 - Fixed ports: `COM36 @ 9600`, `COM38 @ 115200`, `COM39`.
