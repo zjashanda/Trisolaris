@@ -11,8 +11,10 @@
 - [completed] Commit the current root directory as the initial root commit: `f8d1705` / `Initial import of Trisolaris`.
 - [completed] Create the remote GitHub repository `zjashanda/Trisolaris` and push `main` to `origin`.
 - [completed] Restore nested repo metadata for `mars-moon/` and `tools/audio/listenai-play/`, then verify root status is clean and tracking `origin/main`.
-- [in_progress] Add a root `README.md`, switch the GitHub repository visibility to public, and clarify whether `mars-moon/` has been uploaded.
-- [pending] Commit and push the new `README.md` plus the latest `plan.md` update.
+- [completed] Add a root `README.md` for the published repository.
+- [completed] Switch `zjashanda/Trisolaris` from private to public on GitHub.
+- [completed] Confirm `mars-moon/` has been uploaded as a subdirectory inside the root `Trisolaris` repository; it is not a separate GitHub repo in this round.
+- [completed] Commit and push the new `README.md` plus the latest `plan.md` update: `e723bd2` / `Add repository README`.
 
 ## Current Focus
 - The current directory is now published as the Git repository `Trisolaris`.
