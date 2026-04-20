@@ -108,3 +108,9 @@
 - [done] Commit and push the added fullflow assets without bringing runtime logs, burn artifacts, or report bundles into Git. Commit `42b27b2`.
 - [done] Sync the final uploaded file list back into `plan.md` and return it to the user.
 
+## 2026-04-20 报告中文化 Round
+- [done] Read `plan.md` and confirm the current issue: the detailed report generator still uses English template text and only drills down on FAIL / MANUAL items.
+- [doing] Update the detailed report generator so the report body, headings, labels, and default output filename are all Chinese, and add PASS detail sections instead of only listing FAIL details.
+- [pending] Regenerate the local detailed reports from the updated generator and verify the markdown is readable in Windows with Chinese content.
+- [pending] Commit and push the report-generator update plus any necessary skill/doc updates to `origin`.
+
