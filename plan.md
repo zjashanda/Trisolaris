@@ -110,7 +110,7 @@
 
 ## 2026-04-20 报告中文化 Round
 - [done] Read `plan.md` and confirm the current issue: the detailed report generator still uses English template text and only drills down on FAIL / MANUAL items.
-- [doing] Update the detailed report generator so the report body, headings, labels, and default output filename are all Chinese, and add PASS detail sections instead of only listing FAIL details.
-- [pending] Regenerate the local detailed reports from the updated generator and verify the markdown is readable in Windows with Chinese content.
-- [pending] Commit and push the report-generator update plus any necessary skill/doc updates to `origin`.
+- [done] Update the detailed report generator so the report body, headings, labels, and default output filename are all Chinese, and add PASS detail sections instead of only listing FAIL details.
+- [done] Regenerate the local detailed reports from the updated generator and verify the markdown is readable in Windows with Chinese content.
+- [done] Commit and push the report-generator update to `origin`. Commit `e4d9900`.
 
