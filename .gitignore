@@ -5,6 +5,13 @@ __pycache__/
 
 # Ephemeral raw execution workspace
 result/
+audio_cache/
+deliverables/csk5062_xiaodu_fan/reports/
+tools/burn_bundle/windows/app.bin
+tools/burn_bundle/windows/burn.log
+tools/burn_bundle/windows/burn_tool.log
+固件/
+固件.zip
 
 # Temporary nested repo backup markers used during root publish
 .git_codex_publish_backup/

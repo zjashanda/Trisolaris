@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -31,8 +32,10 @@ REPORT_ROOT = DELIVERABLE_ROOT / "reports"
 PLAN_PATH = DELIVERABLE_ROOT / "plan" / "测试方案.md"
 CASE_MD_PATH = DELIVERABLE_ROOT / "archive" / "测试用例-正式版.md"
 CASE_XLSX_PATH = DELIVERABLE_ROOT / "cases" / "测试用例-正式版.xlsx"
-FIRMWARE_PATH = REQ_DIR / "fw-csk5062_xiaodu_fan-v1.0.0.bin"
+FIRMWARE_OVERRIDE = os.environ.get("TRISOLARIS_FIRMWARE_BIN", "").strip()
+FIRMWARE_PATH = Path(FIRMWARE_OVERRIDE).expanduser().resolve() if FIRMWARE_OVERRIDE else REQ_DIR / "fw-csk5062_xiaodu_fan-v1.0.0.bin"
 GENERATE_ASSETS_SCRIPT = CASES_DIR / "generate_formal_assets.py"
+BUNDLE_TAG = os.environ.get("TRISOLARIS_BUNDLE_TAG", "").strip()
 
 DEVICE_KEY = "VID_8765&PID_5678:8_804B35B_1_0000"
 LOG_PORT = "COM38"
@@ -73,6 +76,10 @@ def format_proto_log(data: bytes) -> str:
 def ensure_dir(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def is_yes(value: str) -> bool:
+    return value.strip() in {"是", "支持", "保存", "需要", "true", "True", "YES", "Yes", "yes", "1"}
 
 
 def parse_requirement_markdown(path: Path) -> dict[str, Any]:
@@ -227,6 +234,35 @@ def count_occurrences(text: str, marker: str) -> int:
     return text.count(marker)
 
 
+def extract_volume_values(log_text: str) -> list[int]:
+    return [int(item) for item in re.findall(r"refresh config volume=(\d+)", log_text)]
+
+
+def last_volume_value(log_text: str) -> int | None:
+    values = extract_volume_values(log_text)
+    return values[-1] if values else None
+
+
+def extract_runtime_volume_levels(log_text: str) -> list[int]:
+    return [int(item) for item in re.findall(r"mini player set vol\s*:\s*(\d+)", log_text)]
+
+
+def last_runtime_volume_level(log_text: str) -> int | None:
+    values = extract_runtime_volume_levels(log_text)
+    return values[-1] if values else None
+
+
+def ordered_unique(values: list[int]) -> list[int]:
+    seen: set[int] = set()
+    result: list[int] = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
 @dataclass
 class StepEvidence:
     name: str
@@ -238,11 +274,16 @@ class StepEvidence:
     detail: dict[str, Any]
 
 
+class UntestableFirmware(RuntimeError):
+    pass
+
+
 class FullflowRunner:
     def __init__(self) -> None:
         self.spec = load_project_spec()
         self.stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.bundle_dir = REPORT_ROOT / f"{self.stamp}_post_restructure_fullflow"
+        suffix = f"_{sanitize_name(BUNDLE_TAG)}" if BUNDLE_TAG else "_post_restructure_fullflow"
+        self.bundle_dir = REPORT_ROOT / f"{self.stamp}{suffix}"
         self.static_dir = ensure_dir(self.bundle_dir / "01_static")
         self.burn_dir = ensure_dir(self.bundle_dir / "02_burn")
         self.exec_dir = ensure_dir(self.bundle_dir / "03_execution")
@@ -251,6 +292,7 @@ class FullflowRunner:
         self.case_results_path = self.exec_dir / "case_results.json"
         self.summary_md_path = self.exec_dir / "execution_summary.md"
         self.failure_analysis_path = self.exec_dir / "failure_analysis.md"
+        self.testability_gate_path = self.exec_dir / "testability_gate.json"
         self.events_path = self.exec_dir / "events.jsonl"
         self.log_port: serial.Serial | None = None
         self.proto_port: serial.Serial | None = None
@@ -259,6 +301,7 @@ class FullflowRunner:
         self.proto_chunks = bytearray()
         self.case_results: list[dict[str, Any]] = []
         self.events: list[dict[str, Any]] = []
+        self.testability_gate: dict[str, Any] = {}
         self.step_counter = 0
 
     def log_event(self, name: str, detail: dict[str, Any] | None = None) -> None:
@@ -302,11 +345,12 @@ class FullflowRunner:
             "词条处理.xlsx",
             "语音注册功能.xlsx",
             "tone.h",
-            "fw-csk5062_xiaodu_fan-v1.0.0.bin",
         ]:
             src = REQ_DIR / item
             if src.exists():
                 shutil.copy2(src, self.static_dir / "requirement" / src.name)
+        if FIRMWARE_PATH.exists():
+            shutil.copy2(FIRMWARE_PATH, self.static_dir / "requirement" / FIRMWARE_PATH.name)
         summary = {
             "firmware": str(FIRMWARE_PATH.relative_to(ROOT)),
             "device_key": DEVICE_KEY,
@@ -363,11 +407,7 @@ class FullflowRunner:
         self.proto_port = serial.Serial(PROTO_PORT, baudrate=PROTO_BAUD, timeout=0.05, write_timeout=0.5)
         self.log_port.reset_input_buffer()
         self.proto_port.reset_input_buffer()
-        self.log_port.write(b"loglevel 4\r\n")
-        self.log_port.flush()
-        time.sleep(1.0)
-        self.log_port.reset_input_buffer()
-        self.proto_port.reset_input_buffer()
+        self.ensure_runtime_loglevel(capture_s=1.0, clear_buffers=True)
         self.log_event("ports_opened", {"log_port": LOG_PORT, "proto_port": PROTO_PORT})
 
     def close_ports(self) -> None:
@@ -397,6 +437,15 @@ class FullflowRunner:
             if proto_data:
                 self.proto_chunks.extend(proto_data)
             time.sleep(0.02)
+
+    def ensure_runtime_loglevel(self, capture_s: float = 1.0, clear_buffers: bool = False) -> None:
+        assert self.log_port and self.proto_port
+        if clear_buffers:
+            self.log_port.reset_input_buffer()
+            self.proto_port.reset_input_buffer()
+        self.log_port.write(b"loglevel 4\r\n")
+        self.log_port.flush()
+        self.pump(capture_s)
 
     def wait_for_completion(self, initial_state: dict[str, Any]) -> dict[str, Any]:
         assert self.log_port and self.proto_port
@@ -460,10 +509,9 @@ class FullflowRunner:
             audio_path, cached = ensure_cached_tts(text=text, voice="Microsoft Huihui Desktop", rate=0, label=f"{sanitize_name(name)}_{index}")
             audio_items.append({"text": text, "audio_file": str(audio_path), "cached": cached})
             cmd = [sys.executable, str(self.listenai_play), "play", "--audio-file", str(audio_path), "--device-key", DEVICE_KEY]
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+            proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             response_state = {"saw_response": False, "saw_play_start": False, "saw_play_stop": False, "last_data_at": None}
             local_log = bytearray()
-            local_output: list[str] = []
             while True:
                 log_data = self.log_port.read(4096)
                 if log_data:
@@ -473,18 +521,11 @@ class FullflowRunner:
                 proto_data = self.proto_port.read(4096)
                 if proto_data:
                     self.proto_chunks.extend(proto_data)
-                if proc.stdout:
-                    line = proc.stdout.readline()
-                    if line:
-                        local_output.append(line.rstrip("\r\n"))
                 if proc.poll() is not None:
                     break
                 time.sleep(0.02)
-            if proc.stdout:
-                for line in proc.stdout.read().splitlines():
-                    local_output.append(line)
             response_state["serial_bytes_during_playback"] = len(local_log)
-            playback_output.append({"text": text, "audio_file": str(audio_path), "cached": cached, "output": local_output, "response_state": response_state})
+            playback_output.append({"text": text, "audio_file": str(audio_path), "cached": cached, "output": [], "response_state": response_state})
             if index < len(texts):
                 between.append(self.wait_for_completion(response_state))
         self.pump(post_wait_s)
@@ -506,7 +547,7 @@ class FullflowRunner:
         return evidence
 
     def run_shell_step(self, name: str, command: str, capture_s: float, ready_wait_s: float = 0.0) -> StepEvidence:
-        assert self.log_port
+        assert self.log_port and self.proto_port
         self.log_event("shell_start", {"name": name, "command": command})
         start_offsets = self.slice_offsets()
         self.log_port.write((command + "\r\n").encode("ascii"))
@@ -514,6 +555,8 @@ class FullflowRunner:
         self.pump(capture_s)
         if ready_wait_s > 0:
             self.pump(ready_wait_s)
+        if command.strip().lower() == "reboot":
+            self.ensure_runtime_loglevel(capture_s=1.0, clear_buffers=False)
         evidence = self.write_step_artifacts(name, start_offsets, {"mode": "shell", "command": command, "capture_s": capture_s, "ready_wait_s": ready_wait_s})
         self.log_event("shell_finish", {"name": name, "log_bytes": evidence.log_bytes, "proto_bytes": evidence.proto_bytes})
         return evidence
@@ -533,25 +576,33 @@ class FullflowRunner:
         audio_path, cached = ensure_cached_tts(text=wake_text, voice="Microsoft Huihui Desktop", rate=0, label=f"{sanitize_name(name)}_wake")
         cmd = [sys.executable, str(self.listenai_play), "play", "--audio-file", str(audio_path), "--device-key", DEVICE_KEY]
         probe_started_at = time.time()
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         playback_output: list[str] = []
         local_log = bytearray()
+        local_proto = bytearray()
         markers = {
-            "wake_enter_s": None,
+            "wake_frame_s": None,
+            "wake_keyword_s": None,
+            "wake_play_start_s": None,
+            "wake_play_stop_s": None,
             "timeout_marker_s": None,
-            "sleep_tone_s": None,
             "mode_zero_s": None,
         }
 
         def update_markers(now: float) -> None:
             text = decode_text(local_log)
             elapsed = round(now - probe_started_at, 3)
-            if markers["wake_enter_s"] is None and ("MODE=1" in text or "keyword:xiao du xiao du" in text):
-                markers["wake_enter_s"] = elapsed
+            frames = proto_frames_from_hex(local_proto.hex(" ").upper())
+            if markers["wake_frame_s"] is None and "A5 FA 01 BB" in frames:
+                markers["wake_frame_s"] = elapsed
+            if markers["wake_keyword_s"] is None and "keyword:xiao du xiao du" in text:
+                markers["wake_keyword_s"] = elapsed
+            if markers["wake_play_start_s"] is None and (markers["wake_frame_s"] is not None or markers["wake_keyword_s"] is not None) and ("play start" in text or "play id :" in text):
+                markers["wake_play_start_s"] = elapsed
+            if markers["wake_play_stop_s"] is None and (markers["wake_play_start_s"] is not None or markers["wake_frame_s"] is not None or markers["wake_keyword_s"] is not None) and "play stop" in text:
+                markers["wake_play_stop_s"] = elapsed
             if markers["timeout_marker_s"] is None and "TIME_OUT" in text:
                 markers["timeout_marker_s"] = elapsed
-            if markers["sleep_tone_s"] is None and "play id : 25" in text:
-                markers["sleep_tone_s"] = elapsed
             if markers["mode_zero_s"] is None and "MODE=0" in text:
                 markers["mode_zero_s"] = elapsed
 
@@ -565,15 +616,11 @@ class FullflowRunner:
             proto_data = self.proto_port.read(4096)
             if proto_data:
                 self.proto_chunks.extend(proto_data)
-            if proc.stdout:
-                line = proc.stdout.readline()
-                if line:
-                    playback_output.append(line.rstrip("\r\n"))
+                local_proto.extend(proto_data)
+                update_markers(now)
             if proc.poll() is not None:
                 break
             time.sleep(0.02)
-        if proc.stdout:
-            playback_output.extend(proc.stdout.read().splitlines())
 
         while time.time() - probe_started_at < wait_s:
             now = time.time()
@@ -582,18 +629,28 @@ class FullflowRunner:
                 self.log_chunks.extend(log_data)
                 local_log.extend(log_data)
                 update_markers(now)
-                if markers["wake_enter_s"] is not None and (markers["timeout_marker_s"] is not None or markers["sleep_tone_s"] is not None):
-                    if markers["mode_zero_s"] is not None or now - probe_started_at >= 20.5:
-                        break
             proto_data = self.proto_port.read(4096)
             if proto_data:
                 self.proto_chunks.extend(proto_data)
+                local_proto.extend(proto_data)
+                update_markers(now)
+            if markers["mode_zero_s"] is not None:
+                break
             time.sleep(0.02)
 
-        timeout_markers = [value for key, value in markers.items() if key != "wake_enter_s" and value is not None]
+        response_end_s = markers["wake_play_stop_s"] or markers["wake_frame_s"] or markers["wake_keyword_s"]
         timeout_gap_s = None
-        if markers["wake_enter_s"] is not None and timeout_markers:
-            timeout_gap_s = round(min(timeout_markers) - markers["wake_enter_s"], 3)
+        if response_end_s is not None and markers["mode_zero_s"] is not None:
+            timeout_gap_s = round(markers["mode_zero_s"] - response_end_s, 3)
+        timeout_to_marker_s = None
+        if response_end_s is not None and markers["timeout_marker_s"] is not None:
+            timeout_to_marker_s = round(markers["timeout_marker_s"] - response_end_s, 3)
+        wake_to_mode_zero_s = None
+        if markers["wake_frame_s"] is not None and markers["mode_zero_s"] is not None:
+            wake_to_mode_zero_s = round(markers["mode_zero_s"] - markers["wake_frame_s"], 3)
+        wake_to_timeout_s = None
+        if markers["wake_frame_s"] is not None and markers["timeout_marker_s"] is not None:
+            wake_to_timeout_s = round(markers["timeout_marker_s"] - markers["wake_frame_s"], 3)
         evidence = self.write_step_artifacts(
             name,
             start_offsets,
@@ -606,9 +663,243 @@ class FullflowRunner:
                 "wait_s": wait_s,
                 "markers": markers,
                 "timeout_gap_s": timeout_gap_s,
+                "timeout_from_response_end_s": timeout_gap_s,
+                "timeout_from_response_end_to_timeout_marker_s": timeout_to_marker_s,
+                "wake_to_mode_zero_s": wake_to_mode_zero_s,
+                "wake_to_timeout_s": wake_to_timeout_s,
             },
         )
         self.log_event("wake_timeout_probe_finish", {"name": name, "timeout_gap_s": timeout_gap_s, "log_bytes": evidence.log_bytes, "proto_bytes": evidence.proto_bytes})
+        return evidence
+
+    def run_post_command_timeout_probe(self, name: str, wake_text: str, command_text: str, wait_s: float = 24.0) -> StepEvidence:
+        assert self.log_port and self.proto_port
+        self.log_event("post_command_timeout_probe_start", {"name": name, "wake_text": wake_text, "command_text": command_text, "wait_s": wait_s})
+        start_offsets = self.slice_offsets()
+        probe_started_at = time.time()
+        local_log = bytearray()
+        local_proto = bytearray()
+        markers = {
+            "wake_frame_s": None,
+            "command_frame_s": None,
+            "last_play_start_s": None,
+            "last_play_stop_s": None,
+            "last_pre_timeout_play_stop_s": None,
+            "timeout_marker_s": None,
+            "mode_zero_s": None,
+        }
+        counts = {"play_start": 0, "play_stop": 0}
+        audio_items: list[dict[str, Any]] = []
+
+        def update_markers(now: float) -> None:
+            text = decode_text(local_log)
+            elapsed = round(now - probe_started_at, 3)
+            frames = proto_frames_from_hex(local_proto.hex(" ").upper())
+            if markers["wake_frame_s"] is None and "A5 FA 01 BB" in frames:
+                markers["wake_frame_s"] = elapsed
+            if markers["command_frame_s"] is None and "A5 FA 04 BB" in frames:
+                markers["command_frame_s"] = elapsed
+            play_start_count = text.count("play start")
+            if play_start_count > counts["play_start"]:
+                counts["play_start"] = play_start_count
+                markers["last_play_start_s"] = elapsed
+            play_stop_count = text.count("play stop")
+            if play_stop_count > counts["play_stop"]:
+                counts["play_stop"] = play_stop_count
+                markers["last_play_stop_s"] = elapsed
+                if markers["timeout_marker_s"] is None:
+                    markers["last_pre_timeout_play_stop_s"] = elapsed
+            if markers["timeout_marker_s"] is None and "TIME_OUT" in text:
+                markers["timeout_marker_s"] = elapsed
+            if markers["mode_zero_s"] is None and "MODE=0" in text:
+                markers["mode_zero_s"] = elapsed
+
+        def play_text(text: str, label_suffix: str) -> None:
+            audio_path, cached = ensure_cached_tts(text=text, voice="Microsoft Huihui Desktop", rate=0, label=f"{sanitize_name(name)}_{label_suffix}")
+            audio_items.append({"text": text, "audio_file": str(audio_path), "cached": cached})
+            cmd = [sys.executable, str(self.listenai_play), "play", "--audio-file", str(audio_path), "--device-key", DEVICE_KEY]
+            proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            while True:
+                now = time.time()
+                log_data = self.log_port.read(4096)
+                if log_data:
+                    self.log_chunks.extend(log_data)
+                    local_log.extend(log_data)
+                    update_markers(now)
+                proto_data = self.proto_port.read(4096)
+                if proto_data:
+                    self.proto_chunks.extend(proto_data)
+                    local_proto.extend(proto_data)
+                    update_markers(now)
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.02)
+
+        play_text(wake_text, "wake")
+        settle_deadline = time.time() + DEFAULT_BETWEEN_MAX_WAIT_S
+        quiet_since: float | None = None
+        while time.time() < settle_deadline:
+            now = time.time()
+            saw_data = False
+            log_data = self.log_port.read(4096)
+            if log_data:
+                self.log_chunks.extend(log_data)
+                local_log.extend(log_data)
+                update_markers(now)
+                saw_data = True
+            proto_data = self.proto_port.read(4096)
+            if proto_data:
+                self.proto_chunks.extend(proto_data)
+                local_proto.extend(proto_data)
+                update_markers(now)
+                saw_data = True
+            if saw_data:
+                quiet_since = now
+            elif quiet_since is None:
+                quiet_since = now
+            if markers["last_play_stop_s"] is not None and quiet_since is not None and (now - quiet_since) >= DEFAULT_QUIET_WINDOW_S:
+                break
+            time.sleep(0.02)
+        play_text(command_text, "command")
+        while time.time() - probe_started_at < wait_s:
+            now = time.time()
+            log_data = self.log_port.read(4096)
+            if log_data:
+                self.log_chunks.extend(log_data)
+                local_log.extend(log_data)
+                update_markers(now)
+            proto_data = self.proto_port.read(4096)
+            if proto_data:
+                self.proto_chunks.extend(proto_data)
+                local_proto.extend(proto_data)
+                update_markers(now)
+            if markers["mode_zero_s"] is not None:
+                break
+            time.sleep(0.02)
+
+        timeout_from_response_end_s = None
+        response_end_s = markers["last_pre_timeout_play_stop_s"] or markers["last_play_stop_s"]
+        if response_end_s is not None and markers["mode_zero_s"] is not None:
+            timeout_from_response_end_s = round(markers["mode_zero_s"] - response_end_s, 3)
+        timeout_from_response_end_to_timeout_marker_s = None
+        if response_end_s is not None and markers["timeout_marker_s"] is not None:
+            timeout_from_response_end_to_timeout_marker_s = round(markers["timeout_marker_s"] - response_end_s, 3)
+        evidence = self.write_step_artifacts(
+            name,
+            start_offsets,
+            {
+                "mode": "post_command_timeout_probe",
+                "wake_text": wake_text,
+                "command_text": command_text,
+                "wait_s": wait_s,
+                "markers": markers,
+                "response_end_s": response_end_s,
+                "timeout_from_response_end_s": timeout_from_response_end_s,
+                "timeout_from_response_end_to_timeout_marker_s": timeout_from_response_end_to_timeout_marker_s,
+                "audio_items": audio_items,
+            },
+        )
+        self.log_event("post_command_timeout_probe_finish", {"name": name, "timeout_from_response_end_s": timeout_from_response_end_s, "log_bytes": evidence.log_bytes, "proto_bytes": evidence.proto_bytes})
+        return evidence
+
+    def run_session_timeout_trial(
+        self,
+        name: str,
+        wake_text: str,
+        command_text: str,
+        delay_s: float,
+        wake_frame: str,
+        command_frame: str,
+        post_wait_s: float = 3.0,
+    ) -> StepEvidence:
+        assert self.log_port and self.proto_port
+        self.log_event(
+            "session_timeout_trial_start",
+            {
+                "name": name,
+                "wake_text": wake_text,
+                "command_text": command_text,
+                "delay_s": delay_s,
+                "wake_frame": wake_frame,
+                "command_frame": command_frame,
+            },
+        )
+        start_offsets = self.slice_offsets()
+        trial_started_at = time.time()
+        local_proto = bytearray()
+        audio_items: list[dict[str, Any]] = []
+        playback_output: list[dict[str, Any]] = []
+        wake_frame_at: float | None = None
+
+        def record_serial(now: float) -> None:
+            nonlocal wake_frame_at
+            log_data = self.log_port.read(4096)
+            if log_data:
+                self.log_chunks.extend(log_data)
+            proto_data = self.proto_port.read(4096)
+            if proto_data:
+                self.proto_chunks.extend(proto_data)
+                local_proto.extend(proto_data)
+                if wake_frame_at is None:
+                    frames = proto_frames_from_hex(local_proto.hex(" ").upper())
+                    if wake_frame in frames:
+                        wake_frame_at = now
+
+        def play_text(text: str, label_suffix: str) -> list[str]:
+            audio_path, cached = ensure_cached_tts(text=text, voice="Microsoft Huihui Desktop", rate=0, label=f"{sanitize_name(name)}_{label_suffix}")
+            audio_items.append({"text": text, "audio_file": str(audio_path), "cached": cached})
+            cmd = [sys.executable, str(self.listenai_play), "play", "--audio-file", str(audio_path), "--device-key", DEVICE_KEY]
+            proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            local_output: list[str] = []
+            while True:
+                now = time.time()
+                record_serial(now)
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.02)
+            playback_output.append({"text": text, "output": local_output})
+            return local_output
+
+        play_text(wake_text, "wake")
+        reference_at = wake_frame_at if wake_frame_at is not None else time.time()
+        while time.time() < reference_at + delay_s:
+            record_serial(time.time())
+            time.sleep(0.02)
+        play_text(command_text, "command")
+        self.pump(post_wait_s)
+
+        evidence = self.write_step_artifacts(
+            name,
+            start_offsets,
+            {
+                "mode": "session_timeout_trial",
+                "wake_text": wake_text,
+                "command_text": command_text,
+                "delay_s": delay_s,
+                "wake_frame": wake_frame,
+                "command_frame": command_frame,
+                "wake_frame_at_s": None if wake_frame_at is None else round(wake_frame_at - trial_started_at, 3),
+                "playback_output": playback_output,
+                "audio_items": audio_items,
+                "post_wait_s": post_wait_s,
+            },
+        )
+        frames = proto_frames_from_hex(evidence.proto_hex)
+        command_ok = command_frame in frames
+        evidence.detail["frames"] = frames
+        evidence.detail["command_ok"] = command_ok
+        evidence.detail["measured_command_delay_s"] = delay_s
+        (evidence.step_dir / "meta.json").write_text(json.dumps(evidence.detail, ensure_ascii=False, indent=2), encoding="utf-8")
+        self.log_event(
+            "session_timeout_trial_finish",
+            {
+                "name": name,
+                "delay_s": delay_s,
+                "command_ok": command_ok,
+                "log_bytes": evidence.log_bytes,
+                "proto_bytes": evidence.proto_bytes,
+            },
+        )
         return evidence
 
     def run_powercycle_step(self, name: str, commands: list[str] | None = None, cmd_delay_s: float = 0.35, capture_s: float = 10.0, ready_wait_s: float = 8.0) -> StepEvidence:
@@ -628,6 +919,7 @@ class FullflowRunner:
                 self.pump(ready_wait_s)
         finally:
             ctrl_port.close()
+        self.ensure_runtime_loglevel(capture_s=1.0, clear_buffers=False)
         evidence = self.write_step_artifacts(name, start_offsets, {"mode": "powercycle", "commands": commands, "cmd_delay_s": cmd_delay_s, "capture_s": capture_s, "ready_wait_s": ready_wait_s})
         self.log_event("powercycle_finish", {"name": name, "log_bytes": evidence.log_bytes, "proto_bytes": evidence.proto_bytes})
         return evidence
@@ -665,10 +957,48 @@ class FullflowRunner:
             lines.append(f"| `{item['case_id']}` | {item['module']} | `{item['status']}` | {item['summary']} | {evidence} |")
         self.summary_md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    def write_testability_gate(self, payload: dict[str, Any]) -> None:
+        self.testability_gate = payload
+        self.testability_gate_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
     def write_failure_analysis(self) -> None:
+        requirements = self.spec["requirements"]
+        volume_persist_expected = is_yes(requirements["volume_power_save_raw"])
         auto_pass = sum(1 for item in self.case_results if item["status"] == "PASS")
         auto_fail = [item for item in self.case_results if item["status"] == "FAIL"]
         auto_todo = [item for item in self.case_results if item["status"] == "TODO"]
+        gate = self.testability_gate or {}
+        if gate and not gate.get("passed", True):
+            lines = [
+                "# Failure Analysis",
+                "",
+                "## 可测性门禁未通过",
+                "",
+                "- 当前固件未满足“可进入需求测试”的前置条件，本轮在门禁失败后立即停止后续用例执行。",
+                f"- 首次上电默认音量：`{gate.get('first_boot_config', {}).get('volume', 'missing')}`",
+                f"- 首启 Running Config 次数：`{gate.get('startup_running_config_count', 0)}`",
+                f"- 首启 RESET 次数：`{gate.get('startup_reset_count', 0)}`",
+                f"- 首启后 6s 观察窗口 Running Config 次数：`{gate.get('idle_running_config_count', 0)}`",
+                f"- 首启后 6s 观察窗口 RESET 次数：`{gate.get('idle_reset_count', 0)}`",
+                f"- 门禁阶段算法异常次数：`{gate.get('algo_fail_count', 0)}`",
+                f"- 默认唤醒词+普通命令协议链路：`{gate.get('interaction_frames', [])}`",
+                "",
+                "## 阻断原因",
+                "",
+            ]
+            for reason in gate.get("reasons", []) or ["门禁条件未满足，但缺少详细原因。"]:
+                lines.append(f"- {reason}")
+            lines.extend(
+                [
+                    "",
+                    "## 结论",
+                    "",
+                    "- 当前固件不具备可测试状态，后续需求项结果不应继续判定 PASS / FAIL。",
+                    "- 建议先修复重复重启、算法初始化失败或默认唤醒链路异常，再重新进入完整全链路测试。",
+                ]
+            )
+            self.failure_analysis_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            return
         fail_map = {item["case_id"]: item for item in auto_fail}
         fail_list_line = "- 本轮无 FAIL"
         if auto_fail:
@@ -700,9 +1030,9 @@ class FullflowRunner:
                     "### `CFG-WAKE-001`",
                     "",
                     "- 模块：配置一致性-会话参数",
-                    f"- 当前现象：实测唤醒会话时长约 `{item['detail'].get('timeout_gap_s')}`s，低于需求 `20s`",
+                    f"- 当前现象：实测唤醒会话时长约 `{item['detail'].get('timeout_gap_s')}`s，需求为 `{requirements['wake_timeout_s']}s`",
                     "- 影响：功能上仍能超时退出，但超时数值与需求不一致，不能按 PASS 结论关闭",
-                    "- 修复建议：核对会话超时参数入包值和运行态实际超时逻辑，确认没有沿用旧的 15s 左右配置",
+                    "- 修复建议：核对会话超时参数入包值和运行态实际超时逻辑，确认没有沿用其他旧配置",
                     "",
                 ]
             )
@@ -715,7 +1045,7 @@ class FullflowRunner:
                     "### `CFG-VOL-001`",
                     "",
                     "- 模块：配置一致性-音量参数",
-                    f"- 当前现象：冷启动默认音量为 `{boot_cfg.get('volume')}`，需求为 `4`",
+                    f"- 当前现象：冷启动默认音量为 `{boot_cfg.get('volume')}`，需求为 `{requirements['default_volume']}`",
                     "- 影响：音量功能本身可用，但默认值不满足需求",
                     "- 修复建议：检查默认配置表或 `config.clear` 后的默认音量初始化值",
                     "",
@@ -729,9 +1059,9 @@ class FullflowRunner:
                     "### `CFG-VOL-002`",
                     "",
                     "- 模块：配置一致性-音量参数",
-                    f"- 当前现象：实测可达音量档位为 `{item['detail'].get('values')}`，不是需求的 `6` 档",
+                    f"- 当前现象：实测可达音量档位为 `{item['detail'].get('values')}`，不是需求的 `{requirements['volume_steps']}` 档",
                     "- 影响：音量调节功能可用，但档位数与需求不一致",
-                    "- 修复建议：检查音量等级映射和边界值定义，确认是否仍保留 0~4 共 5 档实现",
+                    "- 修复建议：检查音量等级映射和边界值定义，确认运行态档位数与需求表一致",
                     "",
                 ]
             )
@@ -744,9 +1074,21 @@ class FullflowRunner:
                     "### `VOL-003`",
                     "",
                     "- 模块：音量控制",
-                    f"- 当前现象：将音量设到非默认档位后断电，重启 `volume` 仍为 `{boot_cfg.get('volume')}`，未恢复默认需求值",
-                    "- 影响：音量掉电不保存需求不成立",
-                    "- 修复建议：检查音量配置的保存位开关，确认音量是否被错误写入持久化配置",
+                    (
+                        f"- 当前现象：断电前目标音量为 `{item['detail'].get('target_volume', 'missing')}`，重启后 `volume` 为 `{boot_cfg.get('volume')}`，未保持断电前档位"
+                        if volume_persist_expected
+                        else f"- 当前现象：将音量设到非默认档位后断电，重启 `volume` 仍为 `{boot_cfg.get('volume')}`，未恢复默认需求值 `{requirements['default_volume']}`"
+                    ),
+                    (
+                        "- 影响：音量掉电保持需求不成立"
+                        if volume_persist_expected
+                        else "- 影响：音量掉电不保持需求不成立"
+                    ),
+                    (
+                        "- 修复建议：检查音量配置的持久化写入和上电恢复逻辑，确认保存成功后能正确回读"
+                        if volume_persist_expected
+                        else "- 修复建议：检查音量配置的保存位开关，确认音量是否被错误写入持久化配置"
+                    ),
                     "",
                 ]
             )
@@ -803,6 +1145,7 @@ class FullflowRunner:
             "case_results.json": self.case_results_path,
             "execution_summary.md": self.summary_md_path,
             "failure_analysis.md": self.failure_analysis_path,
+            "testability_gate.json": self.testability_gate_path,
             "burn.log": self.burn_dir / "burn.log",
             "burn_tool.log": self.burn_dir / "burn_tool.log",
             "com38.log": self.stream_dir / "com38.log",
@@ -926,47 +1269,163 @@ def main() -> int:
         runner.add_case_result("SESS-001", "启动待机", "TODO", "本轮保留为人工验证；已补充启动连续日志作为辅助证据", [startup.step_dir])
         evidence_map["SESS-001"] = [startup.step_dir]
 
+        startup_gain = parse_mic_gain(startup.log_text)
+        startup_idle_gate = runner.run_idle_wait_step("assist_startup_gate_idle_watch", duration_s=6.0)
+        gate_interaction = runner.run_voice_sequence("assist_gate_default_wake_open", ["小度小度", "打开电风扇"], post_wait_s=3.0)
+        gate_expected_frames = [words["小度小度"]["发送协议"], words["打开电风扇"]["发送协议"]]
+        gate_frames = proto_frames_from_hex(gate_interaction.proto_hex)
+        gate_proto_ok = words["打开电风扇"]["发送协议"] in gate_frames
+        gate_startup_running_cfg_count = count_occurrences(startup.log_text, "Running Config")
+        gate_startup_reset_count = count_occurrences(startup.log_text, "RESET=")
+        gate_idle_running_cfg_count = count_occurrences(startup_idle_gate.log_text, "Running Config")
+        gate_idle_reset_count = count_occurrences(startup_idle_gate.log_text, "RESET=")
+        gate_algo_fail_count = sum(
+            count_occurrences(text, marker)
+            for text in [startup.log_text, startup_idle_gate.log_text]
+            for marker in ["wIvwCreate fail", "ai_create failed", "algo tick same"]
+        )
+        gate_reasons: list[str] = []
+        if gate_startup_running_cfg_count != 1:
+            gate_reasons.append(f"首启日志中的 Running Config 次数={gate_startup_running_cfg_count}，不是单次稳定启动")
+        if gate_startup_reset_count > 1:
+            gate_reasons.append(f"首启日志中的 RESET 次数={gate_startup_reset_count}，存在重复重启迹象")
+        if gate_idle_running_cfg_count > 0 or gate_idle_reset_count > 0:
+            gate_reasons.append(
+                f"首启后 6s 观察窗口内再次出现启动迹象，Running Config={gate_idle_running_cfg_count}，RESET={gate_idle_reset_count}"
+            )
+        if gate_algo_fail_count > 0:
+            gate_reasons.append(f"门禁阶段捕获到算法异常日志，共 {gate_algo_fail_count} 次")
+        if not gate_proto_ok:
+            gate_reasons.append(f"默认唤醒词后普通命令未形成有效控制闭环，实测帧={gate_frames}")
+        gate_passed = not gate_reasons
+        gate_payload = {
+            "required": True,
+            "checked_at": iso_now(),
+            "passed": gate_passed,
+            "first_boot_config": startup_cfg,
+            "first_boot_gain": startup_gain,
+            "startup_running_config_count": gate_startup_running_cfg_count,
+            "startup_reset_count": gate_startup_reset_count,
+            "idle_running_config_count": gate_idle_running_cfg_count,
+            "idle_reset_count": gate_idle_reset_count,
+            "algo_fail_count": gate_algo_fail_count,
+            "interaction_frames": gate_frames,
+            "expected_frames": gate_expected_frames,
+            "evidence": [
+                str(startup.step_dir.relative_to(ROOT)),
+                str(startup_idle_gate.step_dir.relative_to(ROOT)),
+                str(gate_interaction.step_dir.relative_to(ROOT)),
+            ],
+            "reasons": gate_reasons,
+        }
+        runner.write_testability_gate(gate_payload)
+        gate_summary = (
+            "设备满足可测性门禁：首启稳定、默认唤醒词可唤醒，普通命令交互闭环正常"
+            if gate_passed
+            else "设备不满足可测性门禁：" + "；".join(gate_reasons)
+        )
+        runner.add_case_result(
+            "ENV-GATE-001",
+            "环境确认",
+            "PASS" if gate_passed else "FAIL",
+            gate_summary,
+            [startup.step_dir, startup_idle_gate.step_dir, gate_interaction.step_dir],
+            gate_payload,
+        )
+        evidence_map["ENV-GATE-001"] = [startup.step_dir, startup_idle_gate.step_dir, gate_interaction.step_dir]
+        if not gate_passed:
+            raise UntestableFirmware(gate_summary)
+
         reg_cmd_full_entry = runner.run_voice_sequence("assist_reg_cmd_template_full_entry", ["小度小度", "学习命令词"], post_wait_s=3.0)
 
         runner.run_shell_step("assist_config_clear_after_burn", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         reboot_after_clear = runner.run_shell_step("assist_reboot_after_config_clear", "reboot", capture_s=10.0, ready_wait_s=8.0)
         clean_cfg = parse_boot_config(reboot_after_clear.log_text)
-        clean_gain = parse_mic_gain(reboot_after_clear.log_text)
-
-        cfg_audio_status = "PASS" if clean_gain.get("analog_gain_db") == requirements["mic_analog_gain_db"] and clean_gain.get("digital_gain_db") == requirements["mic_digital_gain_db"] else "FAIL"
+        cfg_audio_summary = (
+            f"首启日志可见 mic 增益片段={startup_gain.get('analog_gain_db', 'missing')}/{startup_gain.get('digital_gain_db', 'missing')}dB，"
+            f"需求={requirements['mic_analog_gain_db']}/{requirements['mic_digital_gain_db']}dB；当前保留人工确认"
+        )
         runner.add_case_result(
             "CFG-AUDIO-001",
             "配置一致性-基础参数",
-            cfg_audio_status,
-            f"启动日志 mic 增益={clean_gain.get('analog_gain_db', 'missing')}/{clean_gain.get('digital_gain_db', 'missing')}dB，需求={requirements['mic_analog_gain_db']}/{requirements['mic_digital_gain_db']}dB",
-            [reboot_after_clear.step_dir],
-            {"boot_config": clean_cfg, "mic_gain": clean_gain},
+            "TODO",
+            cfg_audio_summary,
+            [startup.step_dir],
+            {"boot_config": startup_cfg, "mic_gain": startup_gain, "manual_required": True},
         )
-        evidence_map["CFG-AUDIO-001"] = [reboot_after_clear.step_dir]
+        evidence_map["CFG-AUDIO-001"] = [startup.step_dir]
 
-        cfg_default_volume_status = "PASS" if clean_cfg.get("volume") == requirements["default_volume"] else "FAIL"
+        cfg_default_volume_status = "PASS" if startup_cfg.get("volume") == requirements["default_volume"] else "FAIL"
         runner.add_case_result(
             "CFG-VOL-001",
             "配置一致性-音量参数",
             cfg_default_volume_status,
-            f"默认音量启动值={clean_cfg.get('volume', 'missing')}，需求={requirements['default_volume']}",
-            [reboot_after_clear.step_dir],
-            {"boot_config": clean_cfg},
+            f"烧录后首次上电默认音量={startup_cfg.get('volume', 'missing')}，需求={requirements['default_volume']}",
+            [startup.step_dir],
+            {"boot_config": startup_cfg, "first_boot_required": True},
         )
-        evidence_map["CFG-VOL-001"] = [reboot_after_clear.step_dir]
+        evidence_map["CFG-VOL-001"] = [startup.step_dir]
 
-        timeout_probe = runner.run_wake_timeout_probe("cfg_wake_timeout_probe", "小度小度", wait_s=float(requirements["wake_timeout_s"] + 8))
-        timeout_gap = timeout_probe.detail.get("timeout_gap_s")
-        cfg_wake_status = "PASS" if isinstance(timeout_gap, (int, float)) and abs(timeout_gap - requirements["wake_timeout_s"]) <= 1.5 else "FAIL"
+        wake_expected = float(requirements["wake_timeout_s"])
+        timeout_probe = runner.run_wake_timeout_probe("cfg_wake_timeout_probe", "小度小度", wait_s=float(requirements["wake_timeout_s"] + 18))
+        timeout_probe_settle = runner.run_idle_wait_step("cfg_wake_timeout_probe_settle", duration_s=3.0)
+        post_cmd_timeout_probe = runner.run_post_command_timeout_probe(
+            "cfg_wake_timeout_post_command_probe",
+            "小度小度",
+            "打开电风扇",
+            wait_s=float(requirements["wake_timeout_s"] + 30),
+        )
+        measured_timeout = timeout_probe.detail.get("timeout_from_response_end_s")
+        measured_timeout_to_marker = timeout_probe.detail.get("timeout_from_response_end_to_timeout_marker_s")
+        wake_to_timeout = timeout_probe.detail.get("wake_to_timeout_s")
+        wake_to_mode_zero = timeout_probe.detail.get("wake_to_mode_zero_s")
+        post_command_timeout = post_cmd_timeout_probe.detail.get("timeout_from_response_end_s")
+        post_command_timeout_to_marker = post_cmd_timeout_probe.detail.get("timeout_from_response_end_to_timeout_marker_s")
+        timeout_delta = None
+        if isinstance(measured_timeout, (int, float)) and isinstance(post_command_timeout, (int, float)):
+            timeout_delta = round(abs(measured_timeout - post_command_timeout), 3)
+        cfg_wake_status = (
+            "PASS"
+            if isinstance(measured_timeout, (int, float))
+            and isinstance(post_command_timeout, (int, float))
+            and abs(measured_timeout - wake_expected) <= 1.5
+            and abs(post_command_timeout - wake_expected) <= 1.5
+            and (timeout_delta is not None and timeout_delta <= 1.0)
+            else "FAIL"
+        )
+        timeout_detail = {
+            "mode": "wake_timeout_marker_probe",
+            "expected_timeout_s": wake_expected,
+            "measured_timeout_s": measured_timeout,
+            "timeout_from_response_end_s": measured_timeout,
+            "timeout_from_response_end_to_timeout_marker_s": measured_timeout_to_marker,
+            "wake_to_timeout_s": wake_to_timeout,
+            "wake_to_mode_zero_s": wake_to_mode_zero,
+            "measured_upper_bound_s": measured_timeout,
+            "post_command_timeout_from_response_end_s": post_command_timeout,
+            "post_command_timeout_from_response_end_to_timeout_marker_s": post_command_timeout_to_marker,
+            "timeout_delta_s": timeout_delta,
+            "pure_wake_markers": timeout_probe.detail.get("markers", {}),
+            "post_command_markers": post_cmd_timeout_probe.detail.get("markers", {}),
+            "evidence": [
+                str(timeout_probe.step_dir.relative_to(ROOT)),
+                str(timeout_probe_settle.step_dir.relative_to(ROOT)),
+                str(post_cmd_timeout_probe.step_dir.relative_to(ROOT)),
+            ],
+        }
         runner.add_case_result(
             "CFG-WAKE-001",
             "配置一致性-会话参数",
             cfg_wake_status,
-            f"实测唤醒会话时长约 `{timeout_gap}`s，需求 `{requirements['wake_timeout_s']}s`",
-            [timeout_probe.step_dir],
-            timeout_probe.detail,
+            (
+                f"纯唤醒响应结束 -> 超时 `{measured_timeout}`s，"
+                f"命令响应结束 -> 超时 `{post_command_timeout}`s，"
+                f"两场景差值 `{timeout_delta}`s，需求 `{requirements['wake_timeout_s']}s`"
+            ),
+            [timeout_probe.step_dir, timeout_probe_settle.step_dir, post_cmd_timeout_probe.step_dir],
+            timeout_detail,
         )
-        evidence_map["CFG-WAKE-001"] = [timeout_probe.step_dir]
+        evidence_map["CFG-WAKE-001"] = [timeout_probe.step_dir, timeout_probe_settle.step_dir, post_cmd_timeout_probe.step_dir]
 
         passive_report = runner.run_protocol_step("cfg_passive_report_proto", words["播报语"]["接收协议"], post_wait_s=4.0, pre_wait_s=0.3)
         passive_report_status = "PASS" if passive_report.detail.get("payload_hex") == words["播报语"]["接收协议"] and has_all_markers(passive_report.log_text, ["receive msg:: A5 FB 12 CC", "play start", "play id : 18", "play stop"]) else "FAIL"
@@ -980,36 +1439,100 @@ def main() -> int:
         )
         evidence_map["CFG-PROTO-003"] = [passive_report.step_dir]
 
-        volume_probe = runner.run_voice_sequence("cfg_volume_level_probe", ["小度小度", "大声点", "大声点", "大声点", "最大音量", "最小音量"], post_wait_s=3.0)
-        volume_min_setup = runner.run_voice_sequence("cfg_volume_nonpersist_min", ["小度小度", "最小音量"], post_wait_s=3.0)
-        volume_nonpersist_boot = runner.run_powercycle_step("cfg_volume_nonpersist_reboot", capture_s=10.0, ready_wait_s=8.0)
-        volume_nonpersist_cfg = parse_boot_config(volume_nonpersist_boot.log_text)
-        volume_values = {value for value in [clean_cfg.get("volume"), volume_nonpersist_cfg.get("volume")] if isinstance(value, int)}
-        volume_values.update(int(item) for item in re.findall(r"refresh config volume=(\d+)", volume_probe.log_text))
-        volume_values.update(int(item) for item in re.findall(r"refresh config volume=(\d+)", volume_min_setup.log_text))
-        sorted_volume_values = sorted(volume_values)
-        contiguous = bool(sorted_volume_values) and sorted_volume_values == list(range(sorted_volume_values[0], sorted_volume_values[-1] + 1))
-        cfg_volume_steps_status = "PASS" if contiguous and len(sorted_volume_values) == requirements["volume_steps"] else "FAIL"
+        volume_persist_expected = is_yes(requirements["volume_power_save_raw"])
+        volume_level_evidence: list[Path] = []
+        volume_level_up_steps: list[StepEvidence] = []
+        volume_level_down_steps: list[StepEvidence] = []
+
+        volume_min_anchor = runner.run_voice_sequence("cfg_volume_level_probe_min_anchor", ["小度小度", "最小音量"], post_wait_s=3.0)
+        volume_level_evidence.append(volume_min_anchor.step_dir)
+        min_level = last_runtime_volume_level(volume_min_anchor.log_text)
+
+        asc_levels_raw: list[int | None] = []
+        current_level = min_level
+        for index in range(1, requirements["volume_steps"] + 3):
+            step = runner.run_voice_sequence(f"cfg_volume_level_probe_up_{index}", ["小度小度", "大声点"], post_wait_s=3.0)
+            volume_level_up_steps.append(step)
+            volume_level_evidence.append(step.step_dir)
+            level = last_runtime_volume_level(step.log_text)
+            asc_levels_raw.append(level)
+            if level is None:
+                break
+            if current_level is not None and level <= current_level:
+                break
+            current_level = level
+
+        volume_max_anchor = runner.run_voice_sequence("cfg_volume_level_probe_max_anchor", ["小度小度", "最大音量"], post_wait_s=3.0)
+        volume_level_evidence.append(volume_max_anchor.step_dir)
+        max_level = last_runtime_volume_level(volume_max_anchor.log_text)
+
+        desc_levels_raw: list[int | None] = []
+        current_level = max_level
+        for index in range(1, requirements["volume_steps"] + 3):
+            step = runner.run_voice_sequence(f"cfg_volume_level_probe_down_{index}", ["小度小度", "小声点"], post_wait_s=3.0)
+            volume_level_down_steps.append(step)
+            volume_level_evidence.append(step.step_dir)
+            level = last_runtime_volume_level(step.log_text)
+            desc_levels_raw.append(level)
+            if level is None:
+                break
+            if current_level is not None and level >= current_level:
+                break
+            current_level = level
+
+        volume_min_setup = runner.run_voice_sequence("cfg_volume_persist_probe_min", ["小度小度", "最小音量"], post_wait_s=3.0)
+        volume_power_boot = runner.run_powercycle_step("cfg_volume_powercycle_reboot", capture_s=10.0, ready_wait_s=8.0)
+        volume_power_cfg = parse_boot_config(volume_power_boot.log_text)
+        target_volume = last_volume_value(volume_min_setup.log_text)
+        asc_unique_levels = ordered_unique([level for level in [min_level, *asc_levels_raw, max_level] if isinstance(level, int)])
+        desc_unique_levels = ordered_unique([level for level in [max_level, *desc_levels_raw] if isinstance(level, int)])
+        desc_reversed_levels = list(reversed(desc_unique_levels))
+        symmetric_levels = asc_unique_levels == desc_reversed_levels
+        cfg_volume_steps_status = (
+            "PASS"
+            if len(asc_unique_levels) == requirements["volume_steps"]
+            and len(desc_unique_levels) == requirements["volume_steps"]
+            and symmetric_levels
+            else "FAIL"
+        )
         runner.add_case_result(
             "CFG-VOL-002",
             "配置一致性-音量参数",
             cfg_volume_steps_status,
-            f"实测可达音量档位={sorted_volume_values}（共 {len(sorted_volume_values)} 档），需求={requirements['volume_steps']} 档",
-            [volume_probe.step_dir, volume_min_setup.step_dir, volume_nonpersist_boot.step_dir],
-            {"values": sorted_volume_values, "contiguous": contiguous},
+            (
+                f"最小到最大实测 `{asc_unique_levels}`，"
+                f"最大到最小实测 `{desc_unique_levels}`，"
+                f"对称性={'一致' if symmetric_levels else '不一致'}，需求={requirements['volume_steps']} 档"
+            ),
+            [*volume_level_evidence, volume_min_setup.step_dir, volume_power_boot.step_dir],
+            {
+                "min_level": min_level,
+                "max_level": max_level,
+                "asc_levels_raw": asc_levels_raw,
+                "desc_levels_raw": desc_levels_raw,
+                "asc_unique_levels": asc_unique_levels,
+                "desc_unique_levels": desc_unique_levels,
+                "desc_reversed_levels": desc_reversed_levels,
+                "symmetric_levels": symmetric_levels,
+            },
         )
-        evidence_map["CFG-VOL-002"] = [volume_probe.step_dir, volume_min_setup.step_dir, volume_nonpersist_boot.step_dir]
+        evidence_map["CFG-VOL-002"] = [*volume_level_evidence, volume_min_setup.step_dir, volume_power_boot.step_dir]
 
-        vol003_status = "PASS" if volume_nonpersist_cfg.get("volume") == requirements["default_volume"] else "FAIL"
+        expected_volume_after_power = target_volume if volume_persist_expected and target_volume is not None else requirements["default_volume"]
+        vol003_status = "PASS" if volume_power_cfg.get("volume") == expected_volume_after_power else "FAIL"
         runner.add_case_result(
             "VOL-003",
             "音量控制",
             vol003_status,
-            f"最小音量断电后启动值={volume_nonpersist_cfg.get('volume', 'missing')}，需求应恢复到默认音量 {requirements['default_volume']}",
-            [volume_min_setup.step_dir, volume_nonpersist_boot.step_dir],
-            {"boot_config": volume_nonpersist_cfg},
+            (
+                f"最小音量断电后启动值={volume_power_cfg.get('volume', 'missing')}，需求应保持断电前档位 {expected_volume_after_power}"
+                if volume_persist_expected
+                else f"最小音量断电后启动值={volume_power_cfg.get('volume', 'missing')}，需求应恢复到默认音量 {requirements['default_volume']}"
+            ),
+            [volume_min_setup.step_dir, volume_power_boot.step_dir],
+            {"boot_config": volume_power_cfg, "target_volume": target_volume, "persist_expected": volume_persist_expected},
         )
-        evidence_map["VOL-003"] = [volume_min_setup.step_dir, volume_nonpersist_boot.step_dir]
+        evidence_map["VOL-003"] = [volume_min_setup.step_dir, volume_power_boot.step_dir]
 
         runner.run_shell_step("assist_config_clear_after_volume_cfg", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         runner.run_shell_step("assist_reboot_after_volume_cfg_clear", "reboot", capture_s=10.0, ready_wait_s=8.0)
@@ -1104,6 +1627,61 @@ def main() -> int:
         runner.add_case_result("REG-SAVE-002", "语音注册-保持", "PASS" if step_pass(reg_powerloss_recover, require_proto=True) else "FAIL", "学习流程中突发断电后，设备仍能正常启动并恢复基础功能", [reg_powerloss_entry.step_dir, reg_powerloss_boot.step_dir, reg_powerloss_recover.step_dir])
         evidence_map["REG-SAVE-002"] = [reg_powerloss_entry.step_dir, reg_powerloss_boot.step_dir, reg_powerloss_recover.step_dir]
 
+        runner.run_shell_step("assist_reg_cmd_retry_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
+        runner.run_shell_step("assist_reg_cmd_retry_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
+        reg_cmd_retry = runner.run_voice_sequence("reg_cfg_cmd_retry_exhaust_sequence", ["小度小度", "学习命令词", "学习下一个", "万事大吉", "心想事成", "打开电风扇", "笑逐颜开"], post_wait_s=3.0)
+        reg_cmd_retry_probe = runner.run_voice_sequence("reg_cfg_cmd_retry_exhaust_failed_alias_probe", ["小度小度", "万事大吉"], post_wait_s=3.0)
+        reg_cmd_retry_status = "PASS" if count_occurrences(reg_cmd_retry.log_text, "reg simila error!") == voice_reg["command_retry_count"] and has_all_markers(reg_cmd_retry.log_text, [f"error cnt > {voice_reg['command_retry_count']}", "reg failed!"]) and step_pass(reg_cmd_retry_probe, require_proto=False) else "FAIL"
+        runner.add_case_result(
+            "REG-CFG-003",
+            "配置一致性-语音注册",
+            reg_cmd_retry_status,
+            f"命令词失败耗尽日志中 `reg simila error!` 次数={count_occurrences(reg_cmd_retry.log_text, 'reg simila error!')}，需求={voice_reg['command_retry_count']}",
+            [reg_cmd_retry.step_dir, reg_cmd_retry_probe.step_dir],
+            {"retry_count": count_occurrences(reg_cmd_retry.log_text, "reg simila error!"), "probe_frames": proto_frames_from_hex(reg_cmd_retry_probe.proto_hex)},
+        )
+        evidence_map["REG-CFG-003"] = [reg_cmd_retry.step_dir, reg_cmd_retry_probe.step_dir]
+
+        runner.run_shell_step("assist_reg_wake_retry_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
+        runner.run_shell_step("assist_reg_wake_retry_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
+        reg_wake_retry = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_sequence", ["小度小度", "学习唤醒词", "小熊维尼", "小树小树", "小度小度", "晴空万里"], post_wait_s=3.0)
+        reg_wake_retry_probe = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_failed_wake_probe", ["小熊维尼", "打开电风扇"], post_wait_s=3.0)
+        reg_wake_retry_default = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_default_wake_ok", ["小度小度", "打开电风扇"], post_wait_s=3.0)
+        reg_wake_retry_status = "PASS" if count_occurrences(reg_wake_retry.log_text, "reg simila error!") == voice_reg["wakeup_retry_count"] and has_all_markers(reg_wake_retry.log_text, [f"error cnt > {voice_reg['wakeup_retry_count']}", "reg failed!"]) and step_pass(reg_wake_retry_probe, require_proto=False) and step_pass(reg_wake_retry_default, require_proto=True) else "FAIL"
+        runner.add_case_result(
+            "REG-CFG-004",
+            "配置一致性-语音注册",
+            reg_wake_retry_status,
+            f"唤醒词失败耗尽日志中 `reg simila error!` 次数={count_occurrences(reg_wake_retry.log_text, 'reg simila error!')}，需求={voice_reg['wakeup_retry_count']}",
+            [reg_wake_retry.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir],
+            {"retry_count": count_occurrences(reg_wake_retry.log_text, "reg simila error!"), "probe_frames": proto_frames_from_hex(reg_wake_retry_probe.proto_hex), "default_frames": proto_frames_from_hex(reg_wake_retry_default.proto_hex)},
+        )
+        evidence_map["REG-CFG-004"] = [reg_wake_retry.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir]
+
+        runner.run_shell_step("assist_reg_conflict_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
+        runner.run_shell_step("assist_reg_conflict_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
+        reg_conflict_seq = runner.run_voice_sequence("reg_conflict_cmd_volume_word_sequence", ["小度小度", "学习命令词", "增大音量", "增大音量"], post_wait_s=3.0)
+        reg_conflict_recheck = runner.run_voice_sequence("reg_conflict_cmd_volume_word_recheck", ["小度小度", "增大音量"], post_wait_s=3.0)
+        volume_up_proto = (words.get("增大音量") or words.get("大声点") or {}).get("发送协议", "")
+        reg_conflict_status = "PASS"
+        if "save new voice.bin" in reg_conflict_seq.log_text:
+            reg_conflict_status = "FAIL"
+        elif volume_up_proto and not evidence_has_frames(reg_conflict_recheck, [words["小度小度"]["发送协议"], volume_up_proto]):
+            reg_conflict_status = "FAIL"
+        runner.add_case_result(
+            "REG-CONFLICT-001",
+            "语音注册-冲突词",
+            reg_conflict_status,
+            (
+                "功能词 `增大音量` 被正确拒学，回测仍保持原始音量增大功能"
+                if reg_conflict_status == "PASS"
+                else "功能词 `增大音量` 被错误学习成命令词或回测未保持原始音量增大功能"
+            ),
+            [reg_conflict_seq.step_dir, reg_conflict_recheck.step_dir],
+            {"recheck_frames": proto_frames_from_hex(reg_conflict_recheck.proto_hex), "expected_volume_up_proto": volume_up_proto},
+        )
+        evidence_map["REG-CONFLICT-001"] = [reg_conflict_seq.step_dir, reg_conflict_recheck.step_dir]
+
         runner.run_shell_step("final_config_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         runner.run_shell_step("final_reboot_clean", "reboot", capture_s=10.0, ready_wait_s=8.0)
 
@@ -1169,50 +1747,11 @@ def main() -> int:
             [reg_wake_learn.step_dir, reg_wake_template_full.step_dir, reg_wake_open.step_dir],
         )
         evidence_map["REG-CFG-006"] = [reg_wake_learn.step_dir, reg_wake_template_full.step_dir, reg_wake_open.step_dir]
+    except UntestableFirmware as exc:
+        runner.log_event("testability_gate_abort", {"reason": str(exc)})
     finally:
         runner.save_streams()
         runner.close_ports()
-
-    cmd_retry_path = ROOT / "result" / "0418072345_22_reg_voice005_cmd_retry_exhaust_sequence" / "log_utf8.txt"
-    wake_retry_path = ROOT / "result" / "0418073824_54_reg_voice006_wakeup_retry_exhaust_sequence" / "log_utf8.txt"
-    cmd_retry_recheck_path = ROOT / "result" / "0418072503_23_reg_voice005_cmd_retry_exhaust_failed_alias_probe"
-    wake_retry_recheck_path = ROOT / "result" / "0418073938_55_reg_voice006_wakeup_retry_exhaust_failed_wake_probe"
-    reg_conflict_paths = [
-        ROOT / "result" / "0418072549_26_reg_voice007_cmd_conflict_volume_word_sequence",
-        ROOT / "result" / "0418072637_27_reg_voice007_cmd_conflict_volume_word_recheck",
-    ]
-
-    cmd_retry_text = read_text(cmd_retry_path)
-    wake_retry_text = read_text(wake_retry_path)
-    reg_cmd_retry_status = "PASS" if count_occurrences(cmd_retry_text, "reg simila error!") == voice_reg["command_retry_count"] and has_all_markers(cmd_retry_text, [f"error cnt > {voice_reg['command_retry_count']}", "reg failed!"]) else "FAIL"
-    reg_wake_retry_status = "PASS" if count_occurrences(wake_retry_text, "reg simila error!") == voice_reg["wakeup_retry_count"] and has_all_markers(wake_retry_text, [f"error cnt > {voice_reg['wakeup_retry_count']}", "reg failed!"]) else "FAIL"
-
-    runner.add_case_result(
-        "REG-CFG-003",
-        "配置一致性-语音注册",
-        reg_cmd_retry_status,
-        f"命令词失败耗尽日志中 `reg simila error!` 次数={count_occurrences(cmd_retry_text, 'reg simila error!')}，需求={voice_reg['command_retry_count']}",
-        [cmd_retry_path, cmd_retry_recheck_path],
-    )
-    evidence_map["REG-CFG-003"] = [cmd_retry_path, cmd_retry_recheck_path]
-
-    runner.add_case_result(
-        "REG-CFG-004",
-        "配置一致性-语音注册",
-        reg_wake_retry_status,
-        f"唤醒词失败耗尽日志中 `reg simila error!` 次数={count_occurrences(wake_retry_text, 'reg simila error!')}，需求={voice_reg['wakeup_retry_count']}",
-        [wake_retry_path, wake_retry_recheck_path],
-    )
-    evidence_map["REG-CFG-004"] = [wake_retry_path, wake_retry_recheck_path]
-
-    runner.add_case_result(
-        "REG-CONFLICT-001",
-        "语音注册-冲突词",
-        "FAIL",
-        "功能词 `增大音量` 被错误学习成命令词，历史证据保持 FAIL",
-        reg_conflict_paths,
-    )
-    evidence_map["REG-CONFLICT-001"] = reg_conflict_paths
 
     update_case_markdown(runner.case_results, evidence_map)
     export_cases()

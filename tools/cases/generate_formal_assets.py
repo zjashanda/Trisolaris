@@ -30,6 +30,10 @@ TRUTH = {
 }
 
 
+def is_yes(value: str) -> bool:
+    return value.strip() in {"是", "支持", "保存", "需要", "true", "True", "YES", "Yes", "yes", "1"}
+
+
 def parse_requirement_markdown(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
 
@@ -162,10 +166,26 @@ def build_dynamic_blocks(req: dict[str, Any], reg: dict[str, Any], words: dict[s
     alt_wakes = [word for word in wake_words if word != default_wake]
     current_wake = alt_wakes[0] if alt_wakes else default_wake
     other_wake = alt_wakes[1] if len(alt_wakes) > 1 else default_wake
+    volume_persist = is_yes(req["volume_power_save_raw"])
     wake_send = get_proto(words, default_wake, "发送协议")
     open_fan_send = get_proto(words, "打开电风扇", "发送协议")
     voice_off_send = get_proto(words, "关闭语音", "发送协议", "A5 FA 11 BB")
     voice_on_recv = get_proto(words, "开语音", "接收协议", TRUTH["voice_on_proto"])
+    volume_power_title = (
+        "音量设置应掉电保存（需求保持断电前档位）"
+        if volume_persist
+        else f"音量设置不应掉电保存（需求默认音量 `{req['default_volume']}`）"
+    )
+    volume_power_assert = (
+        "重启后应保持断电前音量档位，不应恢复成其他值"
+        if volume_persist
+        else "重启后应恢复需求默认音量，而不是保留断电前档位"
+    )
+    volume_power_aux = (
+        "`COM38` 启动日志中的 `volume` 与重启后行为应保持断电前档位"
+        if volume_persist
+        else "`COM38` 启动日志中的 `volume` 与重启后行为应回到默认值"
+    )
 
     return {
         "4.1 环境与会话控制": [
@@ -186,7 +206,7 @@ def build_dynamic_blocks(req: dict[str, Any], reg: dict[str, Any], words: dict[s
             ["CTRL-004", "基础控制", "正例", "关机", "已进入会话", "1. 说 `关机`", "关机功能成立", "`COM36` 出现对应控制协议"],
             ["VOL-001", "音量控制", "正例", "大小声调节", "已进入会话", "1. 说 `大声点`<br>2. 再说 `小声点`", "音量可按方向增减", "`COM36` 协议与词命中正确"],
             ["VOL-002", "音量控制", "正例", "最大 / 最小边界", "已进入会话", "1. 说 `最大音量`<br>2. 说 `最小音量`", "边界设置成立，边界反馈正确", f"边界提示应分别为 `{req['volume_overflow_tone']}` / `{req['volume_underflow_tone']}`"],
-            ["VOL-003", "音量控制", "配置一致性", f"音量设置不应掉电保存（需求默认音量 `{req['default_volume']}`）", "设备可正常调音并支持断电重启", "1. 将音量改到非默认档位<br>2. 断电重启<br>3. 观察启动配置并复测音量状态", "重启后应恢复需求默认音量，而不是保留断电前档位", "`COM38` 启动日志中的 `volume` 与重启后行为应回到默认值"],
+            ["VOL-003", "音量控制", "配置一致性", volume_power_title, "设备可正常调音并支持断电重启", "1. 将音量改到非默认档位<br>2. 断电重启<br>3. 观察启动配置并复测音量状态", volume_power_assert, volume_power_aux],
             ["VOL-004", "音量控制", "异常", "连续快速调音稳定性", "已进入会话", "1. 连续快速执行音量词<br>2. 观察档位与提示", "不应出现跳档、反跳或状态错乱", "协议序列、日志档位与提示应一致"],
         ],
         "4.4 切换唤醒词及交叉验证": [
@@ -218,6 +238,8 @@ def build_dynamic_blocks(req: dict[str, Any], reg: dict[str, Any], words: dict[s
 
 def build_plan_markdown(req: dict[str, Any], reg: dict[str, Any], wake_words: list[str]) -> str:
     default_wake = TRUTH["default_wake"] if TRUTH["default_wake"] in wake_words else wake_words[0]
+    volume_persist = is_yes(req["volume_power_save_raw"])
+    volume_power_desc = "掉电保持" if volume_persist else "掉电不保持"
     return f"""# {req['project_name']}测试方案
 
 ## 1. 方案目标
@@ -267,7 +289,7 @@ def build_plan_markdown(req: dict[str, Any], reg: dict[str, Any], wake_words: li
 ### 4.2 基础控制与音量
 
 - 验证打开/关闭电风扇、开机/关机
-- 验证音量增减、边界提示、默认音量、总档位数和掉电不保持
+- 验证音量增减、边界提示、默认音量、总档位数和{volume_power_desc}
 
 ### 4.3 播报与语音开关
 
@@ -286,7 +308,7 @@ def build_plan_markdown(req: dict[str, Any], reg: dict[str, Any], wake_words: li
 1. 唤醒会话时长是否真为 `{req['wake_timeout_s']}s`
 2. 默认音量是否真为 `{req['default_volume']}`
 3. 音量总档位是否真为 `{req['volume_steps']}`
-4. 音量是否确实不掉电保存
+4. 音量掉电行为是否与需求一致（当前需求：`{req['volume_power_save_raw']}`）
 5. 开关语音协议和掉电保持是否与项目真值一致
 6. 语音注册学习次数、失败重试上限、模板数是否与配置一致
 """

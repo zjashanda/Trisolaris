@@ -143,7 +143,20 @@ Keep `tools/burn_bundle/` as the synced local tool payload, but do not bypass th
 
 After burn or after heavy registration testing, normalize the device state before the next batch when appropriate, for example with `config.clear` and reboot. Keep the normalization evidence in `result/`.
 
-### 6. Execute validation serially
+### 6. Run the mandatory testability gate first
+
+Every firmware run must start with a gate after burn and version confirmation.
+
+Minimum gate requirements:
+
+- no reboot loop during the startup observation window
+- the default wake word can wake the device
+- a normal non-volume command can complete one basic interaction
+- first-boot default volume is captured immediately after burn from the first startup config
+
+If the gate fails, stop the fullflow immediately and report the firmware as untestable. Do not continue into the main case batch and do not force later cases into fake PASS/FAIL conclusions.
+
+### 7. Execute validation serially
 
 Use repo tools or the direct shell/Python fallback instead of ad-hoc manual steps.
 
@@ -157,7 +170,28 @@ Execution rules:
 - If `tools/audio/listenai-play` is missing, sync it into `tools/audio/` first. If local playback tooling already exists but the latest cloud version is required, use the update parameter before execution.
 - Do not rely on hearing as the formal evidence source.
 
-### 7. Judge results carefully
+### 8. Validate parameters with the corrected assertion logic
+
+When a case is about requirement parameters, use the project-approved measurement method instead of a shortcut:
+
+- wake timeout:
+  - pure wake case: measure from wake-response playback end to `TIME_OUT` / `MODE=0`
+  - wake-plus-command case: measure from command-response playback end to `TIME_OUT` / `MODE=0`
+  - only accept the timeout conclusion when both paths are close enough to each other and to the requirement target
+- volume step count:
+  - anchor at minimum and maximum boundaries first
+  - climb from minimum to maximum one step at a time
+  - descend from maximum to minimum one step at a time
+  - use runtime `mini player set vol` levels to build the actual step ladder
+  - require min->max and max->min to be symmetric before judging the step count as valid
+- default volume:
+  - judge it from the first boot after burn, not after later volume cases have already modified the state
+- persistence:
+  - follow the live requirement meaning dynamically
+  - for save-required items, confirm save completion before power loss
+  - for non-save-required items, compare the rebooted state against the requirement default
+
+### 9. Judge results carefully
 
 Use the evidence rules in the reference file. In short:
 
@@ -167,7 +201,7 @@ Use the evidence rules in the reference file. In short:
 - persistence cannot be claimed before save completion is observed
 - manual-only items should stay manual instead of being force-closed automatically
 
-### 8. Sync evidence and conclusions
+### 10. Sync evidence and conclusions
 
 After each batch:
 
