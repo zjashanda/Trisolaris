@@ -104,7 +104,7 @@
 
 ## 2026-04-20 Fullflow Asset Publish Round
 - [done] Read `plan.md` and re-check which generated fullflow assets were still only local.
-- [doing] Add the current requirement baseline plus the generated plan / methods / formal cases into the publish set so the repo contains the complete static fullflow assets.
-- [pending] Commit and push the added fullflow assets without bringing runtime logs, burn artifacts, or report bundles into Git.
-- [pending] Sync the final uploaded file list back into `plan.md` and return it to the user.
+- [done] Add the current requirement baseline plus the generated plan / methods / formal cases into the publish set so the repo contains the complete static fullflow assets.
+- [done] Commit and push the added fullflow assets without bringing runtime logs, burn artifacts, or report bundles into Git. Commit `42b27b2`.
+- [done] Sync the final uploaded file list back into `plan.md` and return it to the user.
 
