@@ -48,9 +48,13 @@ Prefer repo-local tools when they exist because they match the project conventio
 
 - `tools/burn_bundle/run_fan_burn.ps1`
 - `tools/burn_bundle/run_fan_burn.sh`
+- `tools/cases/generate_formal_assets.py`
+- `tools/cases/export_case_md_to_xlsx.py`
+- `tools/debug/run_post_restructure_fullflow.py`
+- `tools/debug/run_timeout_volume_probe.py`
+- `tools/debug/generate_detailed_bundle_report.py`
 - `tools/audio/fan_dual_capture.py`
 - `tools/serial/fan_protocol_probe.py`
-- `tools/cases/export_case_md_to_xlsx.py`
 - `tools/audio/sync_listenai_play.py`
 - `tools/audio/listenai-play/scripts/listenai_play.py`
 - `tools/audio/listenai-play/scripts/install_laid_windows.ps1`
@@ -86,6 +90,13 @@ Write stable outputs outside the requirement directory:
 
 Use Markdown for plan/design/report documents. Use Excel for the formal case table.
 
+Report-writing rules:
+
+- Markdown reports must use Chinese headings/body text.
+- Prefer a Windows-friendly encoding such as `UTF-8 with BOM` for user-facing Markdown deliverables.
+- The detailed report default filename should stay consistent with the project convention, for example `测试报告-详细.md`.
+- Detailed reports must not only expand FAIL items; they must include a clear structure for PASS, FAIL, `待人工`, and `阻塞`.
+
 ## Workflow
 
 ### 1. Parse the requirements into testable function points
@@ -104,6 +115,11 @@ Treat functional correctness as the primary judgment. Treat protocol, playback, 
 ### 2. Build or refresh the test plan
 
 Write or update the test plan under `deliverables/csk5062_xiaodu_fan/plan/`.
+
+Prefer the repo generation chain when refreshing the static assets:
+
+- `tools/cases/generate_formal_assets.py` to refresh the plan / formal case markdown source
+- `tools/cases/export_case_md_to_xlsx.py` to export the formal Excel case table
 
 For each feature, capture:
 
@@ -208,6 +224,7 @@ After each batch:
 - store raw artifacts in `result/`
 - update `plan.md`
 - sync the current truth into the Excel case file and reports
+- when generating detailed reports, keep the structure complete: summary table, PASS details, FAIL analysis, and `待人工` / `阻塞` sections
 - call out verified items, real defects, blocked items, and manual-only items separately
 - clean invalid or empty result directories caused by port contention so they do not pollute formal evidence
 

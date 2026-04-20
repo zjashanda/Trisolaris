@@ -114,3 +114,8 @@
 - [done] Regenerate the local detailed reports from the updated generator and verify the markdown is readable in Windows with Chinese content.
 - [done] Commit and push the report-generator update to `origin`. Commit `e4d9900`.
 
+## 2026-04-20 Skill Rule Sync Round
+- [doing] Update `SKILL.md` so the skill body explicitly includes the static asset generation chain, the Chinese-report requirement, and the rule that detailed reports must contain PASS / FAIL / 待人工 / 阻塞的完整结构 instead of only failure details.
+- [pending] Commit and push the `SKILL.md` update to `origin`.
+- [pending] Return the updated rule summary to the user and reserve task 2 for re-organizing today's latest three firmware result bundles.
+
