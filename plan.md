@@ -789,3 +789,8 @@
 - [done] 语法校验：当前 HTT runner、握手脚本、串口维护脚本和音频 helper 已通过 `python -m py_compile`。
 - [done] Git 暂存统计：`29` 个新增、`500` 个删除、`8` 个修改；删除项主要为历史运行产物、旧项目输入、旧报告日志、临时固件和旧 CSK5062 专用逻辑。
 - [done] 本轮准备提交并推送到 `origin/main`，提交内容为清理后的当前有效仓库状态。
+
+## 2026-04-24 Git 同步完成
+- [done] 清理提交已完成：`55608e3 chore: clean historical validation artifacts`。
+- [done] 已推送到远端：`origin/main`，范围 `87260c1..55608e3`。
+- [done] 本地历史不用的逻辑、执行环境、方案重复版本、日志、报告、音频缓存、临时固件和嵌套仓库元数据已清理；后续运行产物由 `.gitignore` 控制不再入库。
