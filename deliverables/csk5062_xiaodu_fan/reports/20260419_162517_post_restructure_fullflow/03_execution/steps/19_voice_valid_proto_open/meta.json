@@ -1,9 +1,0 @@
-{
-  "name": "voice_valid_proto_open",
-  "log_bytes": 0,
-  "proto_bytes": 0,
-  "mode": "protocol",
-  "payload_hex": "A5 FB 0A CC",
-  "pre_wait_s": 0.5,
-  "post_wait_s": 3.0
-}

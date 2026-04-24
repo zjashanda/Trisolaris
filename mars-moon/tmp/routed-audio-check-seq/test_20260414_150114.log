@@ -1,7 +1,0 @@
-[15:01:14.644][INFO] 串口 /dev/ttyACM0 连接成功
-[15:01:16.646][INFO] 优先使用配置声卡播报：VID_8765&PID_5678:12345678
-[15:01:18.525][INFO] [listenai-play] Target VID_8765&PID_5678:12345678 -> plughw:2,0 (CSK6012Combo)
-[15:01:18.525][INFO] [listenai-play] Probe succeeded.
-[15:01:18.526][INFO] [listenai-play] Play iteration 1/1
-[15:01:18.526][INFO] [listenai-play] Playback finished.
-[15:01:22.662][INFO] 串口 /dev/ttyACM0 已关闭

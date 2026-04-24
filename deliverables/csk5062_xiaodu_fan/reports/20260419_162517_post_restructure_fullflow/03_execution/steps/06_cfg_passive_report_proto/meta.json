@@ -1,9 +1,0 @@
-{
-  "name": "cfg_passive_report_proto",
-  "log_bytes": 0,
-  "proto_bytes": 0,
-  "mode": "protocol",
-  "payload_hex": "A5 FB 12 CC",
-  "pre_wait_s": 0.3,
-  "post_wait_s": 4.0
-}

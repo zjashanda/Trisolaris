@@ -1,241 +1,111 @@
----
+﻿---
 name: trisolaris
-description: Trisolaris offline-voice fullflow skill for `D:\revolution4s\Trisolaris`. Use when the task needs to read requirement docs, analyze function points, write the test plan, generate or refresh formal Excel test cases, burn firmware with the local burn wrappers, validate behavior through `COM36`/`COM38`/`COM39`, drive the specified playback device, and sync evidence/reports for the CSK5062 xiaodu-fan workflow.
+description: 面向 D:\revolution4s\Trisolaris 的离线语音验证 skill。用于读取需求、拆解功能点、设计测试方案、执行好太太晾衣机 CSK3022 验证、烧录固件、控制 COM36/COM38/COM39、验证主动/被动协议和播报 ID、沉淀结果文档并同步 plan.md。
 ---
 
-# Trisolaris
+# Trisolaris 离线语音验证 Skill
 
-Use this skill to execute the current Trisolaris offline-voice workflow end to end inside `D:\revolution4s\Trisolaris`.
+## 启动要求
 
-## Start Here
+1. 进入 `D:\revolution4s\Trisolaris` 后先读取 `plan.md`；如果不存在就创建。
+2. 每完成一个有意义的步骤，都要把已执行、执行中、待执行同步回 `plan.md`。
+3. 判断协议、播报、持久化、PASS/FAIL/BLOCKED 前，优先读取 `references/evidence-rules.md`。
+4. 当前项目主线是 `CSK3022 好太太晾衣机`，历史 CSK5062 风扇运行产物不再作为当前验证输入。
 
-1. Read repo-root `plan.md` first. Create it if missing.
-2. Follow repo `AGENTS.md`: after each meaningful step, sync done / in-progress / pending items back to `plan.md`.
-3. Read `references/repo-workflow.md` before choosing the next action.
-4. Read `references/evidence-rules.md` before judging protocol, playback, persistence, PASS/FAIL/BLOCKED, or manual-only items.
+## 当前输入
 
-## What this skill can own
+- 需求目录：`项目需求/好太太晾衣机/`
+- 需求文档：`好太太晾衣机需求迭代.md`
+- 词表协议：`电控词表协议--小好晾衣机语音词条协议-20260309.xlsx`
+- 状态图：`语音关闭逻辑.png`
+- 固件：`fw-csk3022-htt-clothes-airer-v1.0.9.bin`
+- 需求设计方法参考：`references/需求功能验证设计方法.md`
 
-This skill is the orchestration layer for the whole flow:
+需求目录只放输入材料，不放执行日志、报告 bundle、音频缓存或临时脚本。
 
-- read requirement inputs
-- decompose function points
-- write or refresh the test plan
-- write or refresh the formal Excel cases
-- burn firmware through the local bundle rule
-- run validation on the fixed serial ports
-- drive the specified playback device
-- collect evidence under `result/`
-- sync conclusions into `plan.md` and deliverables
+## 当前输出
 
-## Independence boundary
+- 最终方案/矩阵/缺陷文档：`deliverables/csk3022_htt_clothes_airer/plan/`
+- 稳定用例定义：`deliverables/csk3022_htt_clothes_airer/cases/`
+- 原始运行证据：`result/`，仅本地使用，不提交 Git。
+- 报告 bundle：`deliverables/*/reports/`，仅本地使用，不提交 Git。
 
-Treat the skill as self-contained for workflow knowledge and decision rules, not as a single-file executable that can run without project resources.
+## 固定硬件口径
 
-It still requires these external runtime inputs:
+- `COM36 @ 9600`：协议串口，作为主动/被动协议正式证据。
+- `COM38 @ 115200`：日志/烧录串口，用于识别、播报、play id、超时、启动配置等证据。
+- `COM39 @ 115200`：上下电和 boot 控制。
+- 音频播放设备必须先确认路由；音频链路异常不能直接判固件 FAIL。
 
-- the current Trisolaris repo
-- requirement documents and target firmware
-- burn bundle/toolchain
-- serial devices on `COM36` / `COM38` / `COM39`
-- the target playback device when audio validation is needed
+## 当前脚本入口
 
-Do not depend on another skill such as `mars-moon` for the main flow. Use `mars-moon` only as an optional idea source when a brand-new feature needs decomposition hints.
+优先使用仓库内脚本，不要临时复制散落脚本：
 
-## Fallback rule when repo scripts are missing
+- `tools/debug/run_htt_handshake_formal_suite.py`：握手仿真 + 主链正式验证。
+- `tools/debug/run_htt_numeric_probe.py`：唤醒超时、默认音量、音量档位和边界探测。
+- `tools/debug/run_htt_active_passive_playid_sweep.py`：主动协议、被动协议、播报 ID sweep。
+- `tools/debug/run_htt_followup_checks.py`：稳定 FAIL follow-up 复测。
+- `tools/debug/run_htt_voice_restricted_probe.py`：语音关闭受限态、10s 窗口、play id 77/123。
+- `tools/debug/run_htt_active_only_remaining.py`：active-only 命令全量/复测。
+- `tools/debug/run_htt_active_only_phrase_probe.py`：active-only 别名排查。
+- `tools/debug/run_htt_pyaudio_route_probe.py`：音频路由排查。
+- `tools/debug/run_listenai_endpoint_meter_probe.py`：播放设备链路探测。
+- `tools/serial/fan_proto_handshake_probe.py`：品牌应答、心跳应答、MCU 查询握手仿真。
+- `tools/serial/fan_serial_maintenance.py`：串口维护与上电抓取辅助。
 
-Prefer repo-local tools when they exist because they match the project conventions:
+## 烧录规则
 
-- `tools/burn_bundle/run_fan_burn.ps1`
-- `tools/burn_bundle/run_fan_burn.sh`
-- `tools/cases/generate_formal_assets.py`
-- `tools/cases/export_case_md_to_xlsx.py`
-- `tools/debug/run_post_restructure_fullflow.py`
-- `tools/debug/run_timeout_volume_probe.py`
-- `tools/debug/generate_detailed_bundle_report.py`
-- `tools/audio/fan_dual_capture.py`
-- `tools/serial/fan_protocol_probe.py`
-- `tools/audio/sync_listenai_play.py`
-- `tools/audio/listenai-play/scripts/listenai_play.py`
-- `tools/audio/listenai-play/scripts/install_laid_windows.ps1`
-- `tools/audio/listenai-play/scripts/install_laid_linux.sh`
+烧录只走仓库包装入口：
 
-If one of them is missing or stale, continue with shell/Python directly instead of declaring the flow blocked too early, as long as the local burn bundle, firmware, ports, and evidence path are still available.
+- Windows：`tools/burn_bundle/run_fan_burn.ps1`
+- Linux：`tools/burn_bundle/run_fan_burn.sh`
 
-## Core Inputs
+规则：
 
-Treat the requirement directory as input-only. Keep it clean.
+1. wrapper 负责删除旧 `app.bin`。
+2. wrapper 负责把目标固件复制为 staging `app.bin`。
+3. 烧录后必须同时看烧录日志成功标记和 `COM38` 启动版本。
+4. `tools/burn_bundle/windows/app.bin`、`burn.log`、`burn_tool.log` 是运行产物，不提交。
 
-Typical inputs are:
+## 需求拆解原则
 
-- requirement markdown
-- terms/phrase Excel
-- `tone.h`
-- voice-registration Excel
-- optional `algo res/`
-- target firmware `.bin`
-- later user clarifications that override ambiguous document text
+每个需求点都要落到可验证结构：
 
-If the user clarified behavior after the documents were written, use the latest user clarification as project truth and sync that understanding into the plan, cases, and reports.
+- 需求解析：需求是什么、来自哪个文档/变更口径。
+- 验证方案：用什么入口、什么状态、什么证据链。
+- 用例：前置条件、步骤、正例、反例、异常场景。
+- 断言：主断言和辅助断言分开。
+- 执行结果：PASS/FAIL/BLOCKED 必须有证据，不能只贴日志路径。
 
-## Main Outputs
+## 数值验证原则
 
-Write stable outputs outside the requirement directory:
+数值类参数必须先实测再比对需求，禁止“按需求等待固定时间后反推”。
 
-- test plan: `deliverables/csk5062_xiaodu_fan/plan/`
-- formal cases: `deliverables/csk5062_xiaodu_fan/cases/`
-- reports: `deliverables/csk5062_xiaodu_fan/reports/`
-- raw execution evidence: `result/<timestamp_case_name>/`
-- supporting references: `references/voice_registration/`
+- 唤醒超时：分别验证纯唤醒不说命令、唤醒后说命令且播报结束后的超时；起点可取唤醒发送协议、唤醒识别日志或唤醒响应播报结束，终点必须结合 `TIME_OUT` 和 `MODE=0`。
+- 音量默认值：恢复出厂后通过逐步增大/减小刺探到边界，再结合总档位反推出默认位置。
+- 音量档位：从下边界逐步调到上边界，再从上边界逐步调到下边界，按有效步进数确认档位。
+- 被动播报 ID：注入 MCU -> CSK 的 `0x81` 帧后，必须同时断言播报行为和 play id。
 
-Use Markdown for plan/design/report documents. Use Excel for the formal case table.
+## 好太太握手基线
 
-Report-writing rules:
+正式验证前必须先让 CSK 进入 ready：
 
-- Markdown reports must use Chinese headings/body text.
-- Prefer a Windows-friendly encoding such as `UTF-8 with BOM` for user-facing Markdown deliverables.
-- The detailed report default filename should stay consistent with the project convention, for example `测试报告-详细.md`.
-- Detailed reports must not only expand FAIL items; they must include a clear structure for PASS, FAIL, `待人工`, and `阻塞`.
+1. CSK 发品牌查询 `A5 FA 7F 01 02 21 FB`，MCU/仿真器回 `A5 FA 81 00 20 40 FB`。
+2. CSK 发心跳 `A5 FA 7F 5A 5A D2 FB`，MCU/仿真器回 `A5 FA 83 5A 5A D6 FB`。
+3. MCU 可周期发 `A5 FA 83 A5 A5 6C FB`，CSK 应回 `A5 FA 7F A5 A5 68 FB`。
+4. 若 `COM38` 持续出现 `MCU is not ready!`，先修握手，不进入功能结论。
 
-## Workflow
+## 结论规则
 
-### 1. Parse the requirements into testable function points
+- `PASS`：功能路径执行完成，主断言和关键辅助证据一致。
+- `FAIL`：路径可执行，但固件行为与需求冲突。
+- `BLOCKED`：端口、音频、烧录、ready 状态等条件不足，不能判断功能。
+- `TODO`：已规划但未执行。
 
-Extract these explicitly:
+不要把“没抓到日志”直接写成“功能不存在”；必须先排除端口占用、窗口过短、状态不对、握手未 ready、音频路由异常。
 
-- default state and power-on behavior
-- entry actions and exit conditions
-- state changes and post-state behavior
-- persistence rules and reboot expectations
-- registration rules and conflict boundaries
-- protocol hooks and tone/log clues
+## 清理与同步规则
 
-Treat functional correctness as the primary judgment. Treat protocol, playback, and logs as supporting evidence unless the case is specifically about protocol behavior.
-
-### 2. Build or refresh the test plan
-
-Write or update the test plan under `deliverables/csk5062_xiaodu_fan/plan/`.
-
-Prefer the repo generation chain when refreshing the static assets:
-
-- `tools/cases/generate_formal_assets.py` to refresh the plan / formal case markdown source
-- `tools/cases/export_case_md_to_xlsx.py` to export the formal Excel case table
-
-For each feature, capture:
-
-- what the feature does
-- how to test it
-- what counts as PASS
-- how to write negative cases
-- how to write abnormal scenarios
-
-Do not stop at single-point validation. Add cross-validation where the feature changes state, such as wake-word switching, voice on/off, or registration results affecting later normal interaction.
-
-### 3. Build or refresh the formal test cases
-
-Maintain the formal case set in Excel under `deliverables/csk5062_xiaodu_fan/cases/`.
-
-Rules:
-
-- MD is for plan/design/reporting; formal cases live in Excel.
-- One case should answer one question whenever possible.
-- Use `PASS`, `FAIL`, `BLOCKED`, and `TODO` honestly.
-- A `FAIL` is valid when the case exposes a firmware defect; do not force every case to pass.
-- Keep the case fields explicit: module, test point, preconditions, steps, primary assertion, supporting assertion, status, evidence.
-
-### 4. Burn firmware with the local burn wrappers
-
-Always use the repo-local burn entry scripts. Follow the fixed burn rule exactly:
-
-1. run `tools/burn_bundle/run_fan_burn.ps1` on Windows or `tools/burn_bundle/run_fan_burn.sh` on Linux
-2. let the wrapper delete the previously staged local `app.bin` inside `tools/burn_bundle/`
-3. let the wrapper copy the target firmware into the local `burn_bundle` staging area and rename it to `app.bin`
-4. inspect burn success markers in the local logs
-5. confirm the running version from the `COM38` boot log
-
-Keep `tools/burn_bundle/` as the synced local tool payload, but do not bypass the wrapper to call the inner bundle script directly. Also do not burn directly from an arbitrary source path. If the burn logs and the running version do not both match, stop and resolve burn closure first.
-
-### 5. Normalize the device baseline when needed
-
-After burn or after heavy registration testing, normalize the device state before the next batch when appropriate, for example with `config.clear` and reboot. Keep the normalization evidence in `result/`.
-
-### 6. Run the mandatory testability gate first
-
-Every firmware run must start with a gate after burn and version confirmation.
-
-Minimum gate requirements:
-
-- no reboot loop during the startup observation window
-- the default wake word can wake the device
-- a normal non-volume command can complete one basic interaction
-- first-boot default volume is captured immediately after burn from the first startup config
-
-If the gate fails, stop the fullflow immediately and report the firmware as untestable. Do not continue into the main case batch and do not force later cases into fake PASS/FAIL conclusions.
-
-### 7. Execute validation serially
-
-Use repo tools or the direct shell/Python fallback instead of ad-hoc manual steps.
-
-Execution rules:
-
-- `COM36` protocol, `COM38` burn/log, and `COM39` power/boot are the fixed current ports.
-- Do not run `COM36`/`COM38` capture batches in parallel.
-- Keep serial actions strictly sequential.
-- When sending consecutive voice materials, wait for the previous response to finish; if a clean finish signal is not detected, use the project wait window rather than a hard-coded 5 s assumption.
-- Use the specified playback device key when the task requires controlled audio playback.
-- If `tools/audio/listenai-play` is missing, sync it into `tools/audio/` first. If local playback tooling already exists but the latest cloud version is required, use the update parameter before execution.
-- Do not rely on hearing as the formal evidence source.
-
-### 8. Validate parameters with the corrected assertion logic
-
-When a case is about requirement parameters, use the project-approved measurement method instead of a shortcut:
-
-- wake timeout:
-  - pure wake case: measure from wake-response playback end to `TIME_OUT` / `MODE=0`
-  - wake-plus-command case: measure from command-response playback end to `TIME_OUT` / `MODE=0`
-  - only accept the timeout conclusion when both paths are close enough to each other and to the requirement target
-- volume step count:
-  - anchor at minimum and maximum boundaries first
-  - climb from minimum to maximum one step at a time
-  - descend from maximum to minimum one step at a time
-  - use runtime `mini player set vol` levels to build the actual step ladder
-  - require min->max and max->min to be symmetric before judging the step count as valid
-- default volume:
-  - judge it from the first boot after burn, not after later volume cases have already modified the state
-- persistence:
-  - follow the live requirement meaning dynamically
-  - for save-required items, confirm save completion before power loss
-  - for non-save-required items, compare the rebooted state against the requirement default
-
-### 9. Judge results carefully
-
-Use the evidence rules in the reference file. In short:
-
-- protocol proof comes from `COM36` raw capture
-- recognition / playback / save / boot clues come from `COM38`
-- power-cycle proof comes from `COM39` plus the follow-up boot/behavior evidence
-- persistence cannot be claimed before save completion is observed
-- manual-only items should stay manual instead of being force-closed automatically
-
-### 10. Sync evidence and conclusions
-
-After each batch:
-
-- store raw artifacts in `result/`
-- update `plan.md`
-- sync the current truth into the Excel case file and reports
-- when generating detailed reports, keep the structure complete: summary table, PASS details, FAIL analysis, and `待人工` / `阻塞` sections
-- call out verified items, real defects, blocked items, and manual-only items separately
-- clean invalid or empty result directories caused by port contention so they do not pollute formal evidence
-
-## Done Criteria
-
-Treat the fullflow as closed-loop only when all of these are true:
-
-- requirement points are decomposed
-- the test plan reflects the latest clarifications
-- formal Excel cases exist
-- burn and version confirmation are closed-loop
-- real device validations exist under `result/`
-- conclusions are synced to `plan.md` and the deliverables
-- defects, blocked items, and manual-only items are separated clearly
+- 保留当前有效需求输入、最终方案/用例/缺陷文档、当前 HTT 脚本和共享工具。
+- 删除或忽略历史报告、运行结果、音频缓存、烧录 staging、重复方案版本和旧项目专用逻辑。
+- 提交前执行 `git status --short`、必要脚本的 `py_compile`、目录体积统计。

@@ -1,4 +1,0 @@
-config.clear
-[0m
-root:/$ [0m
-root:/$ 

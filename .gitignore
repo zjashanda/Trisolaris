@@ -1,17 +1,33 @@
-# Local Python/runtime noise
+﻿# Python/runtime noise
 __pycache__/
+**/__pycache__/
 *.py[cod]
 .venv/
 
-# Ephemeral raw execution workspace
+# Ephemeral raw execution workspaces
 result/
 audio_cache/
-deliverables/csk5062_xiaodu_fan/reports/
+deliverables/*/reports/
+
+# Local firmware staging and compressed/extracted payloads
+固件/
+固件.zip
+项目需求/**/fw-*.zip
+项目需求/**/fw-*/
+
+# Burn runtime artifacts
 tools/burn_bundle/windows/app.bin
 tools/burn_bundle/windows/burn.log
 tools/burn_bundle/windows/burn_tool.log
-固件/
-固件.zip
+*.log
+
+# mars-moon runtime/generated local state
+mars-moon/.venv/
+mars-moon/tmp/
+mars-moon/result/
+mars-moon/work/
+mars-moon/generated/
+mars-moon/wavSource/
 
 # Temporary nested repo backup markers used during root publish
 .git_codex_publish_backup/

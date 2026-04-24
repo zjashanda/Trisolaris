@@ -55,9 +55,39 @@ def save_manifest(manifest: dict) -> None:
     MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def sanitize_label(label: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9_-]+", "_", label).strip("_")
+def sanitize_filename_fragment(value: str) -> str:
+    value = re.sub(r"\s+", "_", value.strip())
+    cleaned = re.sub(r"[^0-9A-Za-z_\-\u4E00-\u9FFF]+", "_", value)
+    cleaned = re.sub(r"_+", "_", cleaned).strip("._ ")
     return cleaned or "tts"
+
+
+def build_tts_filename(text: str, label: str, key: str) -> str:
+    # Prefer the spoken text itself so cached wav names stay human-readable in Chinese.
+    text_fragment = sanitize_filename_fragment(text)
+    label_fragment = sanitize_filename_fragment(label)
+    if text_fragment != "tts":
+        base = text_fragment
+    elif label_fragment != "tts":
+        base = label_fragment
+    else:
+        base = "tts"
+    if len(base) > 32:
+        base = base[:32].rstrip("_")
+    return f"{base}_{key[:10]}.wav"
+
+
+def relocate_cached_file(existing: Path, preferred: Path) -> Path:
+    if existing.resolve() == preferred.resolve():
+        return existing
+    preferred.parent.mkdir(parents=True, exist_ok=True)
+    if preferred.is_file():
+        return preferred
+    try:
+        existing.rename(preferred)
+        return preferred
+    except OSError:
+        return existing
 
 
 def cache_key(text: str, voice: str, rate: int) -> str:
@@ -69,14 +99,19 @@ def ensure_cached_tts(text: str, voice: str, rate: int, label: str) -> tuple[Pat
     manifest = load_manifest()
     entries = manifest.setdefault("entries", {})
     key = cache_key(text, voice, rate)
+    preferred_name = build_tts_filename(text=text, label=label, key=key)
+    preferred_path = AUDIO_CACHE_DIR / preferred_name
     if key in entries:
         existing = ROOT / entries[key]["path"]
         if existing.is_file():
-            return existing, True
+            final_path = relocate_cached_file(existing, preferred_path)
+            entries[key]["path"] = str(final_path.relative_to(ROOT))
+            entries[key]["label"] = label
+            save_manifest(manifest)
+            return final_path, True
 
     AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    filename = f"{sanitize_label(label)}_{key[:10]}.wav"
-    out_path = AUDIO_CACHE_DIR / filename
+    out_path = preferred_path
     run_tts(text, out_path, voice, rate)
     entries[key] = {
         "text": text,

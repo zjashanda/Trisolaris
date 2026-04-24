@@ -1,5 +1,0 @@
-[15:00:52.166][INFO] 串口 /dev/ttyACM0 连接成功
-[15:00:55.373][DEBUG]   正则[wakeKw]: ni3 hao3 du4 ya4
-[15:00:55.373][DEBUG]   正则[asrKw]: ni3 hao3 du4 ya4
-[15:00:55.380][DEBUG]   正则[playId]: 0
-[15:00:59.617][INFO] 串口 /dev/ttyACM0 已关闭
