@@ -1,111 +1,99 @@
-﻿---
+---
 name: trisolaris
-description: 面向 D:\revolution4s\Trisolaris 的离线语音验证 skill。用于读取需求、拆解功能点、设计测试方案、执行好太太晾衣机 CSK3022 验证、烧录固件、控制 COM36/COM38/COM39、验证主动/被动协议和播报 ID、沉淀结果文档并同步 plan.md。
+description: Multi-project offline voice validation skill for Trisolaris. Use when tasks need to read a project requirement folder, design validation logic and formal cases, burn firmware, drive audio, capture protocol/log/control serial evidence, fix assertion gaps, execute fullflow validation, and publish reusable project-specific test logic for CSK5062 xiaodu-fan, CSK3022 HTT clothes-airer, or future offline voice projects.
 ---
 
-# Trisolaris 离线语音验证 Skill
+# Trisolaris Multi-Project Offline Voice Validation
 
-## 启动要求
+## Start Here
 
-1. 进入 `D:\revolution4s\Trisolaris` 后先读取 `plan.md`；如果不存在就创建。
-2. 每完成一个有意义的步骤，都要把已执行、执行中、待执行同步回 `plan.md`。
-3. 判断协议、播报、持久化、PASS/FAIL/BLOCKED 前，优先读取 `references/evidence-rules.md`。
-4. 当前项目主线是 `CSK3022 好太太晾衣机`，历史 CSK5062 风扇运行产物不再作为当前验证输入。
+1. Read repo-root `plan.md` first; create it if missing.
+2. After each meaningful step, sync done / in-progress / pending state back to `plan.md`.
+3. Read `references/evidence-rules.md` before judging protocol, playback, persistence, PASS/FAIL/BLOCKED, or manual-only items.
+4. Select the active project from the user's requirement path or explicit project name; do not let one project's runtime artifacts overwrite another project's plan/cases/reports.
 
-## 当前输入
+## Project Layout Rule
 
-- 需求目录：`项目需求/好太太晾衣机/`
-- 需求文档：`好太太晾衣机需求迭代.md`
-- 词表协议：`电控词表协议--小好晾衣机语音词条协议-20260309.xlsx`
-- 状态图：`语音关闭逻辑.png`
-- 固件：`fw-csk3022-htt-clothes-airer-v1.0.9.bin`
-- 需求设计方法参考：`references/需求功能验证设计方法.md`
+- Requirement inputs stay in the project input directory, for example `CSK5062小度风扇需求/` or `项目需求/好太太晾衣机/`.
+- Stable deliverables are project-scoped under `deliverables/<project_key>/plan/`, `deliverables/<project_key>/cases/`, and `deliverables/<project_key>/archive/`.
+- Runtime evidence is local-only under `result/` or `deliverables/<project_key>/reports/`; do not commit raw logs, audio cache, burn staging, or temporary firmware payloads unless the user explicitly asks.
+- Future projects should add a new `deliverables/<project_key>/` and project-specific runners only when shared runners cannot be parameterized safely.
 
-需求目录只放输入材料，不放执行日志、报告 bundle、音频缓存或临时脚本。
+## Current Project Profiles
 
-## 当前输出
+### CSK5062 小度风扇
 
-- 最终方案/矩阵/缺陷文档：`deliverables/csk3022_htt_clothes_airer/plan/`
-- 稳定用例定义：`deliverables/csk3022_htt_clothes_airer/cases/`
-- 原始运行证据：`result/`，仅本地使用，不提交 Git。
-- 报告 bundle：`deliverables/*/reports/`，仅本地使用，不提交 Git。
+- Input: `CSK5062小度风扇需求/`
+- Outputs: `deliverables/csk5062_xiaodu_fan/`
+- Main scripts:
+  - `tools/cases/generate_formal_assets.py`
+  - `tools/cases/export_case_md_to_xlsx.py`
+  - `tools/debug/run_post_restructure_fullflow.py`
+  - `tools/debug/run_missing_nonreg_cases.py`
+  - `tools/debug/run_remaining_voice_reg_batch.py`
+  - `tools/debug/generate_full_formal_aggregate.py`
+  - `tools/debug/apply_fresh_full_suite_convergence.py`
+  - `tools/debug/run_fresh_closure_targets.py`
+  - `tools/debug/run_timeout_volume_probe.py`
+- Linux device mapping is user-provided; the latest local mapping was log/burn `/dev/ttyACM0`, protocol `/dev/ttyACM2`, control/boot `/dev/ttyACM4`, audio key `VID_8765&PID_5678:USB_0_4_3_1_0`.
 
-## 固定硬件口径
+### CSK3022 好太太晾衣机
 
-- `COM36 @ 9600`：协议串口，作为主动/被动协议正式证据。
-- `COM38 @ 115200`：日志/烧录串口，用于识别、播报、play id、超时、启动配置等证据。
-- `COM39 @ 115200`：上下电和 boot 控制。
-- 音频播放设备必须先确认路由；音频链路异常不能直接判固件 FAIL。
+- Input: `项目需求/好太太晾衣机/`
+- Outputs: `deliverables/csk3022_htt_clothes_airer/`
+- Main scripts:
+  - `tools/debug/run_htt_handshake_formal_suite.py`
+  - `tools/debug/run_htt_numeric_probe.py`
+  - `tools/debug/run_htt_active_passive_playid_sweep.py`
+  - `tools/debug/run_htt_followup_checks.py`
+  - `tools/debug/run_htt_voice_restricted_probe.py`
+  - `tools/debug/run_htt_active_only_remaining.py`
+  - `tools/debug/run_htt_active_only_phrase_probe.py`
+  - `tools/debug/run_htt_pyaudio_route_probe.py`
+  - `tools/debug/run_listenai_endpoint_meter_probe.py`
+  - `tools/serial/fan_proto_handshake_probe.py`
+- Before functional judgment, close MCU readiness: brand query, heartbeat, and ready response must be handled; repeated `MCU is not ready!` blocks formal functional conclusions.
 
-## 当前脚本入口
+## Hardware And Burn Rules
 
-优先使用仓库内脚本，不要临时复制散落脚本：
+- Default Windows mapping: `COM36 @ 9600` protocol, `COM38 @ 115200` log/burn, `COM39 @ 115200` power/boot.
+- Linux mappings must come from the user or local probe; never assume `/dev/ttyACM*` order if the user gave explicit ports.
+- Burn only through repo wrappers: `tools/burn_bundle/run_fan_burn.ps1` on Windows or `tools/burn_bundle/run_fan_burn.sh` on Linux.
+- If the device supports `config.clear` or an equivalent full reset, execute `config.clear -> reboot -> burn` before validating firmware defaults.
+- Burn closure requires burn success markers plus running-version confirmation from the boot/log UART.
 
-- `tools/debug/run_htt_handshake_formal_suite.py`：握手仿真 + 主链正式验证。
-- `tools/debug/run_htt_numeric_probe.py`：唤醒超时、默认音量、音量档位和边界探测。
-- `tools/debug/run_htt_active_passive_playid_sweep.py`：主动协议、被动协议、播报 ID sweep。
-- `tools/debug/run_htt_followup_checks.py`：稳定 FAIL follow-up 复测。
-- `tools/debug/run_htt_voice_restricted_probe.py`：语音关闭受限态、10s 窗口、play id 77/123。
-- `tools/debug/run_htt_active_only_remaining.py`：active-only 命令全量/复测。
-- `tools/debug/run_htt_active_only_phrase_probe.py`：active-only 别名排查。
-- `tools/debug/run_htt_pyaudio_route_probe.py`：音频路由排查。
-- `tools/debug/run_listenai_endpoint_meter_probe.py`：播放设备链路探测。
-- `tools/serial/fan_proto_handshake_probe.py`：品牌应答、心跳应答、MCU 查询握手仿真。
-- `tools/serial/fan_serial_maintenance.py`：串口维护与上电抓取辅助。
+## Validation Workflow
 
-## 烧录规则
+1. Parse requirements and latest user clarifications into testable function points.
+2. Generate or refresh test plan and formal cases for the active project.
+3. Burn and close a testability gate before broad execution.
+4. Execute validation serially; do not run protocol/log captures in parallel on the same ports.
+5. Aggregate project cases once all batches complete.
+6. If raw FAIL is caused by assertion logic, empty capture, state contamination, missing save closure, or unmet precondition, fix the validation path and rerun the affected case. Final FAIL may only mean firmware defect or requirement error.
+7. Sync final status to project case assets and `plan.md`.
 
-烧录只走仓库包装入口：
+## Evidence Rules
 
-- Windows：`tools/burn_bundle/run_fan_burn.ps1`
-- Linux：`tools/burn_bundle/run_fan_burn.sh`
+- Use protocol UART raw capture as formal protocol evidence; log `send msg::` is auxiliary.
+- Use log UART for recognition, playback, save, boot config, timeout markers, and play-id evidence.
+- Do not use hearing as formal evidence.
+- Persistence conclusions require save completion before power loss.
+- Negative cases must distinguish feature absence from capture failure, wrong state, port contention, or short windows.
+- Manual-only items remain `TODO`/manual instead of weak automation PASS/FAIL.
 
-规则：
+## Assertion Rules That Must Stay Fixed
 
-1. wrapper 负责删除旧 `app.bin`。
-2. wrapper 负责把目标固件复制为 staging `app.bin`。
-3. 烧录后必须同时看烧录日志成功标记和 `COM38` 启动版本。
-4. `tools/burn_bundle/windows/app.bin`、`burn.log`、`burn_tool.log` 是运行产物，不提交。
+- Wake timeout: measure pure wake and wake+command from response playback end to `TIME_OUT` / `MODE=0`; both paths must agree with the requirement.
+- Volume steps: anchor min/max, climb min->max, descend max->min, and compare runtime `mini player set vol` ladders for symmetry.
+- Default volume: after `config.clear -> reboot -> burn`, capture first `Running Config`, probe from default to one boundary, probe both boundaries for total ladder, then compute default gear as `total_volume_gears - effective_steps_from_default_to_max` for upward probing.
+- Volume persistence: wait for `refresh config volume=` / save closure before reboot; compare reboot state to the live requirement, not to a hard-coded default.
+- Command-word coexistence: require save closure, reboot, learned alias replay, and original default command replay; a target control frame inside an already active session is sufficient even if the wake frame is not repeated.
+- Template-full checks: actively fill templates inside the case, observe save closure, reboot, then re-enter learning; never infer template-full from startup `regCmdCount` alone.
+- Conflict-word checks: use the actual spoken phrase from the word table; for stochastic default-wake conflict, repeat from clean baselines before keeping a firmware FAIL.
 
-## 需求拆解原则
+## Reporting And Publishing
 
-每个需求点都要落到可验证结构：
-
-- 需求解析：需求是什么、来自哪个文档/变更口径。
-- 验证方案：用什么入口、什么状态、什么证据链。
-- 用例：前置条件、步骤、正例、反例、异常场景。
-- 断言：主断言和辅助断言分开。
-- 执行结果：PASS/FAIL/BLOCKED 必须有证据，不能只贴日志路径。
-
-## 数值验证原则
-
-数值类参数必须先实测再比对需求，禁止“按需求等待固定时间后反推”。
-
-- 唤醒超时：分别验证纯唤醒不说命令、唤醒后说命令且播报结束后的超时；起点可取唤醒发送协议、唤醒识别日志或唤醒响应播报结束，终点必须结合 `TIME_OUT` 和 `MODE=0`。
-- 音量默认值：恢复出厂后通过逐步增大/减小刺探到边界，再结合总档位反推出默认位置。
-- 音量档位：从下边界逐步调到上边界，再从上边界逐步调到下边界，按有效步进数确认档位。
-- 被动播报 ID：注入 MCU -> CSK 的 `0x81` 帧后，必须同时断言播报行为和 play id。
-
-## 好太太握手基线
-
-正式验证前必须先让 CSK 进入 ready：
-
-1. CSK 发品牌查询 `A5 FA 7F 01 02 21 FB`，MCU/仿真器回 `A5 FA 81 00 20 40 FB`。
-2. CSK 发心跳 `A5 FA 7F 5A 5A D2 FB`，MCU/仿真器回 `A5 FA 83 5A 5A D6 FB`。
-3. MCU 可周期发 `A5 FA 83 A5 A5 6C FB`，CSK 应回 `A5 FA 7F A5 A5 68 FB`。
-4. 若 `COM38` 持续出现 `MCU is not ready!`，先修握手，不进入功能结论。
-
-## 结论规则
-
-- `PASS`：功能路径执行完成，主断言和关键辅助证据一致。
-- `FAIL`：路径可执行，但固件行为与需求冲突。
-- `BLOCKED`：端口、音频、烧录、ready 状态等条件不足，不能判断功能。
-- `TODO`：已规划但未执行。
-
-不要把“没抓到日志”直接写成“功能不存在”；必须先排除端口占用、窗口过短、状态不对、握手未 ready、音频路由异常。
-
-## 清理与同步规则
-
-- 保留当前有效需求输入、最终方案/用例/缺陷文档、当前 HTT 脚本和共享工具。
-- 删除或忽略历史报告、运行结果、音频缓存、烧录 staging、重复方案版本和旧项目专用逻辑。
-- 提交前执行 `git status --short`、必要脚本的 `py_compile`、目录体积统计。
+- Markdown reports use Chinese headings/body and Windows-friendly UTF-8 where practical.
+- Reports must separate PASS, FAIL, BLOCKED, and TODO/manual items.
+- Final FAIL list must not include validation-plan/assertion issues.
+- Before pushing, run relevant `py_compile`, inspect `git status --short`, avoid committing runtime evidence, and do not delete another project's assets while merging.

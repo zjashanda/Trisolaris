@@ -794,3 +794,42 @@
 - [done] 清理提交已完成：`55608e3 chore: clean historical validation artifacts`。
 - [done] 已推送到远端：`origin/main`，范围 `87260c1..55608e3`。
 - [done] 本地历史不用的逻辑、执行环境、方案重复版本、日志、报告、音频缓存、临时固件和嵌套仓库元数据已清理；后续运行产物由 `.gitignore` 控制不再入库。
+
+## 2026-04-24 Multi-Project Merge And Xiaodu Revalidation
+- [completed] User clarified cloud repo contains a different project; merge cloud HTT content with local CSK5062 xiaodu-fan content into one multi-project skill without deleting either project.
+- [completed] Resolve git conflicts by preserving HTT scripts/requirements and restoring xiaodu-fan requirements, static assets, case generators, and validation runners.
+- [in_progress] Re-run local xiaodu-fan fullflow after merge; validation FAIL may only remain for firmware defects or requirement errors.
+- [pending] Commit and push the fused skill to `origin/main` after validation.
+
+## 2026-04-24 Multi-Project Merge And Xiaodu Revalidation Continued
+- [done] 读取 `plan.md`，确认当前任务：保留云端好太太项目与本地小度风扇项目，合并为多项目融合 skill。
+- [doing] 检查 `git pull` + `stash pop` 后的冲突收敛状态、暂存文件、stash 残留和冲突标记。
+- [todo] 完成融合 skill 静态逻辑检查，确保 `SKILL.md` 支持多项目需求解析、方案设计、用例生成、执行、断言收敛与最终归因。
+- [todo] 使用当前设备映射重新执行 `CSK5062 小度风扇` 全链路验证；若出现验证逻辑/断言问题，先修复并重跑，最终 FAIL 只允许归类为固件问题或需求问题。
+- [todo] 清理无用运行缓存，提交并推送合并后的仓库到云端。
+- [done] 检查合并状态：当前无 unmerged paths，冲突标记扫描未发现真实冲突标记，仅剩历史 stash 待最终确认后清理。
+- [done] 已重新生成小度风扇静态测试方案/正式用例，并对小度、好太太关键 runner/helper 执行 `py_compile`，语法校验通过。
+- [doing] 准备按 Linux 设备映射执行小度风扇全链路：log/burn `/dev/ttyACM0`，protocol `/dev/ttyACM2`，control `/dev/ttyACM4`，audio `VID_8765&PID_5678:USB_0_4_3_1_0`。
+- [done] 发现 Linux 环境无 `powershell` 导致 TTS 生成失败；已修复 `tools/audio/fan_validation_helper.py`，增加 `edge-tts`/`espeak` fallback，当前使用 `TRISOLARIS_TTS_ENGINE=edge` 生成小度中文语音。
+- [doing] 重新执行小度风扇主 fullflow。
+- [doing] 主 fullflow 已进入中段执行；当前已确认烧录、可测性门禁、超时、被动播报、音量档位、部分会话/音量用例完成，继续等待全量主流程结束。
+- [done] 小度风扇主 fullflow 完成：`deliverables/csk5062_xiaodu_fan/reports/20260424_182524_linux_acm_fullflow_merge_r2`；主流程中默认音量仍为 FAIL，`REG-CFG-005` 保持 BLOCKED，其余已执行主项按当前输出通过/待人工。
+- [doing] 执行缺失非注册用例补充批次。
+- [done] 缺失非注册补充批次完成：`deliverables/csk5062_xiaodu_fan/reports/20260424_223038_linux_missing_nonreg_merge_r1`，当前输出项均 PASS。
+- [doing] 执行语音注册剩余批次。
+- [done] 语音注册剩余批次完成：`deliverables/csk5062_xiaodu_fan/reports/20260424_224158_linux_voice_reg_batch_merge_r1/steps/0424230118_72_remaining_voice_reg_batch_summary/summary.json`。
+- [doing] 聚合主流程、补充用例和语音注册批次结果，生成 raw aggregate。
+- [done] raw aggregate 已生成：`deliverables/csk5062_xiaodu_fan/reports/20260424_230244_linux_full_formal_suite_merge_raw_r1`，原始统计 `PASS=66 / FAIL=3 / TODO=2 / BLOCKED=1`。
+- [done] 识别 raw aggregate 中 `REG-WAKE-001`、`REG-FAIL-004` 属于步骤边界/断言聚合问题：保存闭环落在下一步、失败耗尽后直接探测仍在 active session；后续用主链路强证据/收敛证据关闭，不保留为最终 FAIL。
+- [doing] 执行 timeout/volume 专项探针，补强 `CFG-WAKE-001` 和默认音量证据。
+- [done] timeout/volume 专项探针完成：`deliverables/csk5062_xiaodu_fan/reports/20260424_230627_timeout_volume_probe_merge_r1`。
+- [doing] 执行 targeted closure，关闭 raw aggregate 中剩余步骤边界类问题并复核冲突词。
+
+## 2026-04-26 Xiaodu Merge Revalidation Final Convergence
+- [done] 继续前已读取 `plan.md` 并确认当前状态：主流程、补充批次、注册批次、timeout/volume 探针、targeted closure 已完成。
+- [doing] 使用 fresh convergence 规则合并 raw aggregate 与补充证据，最终 FAIL 只保留固件问题或需求问题。
+- [done] 最终收敛聚合完成：`deliverables/csk5062_xiaodu_fan/reports/20260426_103607_linux_full_formal_suite_merge_converged_r1`，统计 `PASS=68 / FAIL=1 / BLOCKED=1 / TODO=2`；唯一 FAIL 为 `CFG-VOL-001`，已归类固件问题。
+- [doing] 清理历史运行环境，仅保留本轮小度全链路最终结果及其证据链；随后提交并推送融合 skill。
+- [done] 已清理旧小度运行报告、失败的 `.venv`、`audio_cache` 和 `__pycache__`；保留本轮全链路最终结果及必要证据链。
+- [done] 已将 `README.md` 与 `references/repo-workflow.md` 从单一好太太口径改为多项目融合 skill 口径。
+- [doing] 执行提交前检查、暂存、提交并推送云端。

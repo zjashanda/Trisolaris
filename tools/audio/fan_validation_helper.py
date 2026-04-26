@@ -2,7 +2,9 @@
 import argparse
 import hashlib
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -21,27 +23,143 @@ MANIFEST_PATH = ROOT / "audio_cache" / "manifest.json"
 
 def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    ps = (
-        "Add-Type -AssemblyName System.Speech; "
-        f"$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
-        f"$s.SelectVoice('{voice}'); "
-        f"$s.Rate = {rate}; "
-        f"$s.SetOutputToWaveFile('{str(out_path)}'); "
-        f"$s.Speak('{text}'); "
-        "$s.Dispose();"
-    )
-    completed = subprocess.run(
-        ["powershell", "-NoProfile", "-Command", ps],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if completed.returncode != 0:
-        raise RuntimeError(
-            f"TTS failed: {completed.returncode}\nSTDOUT:\n{completed.stdout}\nSTDERR:\n{completed.stderr}"
+    errors: list[str] = []
+
+    def validate_output() -> None:
+        if not out_path.is_file() or out_path.stat().st_size <= 44:
+            raise RuntimeError(f"TTS output missing or too small: {out_path}")
+
+    def try_powershell_tts() -> bool:
+        if not shutil.which("powershell"):
+            errors.append("PowerShell TTS skipped: powershell not found")
+            return False
+        ps_text = text.replace("'", "''")
+        ps_out = str(out_path).replace("'", "''")
+        ps_voice = voice.replace("'", "''")
+        ps = (
+            "Add-Type -AssemblyName System.Speech; "
+            "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+            f"$s.SelectVoice('{ps_voice}'); "
+            f"$s.Rate = {rate}; "
+            f"$s.SetOutputToWaveFile('{ps_out}'); "
+            f"$s.Speak('{ps_text}'); "
+            "$s.Dispose();"
         )
-    if not out_path.is_file() or out_path.stat().st_size <= 44:
-        raise RuntimeError(f"TTS output missing or too small: {out_path}")
+        completed = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            errors.append(
+                f"PowerShell TTS failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
+            )
+            return False
+        validate_output()
+        return True
+
+    def try_edge_tts() -> bool:
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            errors.append("edge-tts skipped: ffmpeg not found")
+            return False
+        edge_voice = os.environ.get("TRISOLARIS_EDGE_TTS_VOICE", "zh-CN-XiaoxiaoNeural")
+        edge_rate = os.environ.get("TRISOLARIS_EDGE_TTS_RATE", f"{rate:+d}%")
+        mp3_path = out_path.with_suffix(".edge.mp3")
+        script = (
+            "import asyncio, sys, edge_tts\n"
+            "async def main():\n"
+            "    communicate = edge_tts.Communicate(sys.argv[1], voice=sys.argv[3], rate=sys.argv[4])\n"
+            "    await communicate.save(sys.argv[2])\n"
+            "asyncio.run(main())\n"
+        )
+        completed = subprocess.run(
+            [sys.executable, "-c", script, text, str(mp3_path), edge_voice, edge_rate],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0 or not mp3_path.is_file() or mp3_path.stat().st_size <= 0:
+            errors.append(
+                f"edge-tts failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
+            )
+            mp3_path.unlink(missing_ok=True)
+            return False
+        converted = subprocess.run(
+            [ffmpeg, "-y", "-loglevel", "error", "-i", str(mp3_path), "-ar", "16000", "-ac", "1", str(out_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        mp3_path.unlink(missing_ok=True)
+        if converted.returncode != 0:
+            errors.append(
+                f"edge-tts ffmpeg convert failed: {converted.returncode}; stdout={converted.stdout.strip()}; stderr={converted.stderr.strip()}"
+            )
+            return False
+        validate_output()
+        return True
+
+    def try_espeak_tts() -> bool:
+        espeak = shutil.which("espeak-ng") or shutil.which("espeak")
+        ffmpeg = shutil.which("ffmpeg")
+        if not espeak:
+            errors.append("espeak TTS skipped: espeak-ng/espeak not found")
+            return False
+        temp_path = out_path.with_suffix(".espeak.wav")
+        voice_name = os.environ.get("TRISOLARIS_ESPEAK_VOICE", "cmn")
+        speed = int(os.environ.get("TRISOLARIS_ESPEAK_SPEED", str(max(120, 160 + rate * 10))))
+        completed = subprocess.run(
+            [espeak, "-v", voice_name, "-s", str(speed), "-w", str(temp_path), text],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0 or not temp_path.is_file() or temp_path.stat().st_size <= 44:
+            errors.append(
+                f"espeak TTS failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
+            )
+            temp_path.unlink(missing_ok=True)
+            return False
+        if ffmpeg:
+            converted = subprocess.run(
+                [ffmpeg, "-y", "-loglevel", "error", "-i", str(temp_path), "-ar", "16000", "-ac", "1", str(out_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            temp_path.unlink(missing_ok=True)
+            if converted.returncode != 0:
+                errors.append(
+                    f"espeak ffmpeg convert failed: {converted.returncode}; stdout={converted.stdout.strip()}; stderr={converted.stderr.strip()}"
+                )
+                return False
+        else:
+            temp_path.replace(out_path)
+        validate_output()
+        return True
+
+    preferred = os.environ.get("TRISOLARIS_TTS_ENGINE", "").strip().lower()
+    engines = {
+        "powershell": try_powershell_tts,
+        "edge": try_edge_tts,
+        "edge-tts": try_edge_tts,
+        "espeak": try_espeak_tts,
+        "espeak-ng": try_espeak_tts,
+    }
+    ordered = [engines[preferred]] if preferred in engines else []
+    for engine in [try_powershell_tts, try_edge_tts, try_espeak_tts]:
+        if engine not in ordered:
+            ordered.append(engine)
+    for engine in ordered:
+        try:
+            if engine():
+                return
+        except Exception as exc:
+            errors.append(f"{engine.__name__} raised {type(exc).__name__}: {exc}")
+            out_path.unlink(missing_ok=True)
+    raise RuntimeError("TTS failed on all engines:\n" + "\n".join(errors))
 
 
 def load_manifest() -> dict:
@@ -95,6 +213,15 @@ def cache_key(text: str, voice: str, rate: int) -> str:
     return hashlib.sha1(raw).hexdigest()
 
 
+def resolve_manifest_audio_path(raw_path: str) -> Path:
+    normalized = Path(raw_path.replace("\\", "/"))
+    candidate = ROOT / normalized
+    if candidate.is_file():
+        return candidate
+    fallback = AUDIO_CACHE_DIR / normalized.name
+    return fallback
+
+
 def ensure_cached_tts(text: str, voice: str, rate: int, label: str) -> tuple[Path, bool]:
     manifest = load_manifest()
     entries = manifest.setdefault("entries", {})
@@ -102,7 +229,7 @@ def ensure_cached_tts(text: str, voice: str, rate: int, label: str) -> tuple[Pat
     preferred_name = build_tts_filename(text=text, label=label, key=key)
     preferred_path = AUDIO_CACHE_DIR / preferred_name
     if key in entries:
-        existing = ROOT / entries[key]["path"]
+        existing = resolve_manifest_audio_path(entries[key]["path"])
         if existing.is_file():
             final_path = relocate_cached_file(existing, preferred_path)
             entries[key]["path"] = str(final_path.relative_to(ROOT))

@@ -1,4 +1,4 @@
-﻿# Python/runtime noise
+# Python/runtime noise
 __pycache__/
 **/__pycache__/
 *.py[cod]
@@ -19,6 +19,9 @@ deliverables/*/reports/
 tools/burn_bundle/windows/app.bin
 tools/burn_bundle/windows/burn.log
 tools/burn_bundle/windows/burn_tool.log
+tools/burn_bundle/linux/app.bin
+tools/burn_bundle/linux/burn.log
+tools/burn_bundle/linux/burn_tool.log
 *.log
 
 # mars-moon runtime/generated local state
