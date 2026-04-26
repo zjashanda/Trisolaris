@@ -833,3 +833,6 @@
 - [done] 已清理旧小度运行报告、失败的 `.venv`、`audio_cache` 和 `__pycache__`；保留本轮全链路最终结果及必要证据链。
 - [done] 已将 `README.md` 与 `references/repo-workflow.md` 从单一好太太口径改为多项目融合 skill 口径。
 - [doing] 执行提交前检查、暂存、提交并推送云端。
+- [done] 已提交融合 skill：`22c351a feat: merge multi-project validation skill`。
+- [done] 已通过 GitHub SSH 443 通道推送到 `origin/main`，远端范围 `44fde71..22c351a`。
+- [done] 本轮最终验证结果：`PASS=68 / FAIL=1 / BLOCKED=1 / TODO=2`；唯一 FAIL 为 `CFG-VOL-001`，归类为固件默认音量问题；无验证方案/断言类 FAIL 留存。
