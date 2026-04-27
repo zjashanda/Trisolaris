@@ -1033,3 +1033,15 @@
 - [doing] 推送当前本地提交到 `origin/main`，随后记录最终同步结果。
 - [done] 已推送到 `origin/main`：包含 `87a448f feat: publish reusable fullflow validation skill` 与 `84fb76c chore: record final skill sync plan`。
 - [done] 当前 Git 远端已包含本地可复用 skill 文件；运行产物仍按 `.gitignore` 留在本机，不纳入复用仓库。
+
+## 2026-04-27 语音注册方案核对 Round
+- [done] 读取 `plan.md`，确认本轮目标是核对当前已上传 Git 的 skill 是否包含语音注册验证方案。
+- [done] 已检查 `SKILL.md`、`README.md`、`references/fullflow-validation-method.md`、`deliverables/csk5062_xiaodu_fan/plan/测试方案.md`、`deliverables/csk5062_xiaodu_fan/cases/测试用例-正式版.xlsx` 与语音注册 runner。
+- [done] 结论：CSK5062 小度风扇已有语音注册专项方案、正式用例、执行脚本和聚合断言；好太太项目里的“注册声纹”已按需求视为删除/无效范围，不作为当前正式验证项。
+
+## 2026-04-27 SKILL.md 中文化 Round
+- [done] 读取 `plan.md` 和当前 `SKILL.md`，确认本轮目标是把 skill 主说明文件改成中文。
+- [done] 保留 `name` / `description` 元数据和原有能力边界，将正文规则、项目画像、烧录、验证、断言、报告发布要求统一改为中文表达。
+- [done] 修改后运行 skill 校验，确认 `SKILL.md` 仍可被 Codex 正常识别。
+- [done] 已完成 `SKILL.md` 中文化，并保留原有多项目验证、烧录、证据、断言、语音注册、报告发布规则。
+- [done] 已运行 `quick_validate.py`，结果为 `Skill is valid!`。
