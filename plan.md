@@ -1031,3 +1031,5 @@
 - [done] 按 `skill-git` 流程检查发布配置：owner=`zjashanda`、branch=`main`、SSH=`github-zjashanda`、token 可用。
 - [done] 检查 Git 状态：当前无未跟踪的非忽略文件；忽略项仅保留运行产物、报告、音频缓存、烧录临时文件和日志。
 - [doing] 推送当前本地提交到 `origin/main`，随后记录最终同步结果。
+- [done] 已推送到 `origin/main`：包含 `87a448f feat: publish reusable fullflow validation skill` 与 `84fb76c chore: record final skill sync plan`。
+- [done] 当前 Git 远端已包含本地可复用 skill 文件；运行产物仍按 `.gitignore` 留在本机，不纳入复用仓库。
