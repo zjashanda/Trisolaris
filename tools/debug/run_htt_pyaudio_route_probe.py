@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import struct
 import subprocess
@@ -30,9 +31,13 @@ from fan_validation_helper import ensure_cached_tts  # noqa: E402
 RESULT_ROOT = ROOT / "result" / "csk3022_htt_clothes_airer"
 HANDSHAKE_SCRIPT = ROOT / "tools" / "serial" / "fan_proto_handshake_probe.py"
 
-CTRL_PORT = "COM39"
-LOG_PORT = "COM38"
-PROTO_PORT = "COM36"
+def env_text(name: str, default: str) -> str:
+    return os.environ.get(name, "").strip() or default
+
+
+CTRL_PORT = env_text("TRISOLARIS_CTRL_PORT", "COM39")
+LOG_PORT = env_text("TRISOLARIS_LOG_PORT", "COM38")
+PROTO_PORT = env_text("TRISOLARIS_PROTO_PORT", "COM36")
 CTRL_BAUD = 115200
 LOG_BAUD = 115200
 PROTO_BAUD = 9600

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -25,10 +26,14 @@ DELIVERABLE_ROOT = ROOT / "deliverables" / "csk3022_htt_clothes_airer"
 RESULT_ROOT = ROOT / "result" / "csk3022_htt_clothes_airer"
 HANDSHAKE_SCRIPT = ROOT / "tools" / "serial" / "fan_proto_handshake_probe.py"
 
-DEVICE_KEY = "VID_8765&PID_5678:8_804B35B_1_0000"
-CTRL_PORT = "COM39"
-LOG_PORT = "COM38"
-PROTO_PORT = "COM36"
+def env_text(name: str, default: str) -> str:
+    return os.environ.get(name, "").strip() or default
+
+
+DEVICE_KEY = env_text("TRISOLARIS_DEVICE_KEY", "VID_8765&PID_5678:8_804B35B_1_0000")
+CTRL_PORT = env_text("TRISOLARIS_CTRL_PORT", "COM39")
+LOG_PORT = env_text("TRISOLARIS_LOG_PORT", "COM38")
+PROTO_PORT = env_text("TRISOLARIS_PROTO_PORT", "COM36")
 CTRL_BAUD = 115200
 LOG_BAUD = 115200
 PROTO_BAUD = 9600
@@ -236,9 +241,14 @@ CASES: list[CaseDef] = [
         texts=["小好小好", "语音功能关闭", "小好小好", "打开照明"],
         expected_words=[0x0001, 0x0016, 0x0001],
         forbidden_words=[0x0009],
+        expected_log_markers=[
+            f"receive msg:: {passive_frame_hex(0x0012)}",
+            "refresh config volume=2 voice=0 wakeup=0 play_mode=0",
+        ],
         forbidden_log_markers=["MCU is not ready!"],
+        extra_respond_rules=[(active_frame_hex(0x0016), passive_frame_hex(0x0012))],
         capture_s=34.0,
-        notes="PASS 条件：先产生 0x0001 + 0x0016；受限态下再次唤醒仍可被识别，但普通命令 0x0009 不能再下发。",
+        notes="PASS 条件：先产生 0x0001 + 0x0016；夹具按 MCU 口径回 0x0012 使关闭语音真实生效；受限态下再次唤醒仍可被识别，但普通命令 0x0009 不能再下发。",
     ),
     CaseDef(
         case_id="VOICE-ON-RECOVER-001",
@@ -247,9 +257,15 @@ CASES: list[CaseDef] = [
         objective="验证关闭语音后，在受限状态下说“语音功能打开”可恢复业务，再次唤醒后允许继续执行照明命令。",
         texts=["小好小好", "语音功能关闭", "语音功能打开", "小好小好", "打开照明"],
         expected_words=[0x0001, 0x0016, 0x0017, 0x0001, 0x0009],
+        expected_log_markers=[
+            f"receive msg:: {passive_frame_hex(0x0012)}",
+            "refresh config volume=2 voice=0 wakeup=0 play_mode=0",
+        ],
         forbidden_log_markers=["MCU is not ready!"],
+        extra_respond_rules=[(active_frame_hex(0x0016), passive_frame_hex(0x0012))],
         capture_s=56.0,
         gaps_s=[1.6, 2.4, 4.0, 4.0],
+        notes="夹具按 MCU 口径回 0x0012 使关闭语音真实生效，再验证“语音功能打开”下发 0x0017 后是否恢复普通业务。",
     ),
     CaseDef(
         case_id="SESS-TIMEOUT-001",

@@ -6,7 +6,7 @@ param(
     [int]$LogBaud = 115200,
     [int]$BurnBaud = 1500000,
     [int]$CmdDelayMs = 300,
-    [int]$PreBurnWaitMs = 1500,
+    [int]$PreBurnWaitMs = 6000,
     [int]$PostPowerOnReadSeconds = 8,
     [int]$PostLoglevelReadSeconds = 3,
     [int]$MaxRetry = 3,
@@ -152,14 +152,16 @@ function Resolve-FirmwarePath {
 }
 
 function Enter-BurnReadyState {
-    Write-Log "Prepare device for burn: power off -> boot on -> power on -> boot off"
+    Write-Log "Prepare device for burn: power off -> boot on -> power on -> hold boot ${PreBurnWaitMs}ms -> boot off"
     Invoke-CtrlSequence -Commands @(
         "uut-switch1.off",
         "uut-switch2.on",
-        "uut-switch1.on",
-        "uut-switch2.off"
+        "uut-switch1.on"
     )
     Start-Sleep -Milliseconds $PreBurnWaitMs
+    Invoke-CtrlSequence -Commands @(
+        "uut-switch2.off"
+    )
 }
 
 function Restore-NormalPower {

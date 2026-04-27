@@ -50,6 +50,7 @@ def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
             capture_output=True,
             text=True,
             check=False,
+            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
         )
         if completed.returncode != 0:
             errors.append(
@@ -79,6 +80,7 @@ def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
             capture_output=True,
             text=True,
             check=False,
+            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
         )
         if completed.returncode != 0 or not mp3_path.is_file() or mp3_path.stat().st_size <= 0:
             errors.append(
@@ -91,6 +93,7 @@ def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
             capture_output=True,
             text=True,
             check=False,
+            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
         )
         mp3_path.unlink(missing_ok=True)
         if converted.returncode != 0:
@@ -115,6 +118,7 @@ def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
             capture_output=True,
             text=True,
             check=False,
+            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
         )
         if completed.returncode != 0 or not temp_path.is_file() or temp_path.stat().st_size <= 44:
             errors.append(
@@ -128,6 +132,7 @@ def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
                 capture_output=True,
                 text=True,
                 check=False,
+                timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
             )
             temp_path.unlink(missing_ok=True)
             if converted.returncode != 0:

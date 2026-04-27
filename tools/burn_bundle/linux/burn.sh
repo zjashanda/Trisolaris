@@ -9,7 +9,7 @@ CTRL_BAUD=115200
 LOG_BAUD=115200
 BURN_BAUD=1500000
 CMD_DELAY_MS=300
-PRE_BURN_WAIT_MS=1500
+PRE_BURN_WAIT_MS=6000
 POST_POWER_ON_READ_SECONDS=8
 POST_LOGLEVEL_READ_SECONDS=3
 MAX_RETRY=3
@@ -33,7 +33,7 @@ Options:
   -LogBaud <int>
   -BurnBaud <int>
   -CmdDelayMs <int>
-  -PreBurnWaitMs <int>
+  -PreBurnWaitMs <int>    Hold BOOT after power-on, before releasing BOOT
   -PostPowerOnReadSeconds <int>
   -PostLoglevelReadSeconds <int>
   -MaxRetry <int>
@@ -135,13 +135,13 @@ PY
 }
 
 enter_burn_ready_state() {
-    write_log "Prepare device for burn: power off -> boot on -> power on -> boot off"
+    write_log "Prepare device for burn: power off -> boot on -> power on -> hold boot ${PRE_BURN_WAIT_MS}ms -> boot off"
     send_ctrl_sequence \
         "uut-switch1.off" \
         "uut-switch2.on" \
-        "uut-switch1.on" \
-        "uut-switch2.off"
+        "uut-switch1.on"
     sleep_ms "$PRE_BURN_WAIT_MS"
+    send_ctrl_sequence "uut-switch2.off"
 }
 
 restore_normal_power() {
@@ -318,12 +318,14 @@ fi
 attempt=0
 while [[ "$attempt" -lt "$MAX_RETRY" ]]; do
     attempt=$((attempt + 1))
-    if {
-        write_log "Burn attempt $attempt/$MAX_RETRY"
-        enter_burn_ready_state
-        invoke_burn_tool "$FW_PATH"
-        verify_serial_after_burn
-    }; then
+    write_log "Burn attempt $attempt/$MAX_RETRY"
+    if ! enter_burn_ready_state; then
+        write_log "Enter burn-ready state failed"
+    elif ! invoke_burn_tool "$FW_PATH"; then
+        write_log "Burn tool step failed"
+    elif ! verify_serial_after_burn; then
+        write_log "Post-burn serial verification failed"
+    else
         write_log "Burn flow completed"
         exit 0
     fi

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -25,10 +26,14 @@ DELIVERABLE_ROOT = ROOT / "deliverables" / "csk3022_htt_clothes_airer"
 RESULT_ROOT = ROOT / "result" / "csk3022_htt_clothes_airer"
 HANDSHAKE_SCRIPT = ROOT / "tools" / "serial" / "fan_proto_handshake_probe.py"
 
-DEVICE_KEY = "VID_8765&PID_5678:8_804B35B_1_0000"
-CTRL_PORT = "COM39"
-LOG_PORT = "COM38"
-PROTO_PORT = "COM36"
+def env_text(name: str, default: str) -> str:
+    return os.environ.get(name, "").strip() or default
+
+
+DEVICE_KEY = env_text("TRISOLARIS_DEVICE_KEY", "VID_8765&PID_5678:8_804B35B_1_0000")
+CTRL_PORT = env_text("TRISOLARIS_CTRL_PORT", "COM39")
+LOG_PORT = env_text("TRISOLARIS_LOG_PORT", "COM38")
+PROTO_PORT = env_text("TRISOLARIS_PROTO_PORT", "COM36")
 CTRL_BAUD = 115200
 LOG_BAUD = 115200
 PROTO_BAUD = 9600
@@ -60,7 +65,21 @@ MAX_VOICE_ATTEMPTS = 2
 MAX_BOOT_ATTEMPTS = 2
 MAX_RESET_ATTEMPTS = 2
 MAX_VOLUME_PROBE_STEPS = EXPECTED_VOLUME_STEPS + 4
-SUITE_REVISION = "r2"
+SUITE_REVISION = "r3"
+
+
+def active_frame_hex(data_word: int) -> str:
+    hi = (data_word >> 8) & 0xFF
+    lo = data_word & 0xFF
+    checksum = (0xA5 + 0xFA + 0x7F + hi + lo) & 0xFF
+    return f"A5 FA 7F {hi:02X} {lo:02X} {checksum:02X} FB"
+
+
+def passive_frame_hex(data_word: int) -> str:
+    hi = (data_word >> 8) & 0xFF
+    lo = data_word & 0xFF
+    checksum = (0xA5 + 0xFA + 0x81 + hi + lo) & 0xFF
+    return f"A5 FA 81 {hi:02X} {lo:02X} {checksum:02X} FB"
 
 
 def decode_text(data: bytes) -> str:
@@ -191,6 +210,7 @@ def build_probe_command(
     result_dir: Path,
     capture_s: float,
     timed_sends: list[tuple[float, str]] | None = None,
+    extra_respond_rules: list[tuple[str, str]] | None = None,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -222,6 +242,8 @@ def build_probe_command(
         "--periodic",
         f"{MCU_PING_HEX}@4.0",
     ]
+    for match_hex, reply_hex in extra_respond_rules or []:
+        command.extend(["--respond", f"{match_hex}={reply_hex}"])
     for at_s, payload_hex in timed_sends or []:
         command.extend(["--inject-once", f"{payload_hex}@{at_s}"])
     return command
@@ -265,11 +287,17 @@ def run_capture_step(
     initial_wait_s: float,
     gaps_s: list[float] | None = None,
     timed_sends: list[tuple[float, str]] | None = None,
+    extra_respond_rules: list[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     step_dir.mkdir(parents=True, exist_ok=True)
     probe_stdout = step_dir / "probe_stdout.txt"
     probe_stderr = step_dir / "probe_stderr.txt"
-    command = build_probe_command(step_dir, capture_s=capture_s, timed_sends=timed_sends)
+    command = build_probe_command(
+        step_dir,
+        capture_s=capture_s,
+        timed_sends=timed_sends,
+        extra_respond_rules=extra_respond_rules,
+    )
     playback_records: list[dict[str, Any]] = []
 
     with probe_stdout.open("w", encoding="utf-8") as stdout_handle, probe_stderr.open("w", encoding="utf-8") as stderr_handle:
@@ -383,6 +411,7 @@ def run_voice_step_with_retry(
     capture_s: float,
     timed_sends: list[tuple[float, str]] | None = None,
     gaps_s: list[float] | None = None,
+    extra_respond_rules: list[tuple[str, str]] | None = None,
 ) -> dict[str, Any]:
     attempts: list[dict[str, Any]] = []
     last_capture: dict[str, Any] | None = None
@@ -395,6 +424,7 @@ def run_voice_step_with_retry(
             initial_wait_s=initial_wait_s,
             gaps_s=gaps_s,
             timed_sends=timed_sends,
+            extra_respond_rules=extra_respond_rules,
         )
         observed_words = capture["observed_words"]
         attempt_ok = contains_words_in_order(observed_words, expected_words)
@@ -613,6 +643,7 @@ def run_volume_branch(
             expected_words=[WAKE_WORD, expected_word],
             initial_wait_s=NORMAL_READY_WAIT_S,
             capture_s=NORMAL_VOICE_CAPTURE_S,
+            extra_respond_rules=[(active_frame_hex(expected_word), passive_frame_hex(expected_word))],
         )
         boot_result = run_boot_observe_with_retry(bundle_dir, play_script, f"volume_{branch_name}_step_{index}_boot")
         next_code = boot_result.get("boot_volume")
@@ -747,7 +778,7 @@ def write_summary_md(path: Path, bundle_dir: Path, timeout_result: dict[str, Any
         "",
         f"- 原始结果目录：`{bundle_dir}`",
         "- 口径说明：本轮仍是握手仿真夹具口径，但数值项全部按“先拿固件真实测量值，再与需求值比对”执行。",
-        "- 音量相关主方法：先恢复出厂，再分别从默认位连续“调大音量 / 调小音量”探到上、下边界；用真实边界步数反推默认档位，并计算总档位数。",
+        "- 音量相关主方法：先恢复出厂，再分别从默认位连续“调大音量 / 调小音量”探到上、下边界；夹具对主动调音量协议回同码 MCU 被动协议后，再用真实边界步数反推默认档位，并计算总档位数。",
         "",
         "## 1. 唤醒超时 `25s`",
         "",

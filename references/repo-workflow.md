@@ -16,11 +16,12 @@
 1. 读取 `plan.md`；没有则创建。
 2. 明确本轮目标、当前执行项、待执行项。
 3. 每个关键动作后把 done / doing / todo 同步到 `plan.md`。
-4. 判断证据前读取 `references/evidence-rules.md`。
+4. 新需求、需求变更、全链路执行或发布前读取 `references/fullflow-validation-method.md`。
+5. 判断证据前读取 `references/evidence-rules.md`。
 
 ## 输入目录
 
-- 小度风扇：`CSK5062小度风扇需求/`
+- 小度风扇：`项目需求/CSK5062小度风扇需求/`
 - 好太太晾衣机：`项目需求/好太太晾衣机/`
 
 输入目录保留需求文档、词表、固件和必要资源；压缩包解压副本、临时日志和运行 staging 不放入输入目录。

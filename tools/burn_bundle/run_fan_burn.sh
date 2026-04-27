@@ -9,7 +9,7 @@ CTRL_BAUD=115200
 LOG_BAUD=115200
 BURN_BAUD=1500000
 CMD_DELAY_MS=300
-PRE_BURN_WAIT_MS=1500
+PRE_BURN_WAIT_MS=6000
 POST_POWER_ON_READ_SECONDS=8
 POST_LOGLEVEL_READ_SECONDS=3
 MAX_RETRY=3
@@ -34,7 +34,7 @@ Options:
   -LogBaud <int>
   -BurnBaud <int>
   -CmdDelayMs <int>
-  -PreBurnWaitMs <int>
+  -PreBurnWaitMs <int>    Hold BOOT after power-on, before releasing BOOT
   -PostPowerOnReadSeconds <int>
   -PostLoglevelReadSeconds <int>
   -MaxRetry <int>
@@ -74,21 +74,20 @@ if [[ ! -f "$BUNDLE_SCRIPT" ]]; then
 fi
 
 if [[ -z "$FIRMWARE_BIN" ]]; then
-    mapfile -t CANDIDATE_BINS < <(
-        find "$REPO_ROOT" -mindepth 1 -maxdepth 1 -type d | while read -r dir; do
-            if [[ -f "$dir/tone.h" ]]; then
-                find "$dir" -mindepth 1 -maxdepth 1 -type f -name '*.bin'
-            fi
-        done | sort
-    )
+    PROJECT_REQ_ROOT="$REPO_ROOT/项目需求"
+    if [[ -d "$PROJECT_REQ_ROOT" ]]; then
+        mapfile -t CANDIDATE_BINS < <(find "$PROJECT_REQ_ROOT" -mindepth 2 -maxdepth 2 -type f -name '*.bin' | sort)
+    else
+        CANDIDATE_BINS=()
+    fi
     if [[ "${#CANDIDATE_BINS[@]}" -eq 1 ]]; then
         FIRMWARE_BIN="${CANDIDATE_BINS[0]}"
     elif [[ "${#CANDIDATE_BINS[@]}" -gt 1 ]]; then
-        printf 'Multiple firmware bins found under requirement directories, please specify -FirmwareBin explicitly:\n' >&2
+        printf 'Multiple firmware bins found under 项目需求/*, please specify -FirmwareBin explicitly:\n' >&2
         printf '  %s\n' "${CANDIDATE_BINS[@]}" >&2
         exit 1
     else
-        echo "No firmware bin found under requirement directories; please specify -FirmwareBin explicitly." >&2
+        echo "No firmware bin found under 项目需求/*; please specify -FirmwareBin explicitly." >&2
         exit 1
     fi
 fi

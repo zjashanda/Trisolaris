@@ -6,7 +6,7 @@ param(
     [int]$LogBaud = 115200,
     [int]$BurnBaud = 1500000,
     [int]$CmdDelayMs = 300,
-    [int]$PreBurnWaitMs = 1500,
+    [int]$PreBurnWaitMs = 6000,
     [int]$PostPowerOnReadSeconds = 8,
     [int]$PostLoglevelReadSeconds = 3,
     [int]$MaxRetry = 3,
@@ -28,21 +28,20 @@ if (-not (Test-Path -LiteralPath $bundleScript)) {
 }
 
 if (-not $FirmwareBin) {
-    $requirementDirs = Get-ChildItem -LiteralPath $repoRoot -Directory | Where-Object {
-        (Test-Path -LiteralPath (Join-Path $_.FullName "tone.h")) -and
-        ((Get-ChildItem -LiteralPath $_.FullName -File -Filter *.bin | Measure-Object).Count -ge 1)
-    }
+    $projectReqRoot = Join-Path $repoRoot "项目需求"
     $candidateBins = @()
-    foreach ($dir in $requirementDirs) {
-        $candidateBins += Get-ChildItem -LiteralPath $dir.FullName -File -Filter *.bin
+    if (Test-Path -LiteralPath $projectReqRoot) {
+        foreach ($dir in (Get-ChildItem -LiteralPath $projectReqRoot -Directory)) {
+            $candidateBins += Get-ChildItem -LiteralPath $dir.FullName -File -Filter *.bin
+        }
     }
     if ($candidateBins.Count -eq 1) {
         $FirmwareBin = $candidateBins[0].FullName
     } elseif ($candidateBins.Count -gt 1) {
         $joined = ($candidateBins | ForEach-Object { $_.FullName }) -join "; "
-        throw "Multiple firmware bins found under requirement directories, please specify -FirmwareBin explicitly: $joined"
+        throw "Multiple firmware bins found under 项目需求\\*, please specify -FirmwareBin explicitly: $joined"
     } else {
-        throw "No firmware bin found under requirement directories; please specify -FirmwareBin explicitly."
+        throw "No firmware bin found under 项目需求\\*; please specify -FirmwareBin explicitly."
     }
 }
 

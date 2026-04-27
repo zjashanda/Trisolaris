@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 from collections import Counter
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,7 @@ import openpyxl
 
 
 ROOT = Path(__file__).resolve().parents[2]
-REQ_DIR = ROOT / "CSK5062小度风扇需求"
+REQ_DIR = Path(os.environ.get("TRISOLARIS_REQ_DIR", ROOT / "项目需求" / "CSK5062小度风扇需求")).expanduser().resolve()
 DELIVERABLE_ROOT = ROOT / "deliverables" / "csk5062_xiaodu_fan"
 PLAN_PATH = DELIVERABLE_ROOT / "plan" / "测试方案.md"
 CASE_MD_PATH = DELIVERABLE_ROOT / "archive" / "测试用例-正式版.md"

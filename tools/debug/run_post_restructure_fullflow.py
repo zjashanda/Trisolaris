@@ -26,7 +26,7 @@ from fan_validation_helper import ensure_cached_tts, update_response_state
 from listenai_play_repo import resolve_listenai_play
 
 ROOT = Path(__file__).resolve().parents[2]
-REQ_DIR = ROOT / "CSK5062小度风扇需求"
+REQ_DIR = Path(os.environ.get("TRISOLARIS_REQ_DIR", ROOT / "项目需求" / "CSK5062小度风扇需求")).expanduser().resolve()
 DELIVERABLE_ROOT = ROOT / "deliverables" / "csk5062_xiaodu_fan"
 REPORT_ROOT = DELIVERABLE_ROOT / "reports"
 PLAN_PATH = DELIVERABLE_ROOT / "plan" / "测试方案.md"
