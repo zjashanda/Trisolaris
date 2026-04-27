@@ -1025,3 +1025,9 @@
 - [done] 已删除根目录 `CSK5062小度风扇需求/`，保留并准备提交 `项目需求/CSK5062小度风扇需求/` 作为统一调试需求输入目录。
 - [done] 已更新小度默认需求路径引用：`README.md`、`SKILL.md`、`references/*`、`tools/cases/generate_formal_assets.py`、`tools/debug/run_post_restructure_fullflow.py` 均指向 `项目需求/CSK5062小度风扇需求/`。
 - [done] 已复跑校验：skill quick validate、关键 Python `py_compile`、Linux burn `bash -n`、小度需求路径存在性检查均通过。
+
+## 2026-04-27 Skill Git Final Sync Round
+- [done] 读取 `plan.md`，确认本轮目标是把本地 skill 中可复用、非运行态的有效文件同步到 Git。
+- [done] 按 `skill-git` 流程检查发布配置：owner=`zjashanda`、branch=`main`、SSH=`github-zjashanda`、token 可用。
+- [done] 检查 Git 状态：当前无未跟踪的非忽略文件；忽略项仅保留运行产物、报告、音频缓存、烧录临时文件和日志。
+- [doing] 推送当前本地提交到 `origin/main`，随后记录最终同步结果。
