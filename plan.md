@@ -1139,3 +1139,5 @@
 - [done] 已整理并补齐最新方案逻辑：新增 `20260428_好太太最终收敛方案与结果_v1.md`，更新 README/SKILL/current requirement，给历史 FAIL 文档增加过期说明。
 - [done] 已运行 skill 校验与关键 runner `py_compile`，并清理 `__pycache__`。
 - [doing] 准备暂存、提交并推送当前更新到远程 `origin/main`。
+- [done] 已提交当前方案逻辑更新：`1d600ca feat: converge htt validation logic`。
+- [doing] 准备推送提交到远程 `origin/main` 并确认远端同步状态。
