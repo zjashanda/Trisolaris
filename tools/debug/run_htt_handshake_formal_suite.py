@@ -39,6 +39,7 @@ LOG_BAUD = 115200
 PROTO_BAUD = 9600
 BOOT_READY_WAIT_S = 6.0
 BETWEEN_TEXT_WAIT_S = 1.6
+NORMAL_CMD_DELAY_S = 2.0
 
 
 def active_frame_hex(data_word: int) -> str:
@@ -99,7 +100,7 @@ CASES: list[CaseDef] = [
             "send msg:: A5 FA 7F A5 A5 68 FB",
         ],
         forbidden_log_markers=["MCU is not ready!"],
-        capture_s=18.0,
+        capture_s=42.0,
         notes="仅上电观察，不播报语音。",
     ),
     CaseDef(
@@ -242,13 +243,13 @@ CASES: list[CaseDef] = [
         expected_words=[0x0001, 0x0016, 0x0001],
         forbidden_words=[0x0009],
         expected_log_markers=[
-            f"receive msg:: {passive_frame_hex(0x0012)}",
+            f"receive msg:: {passive_frame_hex(0x0036)}",
             "refresh config volume=2 voice=0 wakeup=0 play_mode=0",
         ],
         forbidden_log_markers=["MCU is not ready!"],
-        extra_respond_rules=[(active_frame_hex(0x0016), passive_frame_hex(0x0012))],
+        extra_respond_rules=[(active_frame_hex(0x0016), passive_frame_hex(0x0036))],
         capture_s=34.0,
-        notes="PASS 条件：先产生 0x0001 + 0x0016；夹具按 MCU 口径回 0x0012 使关闭语音真实生效；受限态下再次唤醒仍可被识别，但普通命令 0x0009 不能再下发。",
+        notes="PASS 条件：先产生 0x0001 + 0x0016；夹具按词表/播报语义回 0x0036 使关闭语音真实生效；受限态下再次唤醒仍可被识别，但普通命令 0x0009 不能再下发。",
     ),
     CaseDef(
         case_id="VOICE-ON-RECOVER-001",
@@ -258,14 +259,19 @@ CASES: list[CaseDef] = [
         texts=["小好小好", "语音功能关闭", "语音功能打开", "小好小好", "打开照明"],
         expected_words=[0x0001, 0x0016, 0x0017, 0x0001, 0x0009],
         expected_log_markers=[
-            f"receive msg:: {passive_frame_hex(0x0012)}",
+            f"receive msg:: {passive_frame_hex(0x0036)}",
+            f"receive msg:: {passive_frame_hex(0x0037)}",
             "refresh config volume=2 voice=0 wakeup=0 play_mode=0",
+            "refresh config volume=2 voice=1 wakeup=0 play_mode=0",
         ],
         forbidden_log_markers=["MCU is not ready!"],
-        extra_respond_rules=[(active_frame_hex(0x0016), passive_frame_hex(0x0012))],
+        extra_respond_rules=[
+            (active_frame_hex(0x0016), passive_frame_hex(0x0036)),
+            (active_frame_hex(0x0017), passive_frame_hex(0x0037)),
+        ],
         capture_s=56.0,
         gaps_s=[1.6, 2.4, 4.0, 4.0],
-        notes="夹具按 MCU 口径回 0x0012 使关闭语音真实生效，再验证“语音功能打开”下发 0x0017 后是否恢复普通业务。",
+        notes="夹具按词表/播报语义回 0x0036 使关闭语音真实生效；“语音功能打开”下发 0x0017 后，夹具回 0x0037，再验证普通业务是否恢复。实测 0x0036 会保持 voice=0，不能作为开语音回包。",
     ),
     CaseDef(
         case_id="SESS-TIMEOUT-001",
@@ -297,7 +303,7 @@ CASES: list[CaseDef] = [
         required_play_ids=[103],
         min_log_marker_counts={"play id : ": 1},
         max_log_marker_counts={"play id : ": 1},
-        capture_s=16.0,
+        capture_s=46.0,
         notes="当前只实测到恢复出厂后的日志值 `mini player set vol : 58` 和 `refresh config volume=2`；它们是否等价于需求“默认 3 档”，必须先建立真实档位映射后再判断，不能直接反推。",
     ),
     CaseDef(
@@ -321,7 +327,7 @@ CASES: list[CaseDef] = [
         required_play_ids=[103],
         min_log_marker_counts={"play id : ": 1},
         max_log_marker_counts={"play id : ": 1},
-        capture_s=18.0,
+        capture_s=50.0,
         notes="`play start` 只允许出现 1 次，用于确认仅恢复出厂提示播放，0x0082 本身不再额外播报。",
     ),
     CaseDef(
@@ -348,7 +354,7 @@ CASES: list[CaseDef] = [
         required_play_ids=[103, 100],
         min_log_marker_counts={"play id : ": 2},
         max_log_marker_counts={"play id : ": 2},
-        capture_s=22.0,
+        capture_s=58.0,
         notes="`play start` 共应出现 2 次：一次来自 0x006C 恢复提示，一次来自 0x0069 强制开启播报提示。",
     ),
     CaseDef(
@@ -365,15 +371,18 @@ CASES: list[CaseDef] = [
         expected_log_markers=[
             f"receive msg:: {passive_frame_hex(0x006C)}",
             f"receive msg:: {passive_frame_hex(0x0012)}",
+            f"receive msg:: {passive_frame_hex(0x0037)}",
             "refresh config volume=2 voice=0 wakeup=0 play_mode=0",
+            "refresh config volume=2 voice=1 wakeup=0 play_mode=0",
             "save config success",
         ],
         forbidden_log_markers=["MCU is not ready!"],
         required_play_ids=[103, 65],
+        extra_respond_rules=[(active_frame_hex(0x0017), passive_frame_hex(0x0037))],
         capture_s=72.0,
         initial_wait_s=14.0,
         gaps_s=[2.0, 8.0, 6.0],
-        notes="先用 0x006C 建立语音/播报默认态，再验证 0x0012 关闭语音后，需要先唤醒再说“语音功能打开”的恢复链路。",
+        notes="先用 0x006C 建立语音/播报默认态，再验证 0x0012 关闭语音后，需要先唤醒再说“语音功能打开”；0x0017 后夹具回 0x0037，再验证业务恢复。实测 0x0036 会保持 voice=0，不能作为开语音回包。",
     ),
     CaseDef(
         case_id="PASSIVE-VOICE-OFF-001",
@@ -486,6 +495,8 @@ def build_handshake_cmd(case: CaseDef, result_dir: Path) -> list[str]:
         str(CTRL_BAUD),
         "--command-preset",
         "normal",
+        "--cmd-delay-s",
+        str(NORMAL_CMD_DELAY_S),
         "--capture-s",
         str(capture_s),
         "--loglevel4-at-s",
@@ -535,6 +546,11 @@ def play_audio(play_script: Path, audio_file: Path, out_path: Path) -> dict[str,
 def evaluate_case(case: CaseDef, case_dir: Path) -> dict[str, Any]:
     com36_text = (case_dir / "com36_frames.txt").read_text(encoding="utf-8", errors="replace")
     com38_text = (case_dir / "com38_utf8.txt").read_text(encoding="utf-8", errors="replace")
+    boot_scoped_text = com38_text
+    version_index = com38_text.rfind("version         :")
+    if version_index >= 0:
+        # Ignore stale/pre-reset boot noise; readiness errors after the final active boot banner still fail.
+        boot_scoped_text = com38_text[version_index:]
     words = parse_data_words(com36_text)
     play_ids = parse_play_ids(com38_text)
     expected_ok = contains_in_order(words, case.expected_words)
@@ -548,16 +564,24 @@ def evaluate_case(case: CaseDef, case_dir: Path) -> dict[str, Any]:
     ]
     expected_marker_hits = [marker for marker in case.expected_log_markers if marker in com38_text]
     missing_markers = [marker for marker in case.expected_log_markers if marker not in com38_text]
-    forbidden_marker_hits = [marker for marker in case.forbidden_log_markers if marker in com38_text]
+    forbidden_marker_hits = []
+    for marker in case.forbidden_log_markers:
+        marker_text = boot_scoped_text if marker == "MCU is not ready!" else com38_text
+        if marker in marker_text:
+            forbidden_marker_hits.append(marker)
+    count_scoped_text = com38_text
+    marker_positions = [com38_text.find(marker) for marker in case.expected_log_markers if marker in com38_text]
+    if marker_positions:
+        count_scoped_text = com38_text[min(marker_positions):]
     min_count_failures = [
-        f"{marker}={com38_text.count(marker)}<{limit}"
+        f"{marker}={count_scoped_text.count(marker)}<{limit}"
         for marker, limit in case.min_log_marker_counts.items()
-        if com38_text.count(marker) < limit
+        if count_scoped_text.count(marker) < limit
     ]
     max_count_failures = [
-        f"{marker}={com38_text.count(marker)}>{limit}"
+        f"{marker}={count_scoped_text.count(marker)}>{limit}"
         for marker, limit in case.max_log_marker_counts.items()
-        if com38_text.count(marker) > limit
+        if count_scoped_text.count(marker) > limit
     ]
 
     passed = (

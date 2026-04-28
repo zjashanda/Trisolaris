@@ -50,13 +50,15 @@ VOL_UP_WORD = 0x0041
 VOL_DOWN_WORD = 0x0042
 
 BASELINE_READY_WAIT_S = 33.0
+TIMEOUT_READY_WAIT_S = 45.0
 NORMAL_READY_WAIT_S = 18.0
+NORMAL_CMD_DELAY_S = 2.0
 BETWEEN_TEXT_WAIT_S = 1.6
 POST_PLAY_GUARD_S = 12.0
-TIMEOUT_CAPTURE_S = 80.0
+TIMEOUT_CAPTURE_S = 115.0
 NORMAL_VOICE_CAPTURE_S = 54.0
-BOOT_OBSERVE_CAPTURE_S = 18.0
-RESET_CAPTURE_S = 18.0
+BOOT_OBSERVE_CAPTURE_S = 30.0
+RESET_CAPTURE_S = 46.0
 TIMEOUT_TOLERANCE_S = 1.5
 EXPECTED_TIMEOUT_S = 25.0
 EXPECTED_VOLUME_STEPS = 5
@@ -88,17 +90,23 @@ def decode_text(data: bytes) -> str:
 
 def parse_boot_config(log_text: str) -> dict[str, int | str]:
     config: dict[str, int | str] = {}
+    blocks: list[dict[str, int | str]] = []
     in_block = False
     for raw_line in log_text.splitlines():
         line = raw_line.replace("\x1b", "")
         if "Running Config" in line:
+            if config:
+                blocks.append(config)
+                config = {}
             in_block = True
             continue
         if not in_block:
             continue
         if "==========================" in line:
             if config:
-                break
+                blocks.append(config)
+                config = {}
+                in_block = False
             continue
         match = re.match(r"\s*([A-Za-z][A-Za-z0-9 ]*[A-Za-z0-9])\s*:\s*([^\s]+)", line)
         if not match:
@@ -106,7 +114,9 @@ def parse_boot_config(log_text: str) -> dict[str, int | str]:
         key = match.group(1).replace(" ", "_").strip()
         value = match.group(2)
         config[key] = int(value) if value.isdigit() else value
-    return config
+    if config:
+        blocks.append(config)
+    return blocks[-1] if blocks else {}
 
 
 def extract_refresh_config_values(log_text: str) -> list[int]:
@@ -180,6 +190,25 @@ def find_last_marker_time(lines: list[dict[str, Any]], patterns: list[str], befo
     return found
 
 
+def find_last_marker_time_between(
+    lines: list[dict[str, Any]],
+    patterns: list[str],
+    after_s: float = 0.0,
+    before_s: float | None = None,
+) -> float | None:
+    found: float | None = None
+    for item in lines:
+        t_s = float(item.get("t_s", 0.0))
+        if t_s < after_s:
+            continue
+        if before_s is not None and t_s > before_s:
+            break
+        text = str(item.get("text", ""))
+        if any(pattern in text for pattern in patterns):
+            found = round(t_s, 3)
+    return found
+
+
 def find_first_data_word_time(frames: list[dict[str, Any]], data_word: int, after_s: float = 0.0) -> float | None:
     for item in frames:
         t_s = float(item.get("t_s", 0.0))
@@ -231,6 +260,8 @@ def build_probe_command(
         str(CTRL_BAUD),
         "--command-preset",
         "normal",
+        "--cmd-delay-s",
+        str(NORMAL_CMD_DELAY_S),
         "--capture-s",
         str(capture_s),
         "--loglevel4-at-s",
@@ -508,9 +539,10 @@ def extract_timeout_markers(capture: dict[str, Any]) -> dict[str, Any]:
             for item in playback_records
             if item.get("play_started_at_s") is not None
         )
-    wake_frame_s = find_first_data_word_time(frames, WAKE_WORD)
-    wakeup_line_s = find_first_marker_time(lines, ["Wakeup:"])
-    wake_keyword_s = find_first_marker_time(lines, ["keyword:xiao hao xiao hao"])
+    after_audio_s = last_audio_play_at_s or 0.0
+    wake_frame_s = find_first_data_word_time(frames, WAKE_WORD, after_s=after_audio_s)
+    wakeup_line_s = find_first_marker_time(lines, ["Wakeup:"], after_s=after_audio_s)
+    wake_keyword_s = find_first_marker_time(lines, ["keyword:xiao hao xiao hao"], after_s=after_audio_s)
     wake_response_play_start_s = (
         find_first_marker_time(lines, ["play start"], after_s=last_audio_play_at_s or 0.0)
         if last_audio_play_at_s is not None
@@ -521,18 +553,30 @@ def extract_timeout_markers(capture: dict[str, Any]) -> dict[str, Any]:
         if last_audio_play_at_s is not None
         else None
     )
-    mode_one_s = find_first_marker_time(lines, ["MODE=1"])
-    wake_marker_s = (
-        wake_frame_s
-        or wake_keyword_s
-        or wakeup_line_s
-        or wake_response_play_start_s
-        or wake_response_play_id_s
-        or mode_one_s
-    )
+    mode_one_s = find_first_marker_time(lines, ["MODE=1"], after_s=after_audio_s)
+    marker_candidates = [
+        ("log_MODE_1", mode_one_s),
+        ("log_Wakeup", wakeup_line_s),
+        ("log_keyword", wake_keyword_s),
+        ("proto_0x0001", wake_frame_s),
+        ("log_play_start", wake_response_play_start_s),
+        ("log_play_id", wake_response_play_id_s),
+    ]
+    wake_marker_source = None
+    wake_marker_s = None
+    for source, value in marker_candidates:
+        if value is not None:
+            wake_marker_source = source
+            wake_marker_s = value
+            break
     timeout_s = find_first_marker_time(lines, ["TIME_OUT"], after_s=wake_marker_s or 0.0)
     mode_zero_s = find_first_marker_time(lines, ["MODE=0"], after_s=wake_marker_s or 0.0)
-    play_stop_before_timeout_s = find_last_marker_time(lines, ["play stop"], before_s=timeout_s)
+    play_stop_before_timeout_s = find_last_marker_time_between(
+        lines,
+        ["play stop"],
+        after_s=wake_marker_s or after_audio_s,
+        before_s=timeout_s,
+    )
     wake_to_timeout_s = round(timeout_s - wake_marker_s, 3) if wake_marker_s is not None and timeout_s is not None else None
     wake_to_mode_zero_s = round(mode_zero_s - wake_marker_s, 3) if wake_marker_s is not None and mode_zero_s is not None else None
     response_end_to_timeout_s = (
@@ -542,6 +586,7 @@ def extract_timeout_markers(capture: dict[str, Any]) -> dict[str, Any]:
     )
     return {
         "wake_marker_s": wake_marker_s,
+        "wake_marker_source": wake_marker_source,
         "wake_frame_s": wake_frame_s,
         "wakeup_line_s": wakeup_line_s,
         "wake_keyword_s": wake_keyword_s,
@@ -567,7 +612,7 @@ def run_timeout_probe(bundle_dir: Path, play_script: Path) -> dict[str, Any]:
             play_script=play_script,
             capture_s=TIMEOUT_CAPTURE_S,
             texts=["小好小好"],
-            initial_wait_s=BASELINE_READY_WAIT_S,
+            initial_wait_s=TIMEOUT_READY_WAIT_S,
             timed_sends=[(6.0, RESET_FRAME_HEX)],
         )
         markers = extract_timeout_markers(capture)
@@ -783,7 +828,8 @@ def write_summary_md(path: Path, bundle_dir: Path, timeout_result: dict[str, Any
         "## 1. 唤醒超时 `25s`",
         "",
         f"- 判定：`{timeout_result['status']}`",
-        f"- 实测起点（优先取主动协议 `0x0001`）：`{timeout_result.get('wake_marker_s')}`s",
+        f"- 实测起点（优先取日志口同源 `MODE=1/Wakeup`，再兜底协议 `0x0001`）：`{timeout_result.get('wake_marker_s')}`s",
+        f"- 起点来源：`{timeout_result.get('wake_marker_source')}`；协议口 `0x0001` 旁证时间：`{timeout_result.get('wake_frame_s')}`s",
         f"- `TIME_OUT` 时间：`{timeout_result.get('timeout_s')}`s",
         f"- `MODE=0` 时间：`{timeout_result.get('mode_zero_s')}`s",
         f"- 实测 `唤醒响应 -> TIME_OUT`：`{timeout_result.get('wake_to_timeout_s')}`s",
@@ -817,7 +863,7 @@ def write_summary_md(path: Path, bundle_dir: Path, timeout_result: dict[str, Any
         "",
         "## 4. 结论",
         "",
-        "- 唤醒超时使用 `0x0001 / Wakeup -> TIME_OUT / MODE=0` 的真实时间差做结论，不再拿需求 `25s` 反推等待窗口。",
+        "- 唤醒超时使用日志口同源 `MODE=1/Wakeup -> TIME_OUT / MODE=0` 的真实时间差做结论；协议口 `0x0001` 只做旁证，避免跨串口时间戳偏移造成误判。",
         "- 默认音量与总档位数使用“恢复出厂后的默认位 -> 连续调大 / 调小直到边界”的真实边界步数做结论，不直接拿需求档位倒推。",
         f"- 向上分支失败原因：`{up_branch.get('failure_reason')}`",
         f"- 向下分支失败原因：`{down_branch.get('failure_reason')}`",

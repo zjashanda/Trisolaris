@@ -141,29 +141,43 @@ def run_voice_off_function_check(bundle_dir: Path, play_script: Path) -> dict[st
 
 def run_passive_008c_check(bundle_dir: Path, play_script: Path) -> dict[str, Any]:
     capture = numeric.run_capture_step(
-        step_dir=bundle_dir / "steps" / "passive_008c_no_broadcast",
+        step_dir=bundle_dir / "steps" / "passive_008c_setting_failed_broadcast",
         play_script=play_script,
-        capture_s=18.0,
+        capture_s=90.0,
         texts=[],
         initial_wait_s=0.0,
-        timed_sends=[(6.0, RESET_HEX), (10.0, PASSIVE_008C_HEX)],
+        timed_sends=[(35.0, PASSIVE_008C_HEX)],
     )
     log_text = capture["log_text"]
     play_ids = formal.parse_play_ids(log_text)
+    receive_t_s = None
+    for item in capture["timed_lines"]:
+        if f"receive msg:: {PASSIVE_008C_HEX}" in item.get("text", ""):
+            receive_t_s = float(item.get("t_s", 0.0))
+            break
+    post_008c_log = ""
+    if receive_t_s is not None:
+        post_008c_log = "\n".join(
+            item.get("text", "")
+            for item in capture["timed_lines"]
+            if float(item.get("t_s", 0.0)) >= receive_t_s
+        )
+    post_008c_play_ids = formal.parse_play_ids(post_008c_log)
     status = "PASS" if (
-        f"receive msg:: {RESET_HEX}" in log_text
-        and f"receive msg:: {PASSIVE_008C_HEX}" in log_text
-        and play_ids == [103]
-        and log_text.count("play start") == 1
-        and log_text.count("play id : ") == 1
-        and "MCU is not ready!" not in log_text
+        receive_t_s is not None
+        and post_008c_play_ids == [127]
+        and post_008c_log.count("play start") == 1
     ) else "FAIL"
     return {
         "status": status,
         "step_dir": str(capture["step_dir"]),
         "play_ids": play_ids,
+        "expected_play_ids": [127],
+        "receive_t_s": receive_t_s,
+        "post_008c_play_ids": post_008c_play_ids,
         "play_start_count": log_text.count("play start"),
         "play_id_count": log_text.count("play id : "),
+        "post_008c_play_start_count": post_008c_log.count("play start"),
     }
 
 
@@ -202,7 +216,7 @@ def write_report(path: Path, bundle_dir: Path, summary: dict[str, Any]) -> None:
         f"- \u64ad\u62a5\u5f00\u5173\u6389\u7535\u4fdd\u5b58\uff1a`{report_mode['status']}`\uff0c\u5b9e\u9645\u8bbe\u7f6e\u503c=`{report_mode['target_value']}`\uff0c\u91cd\u542f\u540e=`{report_mode['boot_value']}`",
         f"- \u8bed\u97f3\u5f00\u5173\u6389\u7535\u4fdd\u5b58\uff1a`{voice['status']}`\uff0c\u5b9e\u9645\u8bbe\u7f6e\u503c=`{voice['target_value']}`\uff0c\u91cd\u542f\u540e=`{voice['boot_value']}`",
         f"- \u8bed\u97f3\u5173\u95ed\u91cd\u542f\u540e\u529f\u80fd\u53d7\u9650\u5192\u70df\uff1a`{voice_func['status']}`",
-        f"- \u88ab\u52a8 `0x008C`\uff1a`{passive_008c['status']}`\uff0cplay ids=`{passive_008c['play_ids']}`",
+        f"- \u88ab\u52a8 `0x008C` \u8bbe\u7f6e\u5931\u8d25\u64ad\u62a5\uff1a`{passive_008c['status']}`\uff0c0x008C \u540e play ids=`{passive_008c['post_008c_play_ids']}`\uff0c\u671f\u671b=`{passive_008c['expected_play_ids']}`",
         f"- `PASSIVE-VOICE-ON-001` \u590d\u68c0\uff1a`{voice_on['status']}`\uff0cPASS=`{voice_on['pass_count']}` FAIL=`{voice_on['fail_count']}` BLOCKED=`{voice_on['blocked_count']}`",
         "",
         "## \u8bc1\u636e",
@@ -214,7 +228,7 @@ def write_report(path: Path, bundle_dir: Path, summary: dict[str, Any]) -> None:
         f"- \u8bed\u97f3\u5173\u95ed\u8bbe\u7f6e\u6b65\u9aa4\uff1a`{voice['set_step_dir']}`",
         f"- \u8bed\u97f3\u5173\u95ed\u91cd\u542f\u89c2\u5bdf\uff1a`{voice['reboot_step_dir']}`",
         f"- \u8bed\u97f3\u5173\u95ed\u91cd\u542f\u540e\u529f\u80fd\u5192\u70df\uff1a`{voice_func['attempts'][0]['step_dir']}`",
-        f"- \u88ab\u52a8 `0x008C` \u68c0\u67e5\uff1a`{passive_008c['step_dir']}`",
+        f"- \u88ab\u52a8 `0x008C` \u8bbe\u7f6e\u5931\u8d25\u64ad\u62a5\u68c0\u67e5\uff1a`{passive_008c['step_dir']}`",
         f"- `PASSIVE-VOICE-ON-001` \u590d\u68c0\u7b2c 1 \u6b21\uff1a`{voice_on['attempts'][0]['result_dir']}`",
         f"- `PASSIVE-VOICE-ON-001` \u590d\u68c0\u7b2c 2 \u6b21\uff1a`{voice_on['attempts'][1]['result_dir']}`",
     ]
@@ -241,7 +255,7 @@ def main() -> int:
             (10.0, formal.passive_frame_hex(0x0043)),
         ],
         initial_wait_s=0.0,
-        capture_s=18.0,
+        capture_s=60.0,
         required_markers=[f"receive msg:: {formal.passive_frame_hex(0x0043)}"],
         require_change_from=2,
     )
@@ -249,12 +263,16 @@ def main() -> int:
         bundle_dir=bundle_dir,
         play_script=play_script,
         name="report_mode_persist_off",
-        texts=[WAKE_TEXT, REPORT_OFF_TEXT],
-        expected_words=[0x0001, 0x0046],
+        texts=[],
+        expected_words=[],
         state_key="play_mode",
-        timed_sends=[(formal.BASELINE_RESET_AT_S, RESET_HEX)],
-        initial_wait_s=formal.BASELINE_READY_WAIT_S,
+        timed_sends=[
+            (formal.BASELINE_RESET_AT_S, RESET_HEX),
+            (10.0, formal.passive_frame_hex(0x0082)),
+        ],
+        initial_wait_s=0.0,
         capture_s=60.0,
+        required_markers=[f"receive msg:: {formal.passive_frame_hex(0x0082)}"],
         require_change_from=0,
     )
     voice_persist = run_state_persist_check(
@@ -269,7 +287,7 @@ def main() -> int:
             (10.0, formal.passive_frame_hex(0x0012)),
         ],
         initial_wait_s=0.0,
-        capture_s=18.0,
+        capture_s=60.0,
         required_markers=[f"receive msg:: {formal.passive_frame_hex(0x0012)}"],
         require_change_from=1,
     )

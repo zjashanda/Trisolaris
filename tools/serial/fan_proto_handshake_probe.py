@@ -160,6 +160,12 @@ def run_probe(
 
         for command in commands:
             stamp = datetime.now().isoformat(timespec="milliseconds")
+            if command.strip().lower() == "uut-switch1.on":
+                # Drop logs emitted by the previous runtime before the new boot
+                # starts; otherwise long-running heartbeat backlog shifts all
+                # timed assertions in the next case.
+                log_port.reset_input_buffer()
+                proto_port.reset_input_buffer()
             ctrl_port.write((command + "\r\n").encode("ascii"))
             ctrl_port.flush()
             control_log.append(f"[{stamp}] {command}")

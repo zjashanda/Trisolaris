@@ -19,9 +19,9 @@
 | `FULL-BRIGHT-MAX-001` | `fixed-passive` | 最亮全链路 | 小好小好 / 调到最亮 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 57 75 FB | receive msg:: A5 FA 81 00 48 68 FB |
 | `FULL-BRIGHT-MIN-001` | `fixed-passive` | 最暗全链路 | 小好小好 / 调到最暗 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 58 76 FB | receive msg:: A5 FA 81 00 49 69 FB |
 | `FULL-COLD-UP-001` | `fixed-passive` | 调冷全链路 | 小好小好 / 增加冷光 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 5D 7B FB | receive msg:: A5 FA 81 00 4A 6A FB |
-| `FULL-WARM-UP-001` | `fixed-passive` | 调暖全链路 | 小好小好 / 增加暖光 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 5E 7C FB | receive msg:: A5 FA 81 00 4B 6B FB |
+| `FULL-WARM-UP-001` | `fixed-passive` | 调暖全链路 | 小好小好 / 调暖一点 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 5E 7C FB | receive msg:: A5 FA 81 00 4B 6B FB |
 | `FULL-COLD-MAX-001` | `fixed-passive` | 最冷全链路 | 小好小好 / 打开冷光模式 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 59 77 FB | receive msg:: A5 FA 81 00 4C 6C FB |
-| `FULL-WARM-MAX-001` | `fixed-passive` | 最暖全链路 | 小好小好 / 打开暖光模式 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 5A 78 FB | receive msg:: A5 FA 81 00 4D 6D FB |
+| `FULL-WARM-MAX-001` | `fixed-passive` | 最暖全链路 | 小好小好 / 调到最暖 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 5A 78 FB | receive msg:: A5 FA 81 00 4D 6D FB |
 | `FULL-NIGHT-ON-001` | `fixed-passive` | 打开夜灯全链路 | 小好小好 / 打开夜灯 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 61 7F FB | receive msg:: A5 FA 81 00 4E 6E FB |
 | `FULL-NIGHT-OFF-001` | `fixed-passive` | 关闭夜灯全链路 | 小好小好 / 关闭夜灯 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 62 80 FB | receive msg:: A5 FA 81 00 4F 6F FB |
 | `FULL-SCENE-CLOTHES-001` | `fixed-passive` | 打开晾衣模式全链路 | 小好小好 / 打开晾衣模式 | A5 FA 7F 00 01 1F FB / A5 FA 7F 00 63 81 FB | receive msg:: A5 FA 81 00 50 70 FB |

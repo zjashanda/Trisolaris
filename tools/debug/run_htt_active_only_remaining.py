@@ -157,7 +157,7 @@ def main() -> int:
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "summary.md"
 
-    write_cases_md(cases_path, selected_cases)
+    write_cases_md(cases_path, CASES)
     write_report_md(report_path, suite_name, suite_dir, results)
     print(json.dumps({"suite_name": suite_name, "suite_dir": str(suite_dir), "report_path": str(report_path)}, ensure_ascii=False, indent=2))
     return 0

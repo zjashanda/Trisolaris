@@ -19,6 +19,9 @@ import run_htt_handshake_formal_suite as base  # noqa: E402
 
 DELIVERABLE_ROOT = base.DELIVERABLE_ROOT
 RESULT_ROOT = base.RESULT_ROOT
+SWEEP_BASELINE_READY_WAIT_S = 33.0
+SWEEP_CMD_DELAY_S = 2.0
+SWEEP_POST_PLAY_GUARD_S = 30.0
 
 
 @dataclass
@@ -83,9 +86,9 @@ CASES: list[SweepCase] = [
     full_chain_case("FULL-BRIGHT-MAX-001", "最亮全链路", "fixed-passive", "调到最亮", 0x0057, 0x0048),
     full_chain_case("FULL-BRIGHT-MIN-001", "最暗全链路", "fixed-passive", "调到最暗", 0x0058, 0x0049),
     full_chain_case("FULL-COLD-UP-001", "调冷全链路", "fixed-passive", "增加冷光", 0x005D, 0x004A),
-    full_chain_case("FULL-WARM-UP-001", "调暖全链路", "fixed-passive", "增加暖光", 0x005E, 0x004B),
+    full_chain_case("FULL-WARM-UP-001", "调暖全链路", "fixed-passive", "调暖一点", 0x005E, 0x004B),
     full_chain_case("FULL-COLD-MAX-001", "最冷全链路", "fixed-passive", "打开冷光模式", 0x0059, 0x004C),
-    full_chain_case("FULL-WARM-MAX-001", "最暖全链路", "fixed-passive", "打开暖光模式", 0x005A, 0x004D),
+    full_chain_case("FULL-WARM-MAX-001", "最暖全链路", "fixed-passive", "调到最暖", 0x005A, 0x004D),
     full_chain_case("FULL-NIGHT-ON-001", "打开夜灯全链路", "fixed-passive", "打开夜灯", 0x0061, 0x004E),
     full_chain_case("FULL-NIGHT-OFF-001", "关闭夜灯全链路", "fixed-passive", "关闭夜灯", 0x0062, 0x004F),
     full_chain_case("FULL-SCENE-CLOTHES-001", "打开晾衣模式全链路", "fixed-passive", "打开晾衣模式", 0x0063, 0x0050),
@@ -139,7 +142,7 @@ CASES: list[SweepCase] = [
 
 def effective_initial_wait(case: SweepCase) -> float:
     if case.baseline_reset and case.texts:
-        return max(case.initial_wait_s, base.BASELINE_READY_WAIT_S)
+        return max(case.initial_wait_s, SWEEP_BASELINE_READY_WAIT_S)
     return case.initial_wait_s
 
 
@@ -147,7 +150,7 @@ def effective_capture_s(case: SweepCase) -> float:
     initial_wait_s = effective_initial_wait(case)
     capture_s = case.capture_s + max(0.0, initial_wait_s - case.initial_wait_s)
     if case.texts:
-        capture_s += base.POST_PLAY_GUARD_S
+        capture_s += SWEEP_POST_PLAY_GUARD_S
     return capture_s
 
 
@@ -171,6 +174,8 @@ def build_handshake_cmd(case: SweepCase, result_dir: Path) -> list[str]:
         str(base.CTRL_BAUD),
         "--command-preset",
         "normal",
+        "--cmd-delay-s",
+        str(SWEEP_CMD_DELAY_S),
         "--capture-s",
         str(effective_capture_s(case)),
         "--loglevel4-at-s",
@@ -194,6 +199,10 @@ def build_handshake_cmd(case: SweepCase, result_dir: Path) -> list[str]:
 def evaluate_case(case: SweepCase, case_dir: Path) -> dict[str, Any]:
     com36_text = (case_dir / "com36_frames.txt").read_text(encoding="utf-8", errors="replace")
     com38_text = (case_dir / "com38_utf8.txt").read_text(encoding="utf-8", errors="replace")
+    boot_scoped_text = com38_text
+    version_index = com38_text.rfind("version         :")
+    if version_index >= 0:
+        boot_scoped_text = com38_text[version_index:]
     active_words = base.parse_data_words(com36_text)
     play_ids = base.parse_play_ids(com38_text)
     response_play_ids = list(play_ids)
@@ -202,7 +211,11 @@ def evaluate_case(case: SweepCase, case_dir: Path) -> dict[str, Any]:
 
     expected_ok = base.contains_in_order(active_words, case.expected_active_words)
     missing_markers = [marker for marker in case.required_log_markers if marker not in com38_text]
-    forbidden_marker_hits = [marker for marker in case.forbidden_log_markers if marker in com38_text]
+    forbidden_marker_hits = []
+    for marker in case.forbidden_log_markers:
+        marker_text = boot_scoped_text if marker == "MCU is not ready!" else com38_text
+        if marker in marker_text:
+            forbidden_marker_hits.append(marker)
     response_play_ok = True
     if case.require_response_play:
         response_play_ok = len(response_play_ids) >= case.min_response_play_ids
@@ -400,7 +413,7 @@ def main() -> int:
     report_dir.mkdir(parents=True, exist_ok=True)
     report_path = report_dir / "summary.md"
 
-    write_cases_md(case_path, selected_cases)
+    write_cases_md(case_path, CASES)
     write_report_md(report_path, suite_name, suite_dir, results)
     print(json.dumps({"suite_name": suite_name, "suite_dir": str(suite_dir), "report_path": str(report_path)}, ensure_ascii=False, indent=2))
     return 0
