@@ -1211,3 +1211,5 @@
 - [done] 已清理本地运行态目录和临时文件：`result/`、`audio_cache/`、`deliverables/*/reports/`、burn staging/log、`tmp-skill/`、`__pycache__`、`*.pyc`、`*.log`；仓库体积从约 168M 降到约 46M。
 - [done] 校验通过：`tools/pool/validation_pool.py validate`、skill `quick_validate.py`、关键 Python runner `py_compile`、Linux burn shell `bash -n` 均通过；已再次清理 `__pycache__`。
 - [done] 远端 `origin/main` 已 fetch 核对，当前本地与远端提交一致，无需先合并冲突；已暂存 34 个可复用更新文件，未暂存运行态目录。
+- [done] 已提交并推送模块化验证池更新到 `origin/main`，提交 `c5cf471 feat: add modular validation pool`。
+- [done] 本轮同步完成：远程仓库已包含模块化工作流、验证池、辅助工具、好太太精简 plan 参考文档、Linux 烧录 6s 时序和当前脚本默认设备/门禁修正；本地运行态日志和报告目录已清理，不进入 Git。
