@@ -26,14 +26,30 @@ DELIVERABLE_ROOT = ROOT / "deliverables" / "csk3022_htt_clothes_airer"
 RESULT_ROOT = ROOT / "result" / "csk3022_htt_clothes_airer"
 HANDSHAKE_SCRIPT = ROOT / "tools" / "serial" / "fan_proto_handshake_probe.py"
 
-def env_text(name: str, default: str) -> str:
-    return os.environ.get(name, "").strip() or default
+def env_text(names: tuple[str, ...], default: str) -> str:
+    for name in names:
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    return default
 
 
-DEVICE_KEY = env_text("TRISOLARIS_DEVICE_KEY", "VID_8765&PID_5678:8_804B35B_1_0000")
-CTRL_PORT = env_text("TRISOLARIS_CTRL_PORT", "COM39")
-LOG_PORT = env_text("TRISOLARIS_LOG_PORT", "COM38")
-PROTO_PORT = env_text("TRISOLARIS_PROTO_PORT", "COM36")
+def default_port(windows_default: str, linux_default: str) -> str:
+    if os.name != "nt" and Path(linux_default).exists():
+        return linux_default
+    return windows_default
+
+
+def default_device_key() -> str:
+    if os.name != "nt":
+        return "VID_8765&PID_5678:USB_0_4_3_1_0"
+    return "VID_8765&PID_5678:8_804B35B_1_0000"
+
+
+DEVICE_KEY = env_text(("HTT_DEVICE_KEY", "TRISOLARIS_DEVICE_KEY"), default_device_key())
+CTRL_PORT = env_text(("HTT_CTRL_PORT", "TRISOLARIS_CTRL_PORT"), default_port("COM39", "/dev/ttyACM4"))
+LOG_PORT = env_text(("HTT_LOG_PORT", "TRISOLARIS_LOG_PORT"), default_port("COM38", "/dev/ttyACM0"))
+PROTO_PORT = env_text(("HTT_PROTO_PORT", "TRISOLARIS_PROTO_PORT"), default_port("COM36", "/dev/ttyACM2"))
 CTRL_BAUD = 115200
 LOG_BAUD = 115200
 PROTO_BAUD = 9600

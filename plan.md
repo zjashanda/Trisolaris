@@ -1142,3 +1142,72 @@
 - [done] 已提交当前方案逻辑更新：`1d600ca feat: converge htt validation logic`。
 - [doing] 准备推送提交到远程 `origin/main` 并确认远端同步状态。
 - [done] 已推送到远程 `origin/main`，包含当前好太太收敛方案逻辑、用例、runner 和文档索引。
+
+## 2026-04-28 模块化验证能力池方案咨询 Round
+- [done] 已读取 `plan.md` 和 `skill-creator` 规范，确认用户目标：把当前按项目经验引用的需求解析方式升级为“输入需求+固件 -> 对照模块化功能/方案/用例池 -> 自动选取验证逻辑 -> 执行 -> 将新逻辑回灌池子”的通用 skill 能力。
+- [doing] 输出可实现性结论、建议架构、落地文件结构和实施步骤；等待用户确认后再进入代码和文档改造。
+
+## 2026-04-28 模块化验证池落地与好太太验证 Round
+- [done] 已读取 `plan.md`，确认本轮目标：拉取 `mars-moon`、`mars-belt` 到临时 `tmp-skill/`，抽取验证模式，与当前小度/好太太经验合并成模块化功能/方案/用例/断言池。
+- [doing] 准备克隆外部仓库并分析其测试结构，后续用完删除 `tmp-skill/`。
+- [todo] 实现 `references/validation-pool/`、模块化工作流、辅助脚本和 SKILL 入口规则。
+- [todo] 用 `项目需求/好太太晾衣机` 执行验证，若发现方案/断言问题先优化后复跑。
+- [done] HTTPS 克隆 GitHub 超时后，已改用 SSH `github-zjashanda` 成功克隆 `mars-moon` 和 `mars-belt` 到 `tmp-skill/`。
+- [doing] 分析两个外部仓库的 SKILL、工作流、方案、脚本和测试资产，抽取可合并到模块化验证池的通用模式。
+- [done] 已新增模块化验证池核心文档、外部项目模式提取记录、模块化工作流和 `tools/pool/validation_pool.py`。
+- [done] 已用好太太需求生成模块匹配结果，并落地 `20260428_模块化验证池应用方案_v1.md`。
+- [doing] 更新 SKILL/README/fullflow 入口规则，随后执行校验和好太太回归验证。
+
+## 2026-04-28 模块化验证池落地与好太太验证 Round - 续
+- [done] 已读取 `plan.md`，确认继续执行本轮模块化验证池落地任务。
+- [doing] 修复好太太验证脚本默认串口/声卡配置，使 Linux 当前设备 `/dev/ttyACM0`、`/dev/ttyACM2`、`/dev/ttyACM4` 与 `VID_8765&PID_5678:USB_0_4_3_1_0` 可通过环境变量/默认值稳定生效。
+- [todo] 重新运行模块化验证池校验、skill 校验和关键脚本语法校验。
+- [todo] 重新执行好太太晾衣机全链路验证；若出现方案/断言/执行问题，先修正并复跑，最终 FAIL 只允许归类为固件或需求问题。
+- [todo] 生成模块化验证池落地结论与好太太需求验证结果报告。
+- [todo] 删除临时仓库 `tmp-skill/`，整理 Git 状态，避免临时文件和运行日志入库。
+- [done] 已修复好太太正式/数值/串口握手/音频路由脚本的设备配置：支持 `HTT_*` 与 `TRISOLARIS_*` 环境变量覆盖；Linux 当前设备存在时默认使用 `/dev/ttyACM0`、`/dev/ttyACM2`、`/dev/ttyACM4` 和 `VID_8765&PID_5678:USB_0_4_3_1_0`。
+- [doing] 开始执行模块化验证池、skill 和关键脚本校验。
+- [done] 模块化验证池校验通过：16 个模块有效。
+- [done] 已重新生成好太太模块匹配结果：`deliverables/csk3022_htt_clothes_airer/plan/20260428_模块化验证池匹配结果_v1.md`。
+- [done] Skill 校验通过；关键 Python 脚本语法校验通过；已清理 `__pycache__`。
+- [doing] 准备执行好太太晾衣机全链路验证。
+- [done] 已同步 Linux 烧录入口默认端口：日志/烧录 `/dev/ttyACM0`、控制/boot `/dev/ttyACM4`，并继续支持环境变量覆盖；烧录保持上电后等待 6s 再退出 boot。
+- [done] 发现当前 `/dev/ttyACM4` 不能稳定完成 power-cycle，导致烧录与 `ENV-BOOT-001` 误阻塞/误失败；对比探测确认当前实际控制口为 `/dev/ttyACM3`，`/dev/ttyACM0` 日志/烧录、`/dev/ttyACM2` 协议保持不变。
+- [done] 已用实际控制口 `/dev/ttyACM3` 完成 `ENV-BOOT-001` 冒烟复核，结果 PASS；后续全链路验证使用显式 `HTT_CTRL_PORT=/dev/ttyACM3`，并在报告中记录端口探测证据，避免把端口映射问题归为固件或需求问题。
+- [done] 已生成模块化验证池落地结论：`deliverables/csk3022_htt_clothes_airer/plan/20260429_模块化验证池落地验证结论_v1.md`。
+- [done] 已补充端口验活、被动注入 ready/粘连排查、raw FAIL 收敛规则到 SKILL、模块化工作流和验证池。
+- [done] 已复跑验证池校验、skill 校验、关键 Python 语法校验和 Linux 烧录脚本语法校验，全部通过。
+- [done] 已删除临时外部仓库目录 `tmp-skill/`。
+- [done] 好太太可采信最终结果沿用当前 clean full-chain 收敛报告：96 PASS / 0 FAIL / 0 BLOCKED；本轮端口/注入时序 raw FAIL 已归为验证环境/执行门禁问题，不进入固件或需求最终 FAIL。
+- [done] 已单独复核 Linux 烧录入口 `run_fan_burn.sh` 与 `linux/burn.sh` 的 bash 语法，结果通过。
+- [done] 已清理本轮烧录工具 staging 文件和临时烧录日志，保留可采信验证报告证据目录。
+
+## 2026-04-29 模块化验证池使用口径确认 Round
+- [done] 已读取 `plan.md`，确认用户询问当前是否全部改走模块化验证池/工作流/辅助工具，旧文件是否不用。
+- [doing] 明确当前 skill 的入口优先级：新需求/需求变更优先走模块化验证池，旧项目文件仍作为项目资产、执行器和历史证据，不作为新项目默认断言来源。
+- [done] 已向用户说明：当前新需求/需求变更优先走模块化验证池三件套，但旧文件不是全部废弃，仍承担项目资产、执行脚本、历史证据和参考案例职责。
+
+## 2026-04-29 模块化验证池口径答复同步
+- [done] 已再次读取 `plan.md`，确认当前问题是澄清新模块化验证池三件套与旧文件的关系。
+- [done] 当前答复口径：新需求/需求变更优先走 `references/validation-pool/INDEX.md`、`references/modular-validation-workflow.md`、`tools/pool/validation_pool.py`；旧文件不再作为新项目默认断言来源，但仍保留为项目资产、执行器、历史证据和参考样例。
+
+## 2026-04-29 新项目模块化入口确认
+- [done] 已读取 `plan.md`，确认用户询问后续新项目是否直接参考并更新 `modular-validation-workflow.md` 和 `validation-pool`。
+- [done] 当前口径：后续新项目按模块化工作流执行，优先匹配验证池；项目特有逻辑落项目方案/用例，验证后可复用的模块化逻辑再回灌验证池。
+
+## 2026-04-29 Skill 入口更新核对
+- [done] 已读取 `plan.md`，确认用户询问模块化验证池/工作流/回灌规则是否已经更新到当前 skill。
+- [done] 已核对 `SKILL.md`、`README.md`、`references/fullflow-validation-method.md`：本地 skill 入口已包含模块化工作流、验证池、辅助工具和新需求回灌规则。
+- [todo] 若需要同步云端，还需将当前 `SKILL.md`、`README.md`、`references/validation-pool/`、`references/modular-validation-workflow.md`、`tools/pool/` 等未提交变更完成校验、提交并推送。
+
+## 2026-04-29 模块化验证池更新同步 Git Round
+- [done] 已读取 `plan.md` 和 `skill-git` 说明，确认本轮目标：清理无用运行日志/临时文件，保留精简参考资产，并将当前模块化验证池与相关脚本/文档同步到远程 Git。
+- [doing] 核对当前 Git 状态、忽略规则、未跟踪文件和可清理运行态目录，确定提交范围。
+- [todo] 删除无用日志、缓存、烧录 staging 和临时目录，保留必要的静态方案/用例/验证池文档。
+- [todo] 运行验证池校验、skill 校验、关键脚本语法校验。
+- [todo] 提交本地更新，拉取/合并远端最新后推送到 `origin/main`。
+- [done] 已确认当前待提交更新集中在 `SKILL.md`、`README.md`、模块化工作流、验证池、`tools/pool/validation_pool.py`、烧录脚本、好太太执行脚本和 3 份精简 plan 文档。
+- [done] 已确认 `result/`、`audio_cache/`、`deliverables/*/reports/`、日志、burn staging、`__pycache__` 均未被 Git 跟踪，可作为本地运行态清理对象。
+- [done] 已清理本地运行态目录和临时文件：`result/`、`audio_cache/`、`deliverables/*/reports/`、burn staging/log、`tmp-skill/`、`__pycache__`、`*.pyc`、`*.log`；仓库体积从约 168M 降到约 46M。
+- [done] 校验通过：`tools/pool/validation_pool.py validate`、skill `quick_validate.py`、关键 Python runner `py_compile`、Linux burn shell `bash -n` 均通过；已再次清理 `__pycache__`。
+- [done] 远端 `origin/main` 已 fetch 核对，当前本地与远端提交一致，无需先合并冲突；已暂存 34 个可复用更新文件，未暂存运行态目录。

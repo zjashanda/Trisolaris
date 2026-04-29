@@ -2,6 +2,7 @@
 import argparse
 import codecs
 import json
+import os
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -9,7 +10,21 @@ from pathlib import Path
 
 import serial
 
-INTER_REPLY_GAP_S = 0.03
+INTER_REPLY_GAP_S = float(os.environ.get("HTT_REPLY_GAP_S") or os.environ.get("TRISOLARIS_REPLY_GAP_S") or "0.12")
+
+
+def env_text(names: tuple[str, ...], default: str) -> str:
+    for name in names:
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    return default
+
+
+def default_port(windows_default: str, linux_default: str) -> str:
+    if os.name != "nt" and Path(linux_default).exists():
+        return linux_default
+    return windows_default
 
 
 def parse_hex_bytes(text: str) -> bytes:
@@ -347,13 +362,13 @@ def run_probe(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Power-cycle the device and emulate basic MCU handshake replies on COM36.")
+    parser = argparse.ArgumentParser(description="Power-cycle the device and emulate basic MCU handshake replies.")
     parser.add_argument("--result-dir", required=True)
-    parser.add_argument("--proto-port", default="COM36")
+    parser.add_argument("--proto-port", default=env_text(("HTT_PROTO_PORT", "TRISOLARIS_PROTO_PORT"), default_port("COM36", "/dev/ttyACM2")))
     parser.add_argument("--proto-baudrate", type=int, default=9600)
-    parser.add_argument("--log-port", default="COM38")
+    parser.add_argument("--log-port", default=env_text(("HTT_LOG_PORT", "TRISOLARIS_LOG_PORT"), default_port("COM38", "/dev/ttyACM0")))
     parser.add_argument("--log-baudrate", type=int, default=115200)
-    parser.add_argument("--ctrl-port", default="COM39")
+    parser.add_argument("--ctrl-port", default=env_text(("HTT_CTRL_PORT", "TRISOLARIS_CTRL_PORT"), default_port("COM39", "/dev/ttyACM4")))
     parser.add_argument("--ctrl-baudrate", type=int, default=115200)
     parser.add_argument("--command-preset", choices=["normal", "burn", "none"], default="normal")
     parser.add_argument("--command", action="append", default=[])
@@ -402,4 +417,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-INTER_REPLY_GAP_S = 0.03
