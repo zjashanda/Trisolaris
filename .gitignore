@@ -24,13 +24,9 @@ tools/burn_bundle/linux/burn.log
 tools/burn_bundle/linux/burn_tool.log
 *.log
 
-# mars-moon runtime/generated local state
-mars-moon/.venv/
-mars-moon/tmp/
-mars-moon/result/
-mars-moon/work/
-mars-moon/generated/
-mars-moon/wavSource/
 
 # Temporary nested repo backup markers used during root publish
 .git_codex_publish_backup/
+
+# Formal-suite runtime logs; keep concise suite_report/suite_summary only
+deliverables/formal_suite_runs/*/logs/

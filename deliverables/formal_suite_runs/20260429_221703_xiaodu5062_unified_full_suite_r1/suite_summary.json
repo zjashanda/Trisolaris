@@ -1,0 +1,139 @@
+{
+  "project_id": "csk5062_xiaodu_fan",
+  "adapter": "xiaodu-5062",
+  "req_dir": "项目需求/CSK5062小度风扇需求",
+  "firmware": "项目需求/CSK5062小度风扇需求/fw-csk5062_xiaodu_fan-v1.0.0.bin",
+  "classification": "deliverables/csk5062_xiaodu_fan/plan/20260429_221703_formal_suite_模块化验证池匹配结果.md",
+  "phases": [
+    {
+      "name": "xiaodu_main_fullflow",
+      "cmd": [
+        "python3",
+        "tools/debug/run_post_restructure_fullflow.py"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/logs/02_xiaodu_main_fullflow.log",
+      "started_at": "2026-04-29T22:17:03",
+      "finished_at": "2026-04-29T22:40:30"
+    },
+    {
+      "name": "xiaodu_missing_nonreg",
+      "cmd": [
+        "python3",
+        "tools/debug/run_missing_nonreg_cases.py"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/logs/03_xiaodu_missing_nonreg.log",
+      "started_at": "2026-04-29T22:40:30",
+      "finished_at": "2026-04-29T22:51:10"
+    },
+    {
+      "name": "xiaodu_remaining_voice_reg",
+      "cmd": [
+        "python3",
+        "tools/debug/run_remaining_voice_reg_batch.py"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/logs/04_xiaodu_remaining_voice_reg.log",
+      "started_at": "2026-04-29T22:51:10",
+      "finished_at": "2026-04-29T23:10:28"
+    },
+    {
+      "name": "xiaodu_regcfg005_closure",
+      "cmd": [
+        "python3",
+        "tools/debug/run_xiaodu_regcfg005_closure.py"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/logs/05_xiaodu_regcfg005_closure.log",
+      "started_at": "2026-04-29T23:10:28",
+      "finished_at": "2026-04-29T23:12:28"
+    },
+    {
+      "name": "xiaodu_generate_72_aggregate",
+      "cmd": [
+        "python3",
+        "tools/debug/generate_full_formal_aggregate.py",
+        "--main-case-results",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/case_results.json",
+        "--supplement-case-results",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_224030_xiaodu5062_unified_full_suite_r1_missing_nonreg/03_execution/case_results.json",
+        "--voice-summary",
+        "result/csk5062_xiaodu_fan/0429231028_73_remaining_voice_reg_batch_summary/summary.json",
+        "--overlay-case-results",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_231029_xiaodu5062_unified_full_suite_r1_regcfg005_closure/03_execution/case_results.json",
+        "--tag",
+        "xiaodu5062_unified_full_suite_r1_formal_aggregate"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/logs/06_xiaodu_generate_72_aggregate.log",
+      "started_at": "2026-04-29T23:12:28",
+      "finished_at": "2026-04-29T23:12:28"
+    },
+    {
+      "name": "xiaodu_regcfg005_closure_r3_fixed_timing",
+      "cmd": [
+        "python3",
+        "tools/debug/run_xiaodu_regcfg005_closure.py"
+      ],
+      "returncode": 0,
+      "log_path": "result/csk5062_xiaodu_fan/20260429_unified_regcfg005_closure_r3.log",
+      "started_at": null,
+      "finished_at": null
+    },
+    {
+      "name": "xiaodu_generate_72_aggregate_converged",
+      "cmd": [
+        "python3",
+        "tools/debug/generate_full_formal_aggregate.py",
+        "--overlay-case-results",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_231733_xiaodu5062_unified_full_suite_r1_regcfg005_closure_r3/03_execution/case_results.json"
+      ],
+      "returncode": 0,
+      "log_path": "deliverables/csk5062_xiaodu_fan/reports/20260429_232027_xiaodu5062_unified_full_suite_r1_formal_aggregate_converged/aggregate_report.md",
+      "started_at": null,
+      "finished_at": null
+    }
+  ],
+  "artifacts": {
+    "main_case_results": "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/case_results.json",
+    "supplement_case_results": "deliverables/csk5062_xiaodu_fan/reports/20260429_224030_xiaodu5062_unified_full_suite_r1_missing_nonreg/03_execution/case_results.json",
+    "voice_summary": "result/csk5062_xiaodu_fan/0429231028_73_remaining_voice_reg_batch_summary/summary.json",
+    "closure_case_results": "deliverables/csk5062_xiaodu_fan/reports/20260429_231733_xiaodu5062_unified_full_suite_r1_regcfg005_closure_r3/03_execution/case_results.json",
+    "aggregate_case_results": "deliverables/csk5062_xiaodu_fan/reports/20260429_232027_xiaodu5062_unified_full_suite_r1_formal_aggregate_converged/aggregate_case_results.json",
+    "aggregate_report": "deliverables/csk5062_xiaodu_fan/reports/20260429_232027_xiaodu5062_unified_full_suite_r1_formal_aggregate_converged/aggregate_report.md"
+  },
+  "counts": {
+    "PASS": 70,
+    "TODO": 1,
+    "FAIL": 1,
+    "TOTAL": 72
+  },
+  "nonpass": [
+    {
+      "case_id": "SESS-001",
+      "module": "启动待机",
+      "status": "TODO",
+      "summary": "本轮保留为人工验证；已补充启动连续日志作为辅助证据",
+      "evidence": [
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/01_assist_startup_powercycle_capture"
+      ]
+    },
+    {
+      "case_id": "CFG-VOL-001",
+      "module": "配置一致性-音量参数",
+      "status": "FAIL",
+      "summary": "烧录后探测默认音量档位=2，需求=3；启动配置 raw volume=1，期望 raw≈2",
+      "evidence": [
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/01_assist_startup_powercycle_capture",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/04_cfg_default_volume_position_probe_default_to_max_up_1",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/05_cfg_default_volume_position_probe_default_to_max_up_2",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/06_cfg_default_volume_position_probe_default_to_max_up_3",
+        "deliverables/csk5062_xiaodu_fan/reports/20260429_221705_xiaodu5062_unified_full_suite_r1_main_fullflow/03_execution/steps/07_cfg_default_volume_position_probe_default_to_max_up_4"
+      ]
+    }
+  ],
+  "status": "DONE_CONVERGED",
+  "suite_dir": "deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1",
+  "convergence_note": "REG-CFG-005 初次 targeted closure 因注册提示时序过快 BLOCKED；已修正为单句固定等待后复测 PASS，并重新聚合 72 条正式用例。"
+}

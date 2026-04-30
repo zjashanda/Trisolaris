@@ -1,0 +1,26 @@
+{
+  "project_id": "csk3022_htt_clothes_airer",
+  "display_name": "CSK3022 好太太晾衣机",
+  "adapter": "script-pipeline",
+  "deliverable_root": "deliverables/csk3022_htt_clothes_airer",
+  "result_root": "result/csk3022_htt_clothes_airer",
+  "detect": {
+    "path_keywords": ["好太太", "晾衣机", "htt", "clothes"],
+    "required_any_files": ["好太太晾衣机需求迭代.md", "当前有效需求清单_20260422.md"],
+    "firmware_keywords": ["htt", "clothes", "airer", "csk3022"]
+  },
+  "firmware_globs": ["fw-csk3022-htt-clothes-airer-*.bin", "*.bin"],
+  "stages": [
+    {"name": "handshake_formal", "cmd": ["python3", "tools/debug/run_htt_handshake_formal_suite.py"]},
+    {"name": "numeric_probe", "cmd": ["python3", "tools/debug/run_htt_numeric_probe.py"]},
+    {"name": "followup_checks", "cmd": ["python3", "tools/debug/run_htt_followup_checks.py"]},
+    {"name": "voice_switch_state_machine", "cmd": ["python3", "tools/debug/run_htt_voice_switch_state_machine_probe.py"], "allow_nonzero": true},
+    {"name": "active_passive_playid_sweep", "cmd": ["python3", "tools/debug/run_htt_active_passive_playid_sweep.py"]},
+    {"name": "active_only_remaining", "cmd": ["python3", "tools/debug/run_htt_active_only_remaining.py"]},
+    {"name": "active_only_phrase_probe", "cmd": ["python3", "tools/debug/run_htt_active_only_phrase_probe.py"]}
+  ],
+  "notes": [
+    "好太太项目必须先闭合 MCU ready/心跳/品牌应答，再执行正式功能断言。",
+    "脚本管线型 adapter 只负责统一运行和汇总；具体协议码值仍在项目 runner 内。"
+  ]
+}

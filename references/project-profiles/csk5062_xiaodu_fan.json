@@ -1,0 +1,18 @@
+{
+  "project_id": "csk5062_xiaodu_fan",
+  "display_name": "CSK5062 小度风扇",
+  "adapter": "xiaodu-5062",
+  "deliverable_root": "deliverables/csk5062_xiaodu_fan",
+  "result_root": "result/csk5062_xiaodu_fan",
+  "detect": {
+    "path_keywords": ["CSK5062", "小度", "风扇"],
+    "required_any_files": ["需求文档.md", "词条处理.xlsx", "语音注册功能.xlsx"],
+    "firmware_keywords": ["csk5062", "xiaodu", "fan"]
+  },
+  "firmware_globs": ["fw-csk5062_xiaodu_fan-*.bin", "*.bin"],
+  "formal_case_count": 72,
+  "notes": [
+    "该 profile 使用通用入口编排：模块匹配 -> 烧录/gate/主链路 -> 非注册补充 -> 语音注册补充 -> targeted overlay -> 72 条聚合。",
+    "这些阶段是内部调度细节，对外只暴露一次正式全集执行结果。"
+  ]
+}

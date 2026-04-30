@@ -1213,3 +1213,128 @@
 - [done] 远端 `origin/main` 已 fetch 核对，当前本地与远端提交一致，无需先合并冲突；已暂存 34 个可复用更新文件，未暂存运行态目录。
 - [done] 已提交并推送模块化验证池更新到 `origin/main`，提交 `c5cf471 feat: add modular validation pool`。
 - [done] 本轮同步完成：远程仓库已包含模块化工作流、验证池、辅助工具、好太太精简 plan 参考文档、Linux 烧录 6s 时序和当前脚本默认设备/门禁修正；本地运行态日志和报告目录已清理，不进入 Git。
+
+## 2026-04-29 小度 5062 模块化全链路验证 Round
+- [done] 已读取 `plan.md`、模块化工作流、验证池索引和全链路方法文档。
+- [done] 当前任务：用 `项目需求/CSK5062小度风扇需求/` 验证最新模块化 skill 逻辑是否能走通小度 5062 全链路。
+- [done] 用户确认串口和声卡沿用当前映射：日志/烧录 `/dev/ttyACM0`，协议 `/dev/ttyACM2`，控制/boot `/dev/ttyACM4`，声卡 `VID_8765&PID_5678:USB_0_4_3_1_0`。
+- [doing] 核对小度需求、固件、既有 runner 参数和 Linux 当前设备门禁。
+- [todo] 先用模块化验证池生成/刷新小度需求匹配结果，再执行烧录、gate 和全链路验证。
+- [todo] 若出现方案、断言、执行或环境问题，先收敛后复跑；最终 FAIL 只允许归为固件问题或需求问题。
+- [done] 已用 `tools/pool/validation_pool.py classify` 生成小度模块化匹配结果：`deliverables/csk5062_xiaodu_fan/plan/20260429_模块化验证池匹配结果_v1.md`；主要命中需求解析、唤醒会话、音量、持久化、语音注册、主动协议、播报和 FAIL 收敛模块。
+- [done] 已重新生成/核对小度静态方案和正式用例资产；关键小度 runner 与资产生成脚本 `py_compile` 通过。
+- [done] 小度全链路 r1 按用户口径 `/dev/ttyACM4` 进入烧录，烧录工具 3 次均 `RECEIVE OVERTIME`，缺失 `CONNECT ROM AND DOWNLOAD RAM LOADER SUCCESS`；该 raw FAIL 归入烧录/控制口门禁问题，不作为固件或需求 FAIL。
+- [done] 已做控制口探测：`/dev/ttyACM3` 能触发设备上电日志重启，当前 `/dev/ttyACM0` 日志显示仍是历史 `version 1.0.9`，需重新烧录小度固件后再进入正式验证。
+- [doing] 按模块化门禁规则改用实测有效控制口 `/dev/ttyACM3` 重新执行小度全链路 r2，并在结果中记录端口漂移证据。
+- [done] 已完成小度当前设备门禁排查：模块化需求匹配和静态方案/用例生成通过，但当前设备日志仍显示好太太历史固件 `version=1.0.9`，小度固件烧录在端口/baud/boot 时序探测后仍无法连接 ROM。
+- [done] 已输出本轮模块化 skill 验证结果文档：`deliverables/csk5062_xiaodu_fan/plan/20260429_小度5062模块化skill验证结果_v1.md`；正式功能全链路未执行，原因是 burn/device gate BLOCKED，不是方案/断言/用例失败。
+- [doing] 用户要求提供烧录工具目录和手工烧录命令，并由我先手动执行进入烧录模式的四步控制命令。
+- [done] 已将小度固件复制到烧录工具目录：`tools/burn_bundle/linux/app.bin`。
+- [done] 已按用户指定控制口 `/dev/ttyACM4` 手动执行进入烧录模式四步：`uut-switch1.off` -> `uut-switch2.on` -> `uut-switch1.on` -> 等 6s -> `uut-switch2.off`。
+- [doing] 用户要求将进入烧录模式时 `uut-switch1.on` 后等待从 6s 改为 1s，并重新执行手动烧录尝试。
+- [done] 已完成 1s 等待手动烧录重试：控制序列执行成功，但 `Uart_Burn_Tool` 仍连续 `RECEIVE OVERTIME`，无 `CONNECT ROM AND DOWNLOAD RAM LOADER SUCCESS` / `SEND MD5 COMMAND WITH RAM SUCCESS` / `SEND END COMMAND SUCCESS` 成功标记；日志位于 `result/csk5062_xiaodu_fan/20260429_manual_burn_wait1s/`。
+- [doing] 用户要求再次重新尝试烧录；本次使用完整封装烧录脚本，继续使用小度固件、控制 `/dev/ttyACM4`、烧录 `/dev/ttyACM0`。
+- [done] 再次完整烧录重试完成：使用封装脚本、`PreBurnWaitMs=1000`、`MaxRetry=3`，三次仍均为 `RECEIVE OVERTIME`，缺失 ROM 下载成功标记；日志 `result/csk5062_xiaodu_fan/20260429_reburn_retry_wait1s_wrapper.log`。
+
+## 2026-04-29 本机重启 Round
+- [done] 已读取 `plan.md`，用户要求重启当前电脑。
+- [doing] 执行系统重启；重启后需重新连接环境继续任务。
+- [done] 上一轮本机重启命令返回 `Interactive authentication required`，系统未重启。
+- [doing] 用户要求再次重试烧录；继续使用小度固件、控制 `/dev/ttyACM4`、烧录 `/dev/ttyACM0`，本次保留独立日志。
+- [done] 再次重试烧录完成：3 次均失败，工具输出主要为 `END COMMAND FORMAT ERROR, SEND AGAIN` / `RECEIVE OVERTIME`，仍未完成 ROM 下载闭环；日志 `result/csk5062_xiaodu_fan/20260429_reburn_retry_again_151706.log`。
+- [doing] 用户说明线接错已修正，开始重新尝试小度固件烧录；先按上一轮 1s boot 等待时序重试，若失败再用标准 6s 时序对比。
+- [done] 线修正后烧录重试成功：`PreBurnWaitMs=1000`，`/dev/ttyACM4` 控制、`/dev/ttyACM0` 烧录，出现 `SEND END COMMAND SUCCESS`、`SEND MD5 COMMAND WITH RAM SUCCESS`、`CONNECT ROM AND DOWNLOAD RAM LOADER SUCCESS`、`Burn flow completed`；日志 `result/csk5062_xiaodu_fan/20260429_reburn_after_wire_fix_wait1s_152651.log`。
+- [doing] 烧录门禁恢复后，继续按小度 5062 模块化验证流程执行后续 gate / fullflow。
+
+## 2026-04-29 小度 5062 接线修正后重试 Round - 续
+- [done] 已重新读取 `plan.md`，确认当前接线已由用户修正，继续小度 5062 烧录/验证闭环。
+- [done] 已复核接线修正后的烧录日志：`/dev/ttyACM4` 控制、`/dev/ttyACM0` 烧录、`PreBurnWaitMs=1000` 已成功，存在 ROM 下载、MD5、END 成功标记。
+- [doing] 基于烧录成功状态继续排查后续 gate：当前关注音频唤醒/协议串口是否形成控制闭环，避免把音频路由、串口映射或断言问题误归为固件/需求 FAIL。
+- [todo] 若 gate 收敛通过，继续执行小度 5062 全链路；若 gate 仍不可用，输出阻塞门禁证据并给出下一步验证口径。
+- [done] 已重新执行小度 5062 全链路 r2，烧录与 `ENV-GATE-001` 门禁通过；报告目录：`deliverables/csk5062_xiaodu_fan/reports/20260429_153434_xiaodu5062_modular_after_wire_fix_fullflow_r2`。
+- [doing] 正在收敛 r2 raw FAIL/BLOCKED：已确认 `CFG-AUDIO-001` 是增益日志解析正则问题；`SWAKE-005/007` 后续大量注册用例无响应受切换唤醒词后设备不再唤醒影响，需先隔离模块再复跑，不能把后续注册项直接算固件 FAIL。
+- [todo] 修正 runner：mic 增益解析兼容日志换行；切换唤醒词专项结束后执行隔离恢复/重新烧录再进入语音注册专项；必要时对 `SWAKE-005` 做清洁环境定向复现。
+- [done] 已修正 `run_post_restructure_fullflow.py`：mic 增益解析可处理日志换行/ANSI；烧录函数支持隔离 reburn 子目录；切换唤醒词专项后若默认唤醒链路失效，会先隔离重烧再进入语音注册专项，避免下游用例被前序固件状态污染。
+- [doing] 执行修正后的全链路 r3，目标是将方案/断言/执行污染项收敛掉，只保留真实固件/需求问题。
+- [done] 修正后 r3 重新烧录成功，但 `ENV-GATE-001` 未通过：启动版本/增益/配置正常，协议/日志在播放“小度小度 -> 打开电风扇”时均无唤醒响应。
+- [done] 追加手工 `PreBurnWaitMs=1000` 重烧成功，并做 60s 等待、强制 boot off powercycle、`config.clear`、声卡 render/capture 环回验证；烧录和声卡播放链路可用，但 DUT 仍无 `Wakeup/keyword/0x0001/0x0004`。
+- [doing] 当前小度 5062 全链路处于门禁阻塞：不是烧录问题，r2 已证明接线修正后能通过 gate；当前需先恢复 DUT 收音/唤醒链路，否则后续用例结果不可采信。
+- [done] 已向用户解释当前卡点：不是烧录失败，而是 DUT 现在启动正常但不响应唤醒，导致 `ENV-GATE-001` 可测性门禁阻塞；后续需要先恢复收音/唤醒链路后再继续全链路。
+
+## 2026-04-29 小度声卡定向播放复核
+- [done] 已按要求读取 `plan.md` 并确认本轮动作：使用指定声卡 `VID_8765&PID_5678:USB_0_4_3_1_0` 播放唤醒语料给现场观察。
+- [doing] 先 scan/probe 指定声卡，再播放 `小度小度` 唤醒语料，并同步抓取 `/dev/ttyACM0` 日志。
+- [done] 指定声卡播放完成：`VID_8765&PID_5678:USB_0_4_3_1_0 -> plughw:1,0 (CSK6012Combo)`，语料 `小度小度` 播放成功。
+- [done] DUT 已正常响应唤醒：`/dev/ttyACM0` 捕获到 `Wakeup`、`keyword:xiao du xiao du`、主动协议 `A5 FA 01 BB`、播报 `play id : 6`，说明当前收音/唤醒链路已恢复。
+- [todo] 下一步可继续执行 `小度小度 -> 打开电风扇` gate 复核，再恢复全链路验证。
+
+## 2026-04-29 小度链路恢复后继续全链路
+- [done] 已按要求读取 `plan.md`，当前任务：唤醒链路恢复后继续完成小度 5062 未完成的验证。
+- [doing] 先执行 `小度小度 -> 打开电风扇` gate 复核，确认日志口和协议口闭环都恢复。
+- [todo] gate 通过后继续执行剩余全链路；若出现方案/断言/执行状态污染，先修复并复跑，最终只保留固件/需求问题。
+- [done] gate 复核通过：`小度小度 -> 打开电风扇` 已在 `/dev/ttyACM2` 捕获 `A5 FA 01 BB`、`A5 FA 04 BB`，证据 `result/csk5062_xiaodu_fan/20260429_gate_recheck_after_wake_recovered/`。
+- [done] 已给小度 fullflow 增加 `TRISOLARIS_SKIP_BURN=1` resume 模式；当前固件已多次成功烧录，继续验证时沿用最近成功烧录证据，避免再次烧录改变已恢复的收音链路。
+- [doing] 开始执行恢复链路后的 fullflow resume r4。
+- [done] fullflow resume r4 已完成：报告 `deliverables/csk5062_xiaodu_fan/reports/20260429_171902_xiaodu5062_resume_after_wake_recovered_r4`；当前统计 `PASS=30 / FAIL=1 / TODO=1 / BLOCKED=1`。
+- [doing] 继续收敛剩余 `REG-CFG-005` BLOCKED：需要补做命令词模板数上限专项，用用例内主动填满 2 个命令模板后再重入学习确认模板已满。
+- [todo] 复核 `SESS-001` 是否可由启动日志/播报日志转为自动 PASS，最终结果只保留真实固件/需求 FAIL。
+- [done] 已完成 `REG-CFG-005` 定向收敛：主动填满 2 个命令模板后再次进入学习命令词，命中 `reg over!`、`play id : 34`，BLOCKED 关闭为 PASS，证据 `result/csk5062_xiaodu_fan/20260429_reg_cmd_template_full_targeted_r1/`。
+- [done] 已执行收敛后清理：`config.clear -> reboot`，设备恢复干净默认状态，证据 `result/csk5062_xiaodu_fan/20260429_final_cleanup_after_targeted/`。
+- [done] 已生成最终收敛报告：`deliverables/csk5062_xiaodu_fan/reports/20260429_小度5062_resume_r4_final_converged_summary/summary.md`；最终统计 `PASS=31 / FAIL=1 / TODO=1 / BLOCKED=0`，唯一 FAIL 为 `CFG-VOL-001` 默认音量不符合需求。
+
+## 2026-04-29 小度用例数量解释与补跑计划
+- [done] 已复核当前静态正式用例总数为 72 条；刚才输出的 `PASS=31/FAIL=1/TODO=1` 是主 fullflow 结果集，不是 72 条正式用例全集。
+- [doing] 当前需要向用户说明少的原因，并准备补跑/聚合 `run_missing_nonreg_cases.py`、`run_remaining_voice_reg_batch.py`、`generate_full_formal_aggregate.py` 等补充套件，形成 72 条全集结果。
+- [done] 用户确认补跑 72 条全集；开始执行补充套件与聚合。
+- [doing] 检查补充脚本参数与当前设备环境变量，优先复用已恢复链路和已烧录固件，避免重复烧录造成状态漂移。
+
+## 2026-04-29 小度 72 条正式用例全集补跑 Round
+- [done] 已读取 `plan.md`，确认当前任务是补跑并聚合小度 5062 静态正式用例全集 72 条，而不是只输出主 fullflow 的 33 条结果。
+- [doing] 使用当前已恢复链路和已烧录固件，显式指定 `/dev/ttyACM0`、`/dev/ttyACM2`、`/dev/ttyACM4` 与声卡 `VID_8765&PID_5678:USB_0_4_3_1_0`，执行 `run_missing_nonreg_cases.py`、`run_remaining_voice_reg_batch.py` 和全集聚合。
+- [todo] 对补跑中的 raw FAIL 逐条判断：方案/断言/状态污染先修复或复跑，最终 FAIL 只保留固件问题或需求问题。
+- [todo] 输出 72 条正式用例全集统计、剩余 FAIL/TODO/BLOCKED 清单和证据路径。
+- [done] 缺失非注册项补跑完成：`deliverables/csk5062_xiaodu_fan/reports/20260429_212918_xiaodu5062_missing_nonreg_after_resume_r1/03_execution/case_results.json`，23 PASS / 0 FAIL / 0 TODO / 0 BLOCKED。
+- [doing] 继续执行剩余语音注册批量用例 `run_remaining_voice_reg_batch.py`，运行态结果写入 `result/csk5062_xiaodu_fan/`，后续由聚合脚本转换为正式用例结果。
+- [done] 剩余语音注册批量步骤执行完成：`result/csk5062_xiaodu_fan/0429215946_72_remaining_voice_reg_batch_summary/summary.json`，71 个运行步骤均为 ok。
+- [done] 第一次 72 条聚合完成：`deliverables/csk5062_xiaodu_fan/reports/20260429_220019_xiaodu5062_full_72_formal_after_resume_r1/aggregate_report.md`，结果为 69 PASS / 2 FAIL / 1 TODO / 0 BLOCKED。
+- [doing] 收敛 raw FAIL `REG-FAIL-004`：当前证据显示失败学习后未退出会话，后续 `打开电风扇` 在残留会话内被识别，属于用例时序/断言污染；需增加失败耗尽后的 reboot/待机隔离后重测失败唤醒词。
+- [done] 已修正剩余语音注册批量脚本的 `REG-FAIL-004` 用例时序：失败耗尽后先 `reboot` 隔离残留会话，再验证失败唤醒词不生效，避免把会话残留误判为固件 FAIL。
+- [done] 已完成 `REG-FAIL-004` 定向复测并合并证据：`result/csk5062_xiaodu_fan/20260429_voice_reg_batch_merged_after_regfail004_converge/summary.json`。
+- [done] 已重新生成 72 条正式用例聚合报告：`deliverables/csk5062_xiaodu_fan/reports/20260429_220329_xiaodu5062_full_72_formal_after_resume_r2_converged/aggregate_report.md`，结果 `PASS=70 / FAIL=1 / TODO=1 / BLOCKED=0`。
+- [done] 已执行测试后清理：`config.clear -> reboot`，避免语音注册测试残留影响后续轮次。
+
+## 2026-04-29 好太太/小度新逻辑验证状态确认
+- [done] 已读取 `plan.md`，确认当前用户询问：好太太和小度是否都已经按新的模块化验证池/工作流逻辑跑过一次。
+- [done] 当前结论：好太太已完成一次新逻辑验证并收敛为 96 PASS / 0 FAIL / 0 BLOCKED；小度已完成一次新逻辑验证并扩展聚合到 72 条正式用例，结果 70 PASS / 1 FAIL / 1 TODO / 0 BLOCKED。
+
+## 2026-04-29 FAIL 内容展示
+- [done] 已读取 `plan.md`，确认用户要求展示当前最终 FAIL 内容。
+- [done] 当前最终可采信 FAIL 只有小度 5062 的 `CFG-VOL-001`；好太太最终结果无 FAIL。
+
+## 2026-04-29 小度执行编排解释
+- [done] 已读取 `plan.md`，确认用户询问：为什么小度当前是主 fullflow 后再补充用例，而不是直接跑全部正式用例。
+- [done] 当前解释口径：这是历史执行器向模块化全集执行迁移中的编排问题；主 fullflow 负责烧录/gate/高风险状态链路，补充用例补齐正式 72 条矩阵，但最终 skill 应收敛成单一全集调度入口。
+
+## 2026-04-29 通用全集执行器适配多项目 Round
+- [done] 已读取 `plan.md`，确认用户纠正：全集执行器不能只适配小度，必须能承载好太太、小度和后续新项目。
+- [doing] 调整设计：新增通用正式全集调度入口，入口只处理需求目录、固件、项目识别、模块化匹配、分组调度、结果聚合；具体执行细节下沉到项目 profile/adapter，避免把小度逻辑写死在通用入口里。
+- [todo] 落地通用执行器与项目 registry/profile，先接入小度 5062 和好太太现有执行链路；未知项目输出可执行方案骨架或明确缺少 adapter，而不是误用小度脚本。
+- [todo] 用优化后的通用入口重新跑小度 5062 全链路，并输出最终结果。
+- [done] 已落地通用 profile 目录：`references/project-profiles/`，当前包含 `csk5062_xiaodu_fan.json` 与 `csk3022_htt_clothes_airer.json`；后续新项目通过新增 profile/adapter 接入，不能复用小度硬编码。
+- [done] 已新增通用正式全集调度器：`tools/suite/run_formal_suite.py`，职责为项目识别、验证池匹配、阶段调度、结果聚合和统一报告；小度与好太太只是 adapter/profile。
+- [done] 已新增小度模板满专项 overlay 执行器：`tools/debug/run_xiaodu_regcfg005_closure.py`；已扩展 `generate_full_formal_aggregate.py` 支持 `--overlay-case-results`，用于把 targeted 收敛结果并入正式全集。
+- [done] 已修复小度主链路中的唤醒词失败耗尽用例隔离：失败耗尽后先 reboot，再验证失败唤醒词，避免残留会话污染。
+- [done] 已更新 `SKILL.md` 与 `references/modular-validation-workflow.md`：正式全集执行优先走通用入口，内部可分组，对外只输出全集结果。
+- [done] 已通过通用入口 `tools/suite/run_formal_suite.py` 执行小度 5062 正式全集：烧录/gate/main/nonreg/voice-reg/overlay/aggregate 均由统一调度器编排，入口不再暴露“主 fullflow + 补充用例”的手工拼接。
+- [done] 本次统一调度使用默认 `PreBurnWaitMs=6000`，烧录与 gate 成功；说明当前烧录模块统一 6s boot 时序可用于小度当前设备。
+- [done] 首次 unified r1 聚合中 `REG-CFG-005` 因注册提示等待过短出现 BLOCKED；已修正 `run_xiaodu_regcfg005_closure.py` 为单句固定等待节拍，复测 PASS，并重新聚合。
+- [done] 优化后最终小度全集结果：`PASS=70 / FAIL=1 / TODO=1 / BLOCKED=0 / TOTAL=72`；报告 `deliverables/formal_suite_runs/20260429_221703_xiaodu5062_unified_full_suite_r1/suite_report.md`。
+
+## 2026-04-30 删除 mars-moon 并同步 Git Round
+- [done] 已读取 `plan.md` 和 `skill-git` 规则，确认本轮目标：删除 `mars-moon/`，核对本地更新，筛选应提交文件，提交并推送远程 Git。
+- [doing] 删除 `mars-moon/` 并检查 Git 状态；运行态日志、音频缓存、原始报告默认不提交，除非是通用 skill 能力必要资产。
+- [done] 已按用户要求删除 `mars-moon/`；同时清理 `.gitignore` 中已失效的 `mars-moon/*` 运行态忽略规则。
+- [doing] 继续核对应提交范围：保留通用正式全集调度器、项目 profile、workflow/SKILL 更新、小度静态用例资产和精简执行结论；不提交 `result/`、`audio_cache/`、原始 `.log`。
+- [done] 已更新 `README.md`，补充通用正式全集入口 `tools/suite/run_formal_suite.py`、项目 profile 机制和小度 adapter 内部脚本说明。
+- [done] 校验通过：`validation_pool.py validate`、关键 Python 脚本 `py_compile`、Linux 烧录脚本 `bash -n`。
+- [done] 已删除本轮不再采用的旧小度阻塞态临时 plan 文件，仅保留通用全集入口生成的最新匹配结果和精简 suite 报告。

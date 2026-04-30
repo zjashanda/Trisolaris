@@ -411,16 +411,22 @@ def main() -> int:
     parser.add_argument("--main-case-results", required=True, type=Path)
     parser.add_argument("--supplement-case-results", required=True, type=Path)
     parser.add_argument("--voice-summary", required=True, type=Path)
+    parser.add_argument("--overlay-case-results", action="append", type=Path, default=[], help="Optional case_results JSON files that override earlier results by case_id.")
     parser.add_argument("--tag", default="linux_full_formal_suite")
     args = parser.parse_args()
     args.main_case_results = (ROOT / args.main_case_results).resolve() if not args.main_case_results.is_absolute() else args.main_case_results.resolve()
     args.supplement_case_results = (ROOT / args.supplement_case_results).resolve() if not args.supplement_case_results.is_absolute() else args.supplement_case_results.resolve()
     args.voice_summary = (ROOT / args.voice_summary).resolve() if not args.voice_summary.is_absolute() else args.voice_summary.resolve()
+    args.overlay_case_results = [
+        (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
+        for path in args.overlay_case_results
+    ]
 
     formal_ids = extract_formal_case_ids()
     main_results, main_evidence = source_case_results(args.main_case_results)
     supplement_results, supplement_evidence = source_case_results(args.supplement_case_results)
     voice_results, voice_evidence = evaluate_voice_reg_cases(args.voice_summary)
+    overlay_sources = [source_case_results(path) for path in args.overlay_case_results]
 
     merged: dict[str, dict[str, Any]] = {}
     evidence_map: dict[str, list[Path]] = {}
@@ -428,6 +434,7 @@ def main() -> int:
         (main_results, main_evidence),
         (supplement_results, supplement_evidence),
         (voice_results, voice_evidence),
+        *overlay_sources,
     ]:
         for item in items:
             case_id = item["case_id"]
@@ -464,6 +471,7 @@ def main() -> int:
                 "main_case_results": str(args.main_case_results.relative_to(ROOT)),
                 "supplement_case_results": str(args.supplement_case_results.relative_to(ROOT)),
                 "voice_summary": str(args.voice_summary.relative_to(ROOT)),
+                "overlay_case_results": [str(path.relative_to(ROOT)) for path in args.overlay_case_results],
                 "case_results": ordered_results,
             },
             ensure_ascii=False,
@@ -514,6 +522,7 @@ def main() -> int:
                 "main_case_results": str(args.main_case_results.relative_to(ROOT)),
                 "supplement_case_results": str(args.supplement_case_results.relative_to(ROOT)),
                 "voice_summary": str(args.voice_summary.relative_to(ROOT)),
+                "overlay_case_results": [str(path.relative_to(ROOT)) for path in args.overlay_case_results],
                 "counts": {
                     "PASS": pass_count,
                     "FAIL": len(fail_items),

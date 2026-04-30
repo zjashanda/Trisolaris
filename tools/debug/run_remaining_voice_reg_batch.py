@@ -385,6 +385,11 @@ def main() -> int:
                 "reg_voice006_wakeup_retry_exhaust_sequence",
                 ["小度小度", "学习唤醒词", "小熊维尼", "小树小树", "小度小度", "晴空万里"],
             ),
+            # After registration failure the firmware can still be inside the
+            # previous wake session. Reboot before probing the failed wake word,
+            # otherwise the following command word may be accepted by residual
+            # session state and create a false FAIL.
+            runner.run_shell("reg_voice006_after_exhaust_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0),
             runner.run_dual("reg_voice006_wakeup_retry_exhaust_failed_wake_probe", ["小熊维尼", "打开电风扇"]),
             runner.run_dual("reg_voice006_wakeup_retry_exhaust_default_wake_ok", ["小度小度", "打开电风扇"]),
         ),

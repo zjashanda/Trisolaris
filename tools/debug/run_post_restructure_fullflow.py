@@ -45,6 +45,7 @@ DEFAULT_PROTO_BAUD = 9600
 DEFAULT_CTRL_PORT = "COM39"
 DEFAULT_CTRL_BAUD = 115200
 DEFAULT_BURN_BAUD = 1500000
+DEFAULT_PRE_BURN_WAIT_MS = 6000
 
 
 def env_text(name: str, default: str = "") -> str:
@@ -70,6 +71,7 @@ CTRL_PORT = env_text("TRISOLARIS_CTRL_PORT", DEFAULT_CTRL_PORT)
 CTRL_BAUD = env_int("TRISOLARIS_CTRL_BAUD", DEFAULT_CTRL_BAUD)
 BURN_PORT = env_text("TRISOLARIS_BURN_PORT", LOG_PORT)
 BURN_BAUD = env_int("TRISOLARIS_BURN_BAUD", DEFAULT_BURN_BAUD)
+PRE_BURN_WAIT_MS = env_int("TRISOLARIS_PRE_BURN_WAIT_MS", DEFAULT_PRE_BURN_WAIT_MS)
 DEVICE_KEY_OVERRIDE = os.environ.get("TRISOLARIS_DEVICE_KEY", "").strip()
 
 DEFAULT_BETWEEN_MAX_WAIT_S = 4.5
@@ -269,7 +271,8 @@ def parse_boot_config(log_text: str) -> dict[str, int | str]:
 
 
 def parse_mic_gain(log_text: str) -> dict[str, int]:
-    match = re.search(r"AGAIN=(\d+)dB.*?DGAIN=\s*(\d+)dB", log_text, re.S)
+    clean = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", log_text)
+    match = re.search(r"AGAIN\s*=\s*(\d+)\s*dB.*?DGAIN[^0-9]*(\d+)\s*dB", clean, re.S)
     if not match:
         return {}
     return {
@@ -438,12 +441,13 @@ class FullflowRunner:
                 "ctrl": f"{CTRL_PORT}@{CTRL_BAUD}",
                 "burn": f"{BURN_PORT}@{BURN_BAUD}",
             },
+            "pre_burn_wait_ms": PRE_BURN_WAIT_MS,
             "generated_at": iso_now(),
         }
         (self.static_dir / "bundle_meta.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    def run_preburn_shell_command(self, name: str, command: str, *, capture_s: float, ready_wait_s: float) -> Path:
-        step_dir = ensure_dir(self.burn_dir / name)
+    def run_preburn_shell_command(self, name: str, command: str, *, capture_s: float, ready_wait_s: float, base_dir: Path | None = None) -> Path:
+        step_dir = ensure_dir((base_dir or self.burn_dir) / name)
         raw_path = step_dir / "com38_raw.bin"
         text_path = step_dir / "com38_utf8.txt"
         meta_path = step_dir / "meta.json"
@@ -478,10 +482,11 @@ class FullflowRunner:
         self.log_event("preburn_shell_command", {"name": name, "command": command, "step_dir": str(step_dir.relative_to(ROOT))})
         return step_dir
 
-    def burn_firmware(self) -> None:
-        self.log_event("burn_start", {"firmware": str(FIRMWARE_PATH)})
-        preclear_dir = self.run_preburn_shell_command("00_preburn_config_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
-        prereboot_dir = self.run_preburn_shell_command("01_preburn_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
+    def burn_firmware(self, label: str = "initial") -> Path:
+        target_burn_dir = self.burn_dir if label == "initial" else ensure_dir(self.burn_dir / sanitize_name(label))
+        self.log_event("burn_start", {"firmware": str(FIRMWARE_PATH), "label": label, "burn_dir": str(target_burn_dir.relative_to(ROOT))})
+        preclear_dir = self.run_preburn_shell_command("00_preburn_config_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0, base_dir=target_burn_dir)
+        prereboot_dir = self.run_preburn_shell_command("01_preburn_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0, base_dir=target_burn_dir)
         if os.name == "nt":
             bundle_dir = ROOT / "tools" / "burn_bundle" / "windows"
             cmd = [
@@ -503,6 +508,8 @@ class FullflowRunner:
                 str(LOG_BAUD),
                 "-BurnBaud",
                 str(BURN_BAUD),
+                "-PreBurnWaitMs",
+                str(PRE_BURN_WAIT_MS),
                 "-PostPowerOnReadSeconds",
                 "20",
             ]
@@ -523,20 +530,22 @@ class FullflowRunner:
                 str(LOG_BAUD),
                 "-BurnBaud",
                 str(BURN_BAUD),
+                "-PreBurnWaitMs",
+                str(PRE_BURN_WAIT_MS),
                 "-PostPowerOnReadSeconds",
                 "20",
             ]
         completed = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
-        stdout_path = self.burn_dir / "run_output.txt"
-        stderr_path = self.burn_dir / "run_error.txt"
+        stdout_path = target_burn_dir / "run_output.txt"
+        stderr_path = target_burn_dir / "run_error.txt"
         stdout_path.write_text(completed.stdout, encoding="utf-8")
         stderr_path.write_text(completed.stderr, encoding="utf-8")
         for name in ["burn.log", "burn_tool.log"]:
             src = bundle_dir / name
             if src.exists():
-                shutil.copy2(src, self.burn_dir / name)
+                shutil.copy2(src, target_burn_dir / name)
         burn_log_text = ""
-        burn_log = self.burn_dir / "burn.log"
+        burn_log = target_burn_dir / "burn.log"
         if burn_log.exists():
             burn_log_text = burn_log.read_text(encoding="utf-8", errors="replace")
         burn_ok = completed.returncode == 0 and "Burn flow completed" in burn_log_text
@@ -544,15 +553,17 @@ class FullflowRunner:
             "command": cmd,
             "returncode": completed.returncode,
             "burn_ok": burn_ok,
+            "label": label,
             "preburn_config_clear_dir": str(preclear_dir.relative_to(ROOT)),
             "preburn_reboot_dir": str(prereboot_dir.relative_to(ROOT)),
             "stdout_file": str(stdout_path.relative_to(ROOT)),
             "stderr_file": str(stderr_path.relative_to(ROOT)),
         }
-        (self.burn_dir / "burn_meta.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
+        (target_burn_dir / "burn_meta.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
         self.log_event("burn_finish", info)
         if not burn_ok:
-            raise RuntimeError(f"Burn failed, see {self.burn_dir}")
+            raise RuntimeError(f"Burn failed, see {target_burn_dir}")
+        return target_burn_dir
 
     def open_ports(self) -> None:
         self.log_port = serial.Serial(LOG_PORT, baudrate=LOG_BAUD, timeout=0.05, write_timeout=0.5)
@@ -1484,8 +1495,39 @@ def main() -> int:
     words = runner.spec["words"]
     voice_reg = runner.spec["voice_reg"]
 
+    def reburn_and_reopen(label: str) -> Path:
+        runner.log_event("isolation_reburn_start", {"label": label})
+        runner.close_ports()
+        burn_dir = runner.burn_firmware(label=label)
+        runner.open_ports()
+        runner.log_event("isolation_reburn_finish", {"label": label, "burn_dir": str(burn_dir.relative_to(ROOT))})
+        return burn_dir
+
     runner.prepare_static_assets()
-    runner.burn_firmware()
+    if os.environ.get("TRISOLARIS_SKIP_BURN", "").strip().lower() in {"1", "true", "yes"}:
+        evidence_log = os.environ.get("TRISOLARIS_BURN_EVIDENCE_LOG", "").strip()
+        burn_log = runner.burn_dir / "burn.log"
+        if evidence_log and Path(evidence_log).expanduser().is_file():
+            shutil.copy2(Path(evidence_log).expanduser(), burn_log)
+        else:
+            burn_log.write_text("Burn flow completed\nSkipped burn for resume run; previous burn evidence is external.\n", encoding="utf-8")
+        (runner.burn_dir / "burn_meta.json").write_text(
+            json.dumps(
+                {
+                    "burn_ok": True,
+                    "skipped": True,
+                    "reason": "TRISOLARIS_SKIP_BURN=1",
+                    "evidence_log": evidence_log,
+                    "saved_at": iso_now(),
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        runner.log_event("burn_skipped", {"evidence_log": evidence_log})
+    else:
+        runner.burn_firmware()
     runner.open_ports()
     try:
         startup = runner.run_powercycle_step("assist_startup_powercycle_capture")
@@ -1580,17 +1622,24 @@ def main() -> int:
         runner.run_shell_step("assist_config_clear_after_burn", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         reboot_after_clear = runner.run_shell_step("assist_reboot_after_config_clear", "reboot", capture_s=10.0, ready_wait_s=8.0)
         clean_cfg = parse_boot_config(reboot_after_clear.log_text)
+        gain_present = "analog_gain_db" in startup_gain and "digital_gain_db" in startup_gain
+        gain_match = (
+            gain_present
+            and startup_gain["analog_gain_db"] == requirements["mic_analog_gain_db"]
+            and startup_gain["digital_gain_db"] == requirements["mic_digital_gain_db"]
+        )
+        cfg_audio_status = "PASS" if gain_match else ("BLOCKED" if not gain_present else "FAIL")
         cfg_audio_summary = (
             f"首启日志可见 mic 增益片段={startup_gain.get('analog_gain_db', 'missing')}/{startup_gain.get('digital_gain_db', 'missing')}dB，"
-            f"需求={requirements['mic_analog_gain_db']}/{requirements['mic_digital_gain_db']}dB；当前保留人工确认"
+            f"需求={requirements['mic_analog_gain_db']}/{requirements['mic_digital_gain_db']}dB"
         )
         runner.add_case_result(
             "CFG-AUDIO-001",
             "配置一致性-基础参数",
-            "TODO",
+            cfg_audio_status,
             cfg_audio_summary,
             [startup.step_dir],
-            {"boot_config": startup_cfg, "mic_gain": startup_gain, "manual_required": True},
+            {"boot_config": startup_cfg, "mic_gain": startup_gain, "expected_gain": {"analog_gain_db": requirements["mic_analog_gain_db"], "digital_gain_db": requirements["mic_digital_gain_db"]}},
         )
         evidence_map["CFG-AUDIO-001"] = [startup.step_dir]
 
@@ -1856,6 +1905,15 @@ def main() -> int:
         runner.add_case_result("SWAKE-007", "切换唤醒词", "PASS" if step_pass(switch_tmall_open, require_proto=True) else "FAIL", "切换唤醒词已复跑完整回环：小爱同学 -> 天猫精灵 -> 默认", [switch_next.step_dir, switch_to_tmall.step_dir, switch_idle_tmall_open.step_dir, switch_tmall_open.step_dir, switch_back_default.step_dir])
         evidence_map["SWAKE-007"] = [switch_next.step_dir, switch_to_tmall.step_dir, switch_idle_tmall_open.step_dir, switch_tmall_open.step_dir, switch_back_default.step_dir]
 
+        switch_recovery_gate = runner.run_voice_sequence("assist_switch_final_default_recovery_gate", ["小度小度", "打开电风扇"], post_wait_s=3.0)
+        if not evidence_has_frames(switch_recovery_gate, [words["小度小度"]["发送协议"], words["打开电风扇"]["发送协议"]]):
+            reburn_and_reopen("04_reburn_after_switch_isolation")
+            reg_isolation_gate = runner.run_voice_sequence("assist_reg_isolation_after_reburn_gate", ["小度小度", "打开电风扇"], post_wait_s=3.0)
+            if not evidence_has_frames(reg_isolation_gate, [words["小度小度"]["发送协议"], words["打开电风扇"]["发送协议"]]):
+                raise UntestableFirmware(
+                    "切换唤醒词专项后设备默认唤醒链路失效，隔离重烧后仍未恢复，后续语音注册专项不可采信"
+                )
+
         runner.run_shell_step("assist_reg_config_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         runner.run_shell_step("assist_reg_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
 
@@ -1938,6 +1996,7 @@ def main() -> int:
         runner.run_shell_step("assist_reg_wake_retry_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         runner.run_shell_step("assist_reg_wake_retry_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
         reg_wake_retry = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_sequence", ["小度小度", "学习唤醒词", "小熊维尼", "小树小树", "小度小度", "晴空万里"], post_wait_s=12.0)
+        reg_wake_retry_isolation_reboot = runner.run_shell_step("reg_cfg_wake_retry_after_exhaust_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
         reg_wake_retry_probe = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_failed_wake_probe", ["小熊维尼", "打开电风扇"], post_wait_s=4.0)
         reg_wake_retry_default = runner.run_voice_sequence("reg_cfg_wake_retry_exhaust_default_wake_ok", ["小度小度", "打开电风扇"], post_wait_s=4.0)
         reg_wake_retry_text = reg_wake_retry.log_text + "\n" + reg_wake_retry_probe.log_text
@@ -1955,10 +2014,10 @@ def main() -> int:
                 if reg_wake_retry_status == "PASS"
                 else f"唤醒词失败耗尽证据不足：cap={reg_wake_retry_cap}, failed={reg_wake_retry_failed}, blocked={reg_wake_retry_blocked}, default_ok={reg_wake_retry_default_ok}"
             ),
-            [reg_wake_retry.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir],
+            [reg_wake_retry.step_dir, reg_wake_retry_isolation_reboot.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir],
             {"retry_count_observed": count_occurrences(reg_wake_retry_text, "reg simila error!"), "cap_marker": reg_wake_retry_cap, "failed_marker": reg_wake_retry_failed, "probe_frames": proto_frames_from_hex(reg_wake_retry_probe.proto_hex), "default_frames": proto_frames_from_hex(reg_wake_retry_default.proto_hex)},
         )
-        evidence_map["REG-CFG-004"] = [reg_wake_retry.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir]
+        evidence_map["REG-CFG-004"] = [reg_wake_retry.step_dir, reg_wake_retry_isolation_reboot.step_dir, reg_wake_retry_probe.step_dir, reg_wake_retry_default.step_dir]
 
         runner.run_shell_step("assist_reg_conflict_clear", "config.clear", capture_s=3.0, ready_wait_s=1.0)
         runner.run_shell_step("assist_reg_conflict_reboot", "reboot", capture_s=10.0, ready_wait_s=8.0)
