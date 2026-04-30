@@ -1338,3 +1338,5 @@
 - [done] 已更新 `README.md`，补充通用正式全集入口 `tools/suite/run_formal_suite.py`、项目 profile 机制和小度 adapter 内部脚本说明。
 - [done] 校验通过：`validation_pool.py validate`、关键 Python 脚本 `py_compile`、Linux 烧录脚本 `bash -n`。
 - [done] 已删除本轮不再采用的旧小度阻塞态临时 plan 文件，仅保留通用全集入口生成的最新匹配结果和精简 suite 报告。
+- [done] 已提交本轮更新，提交 `199a81d feat: add unified formal suite runner`，包含删除 `mars-moon/`、新增通用正式全集执行器、项目 profile、README/SKILL/workflow 更新和小度统一全集结果摘要。
+- [doing] 准备推送远程；推送前追加本轮同步记录到 `plan.md` 并单独提交。
