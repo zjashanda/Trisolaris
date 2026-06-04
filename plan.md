@@ -1511,5 +1511,6 @@
 - [done] 读取 `plan.md`，确认本轮任务：把当前 skill 更新同步到 git，并保证其他 PC 拉取后不缺关键源码/文档/配置即可正常使用。
 - [done] 按 skill 发布口径梳理应提交文件：核心源码、Cucumber runtime、Orion SkillTest JSON、docs/spec、README/SKILL 规则、验证池/工作流文档；排除运行日志、历史报告、音频缓存、烧录 staging 和临时产物。
 - [done] 把“git 同步必须保证完整可复用颗粒度”的规则写入 `SKILL.md`、`README.md` 和 `references/repo-workflow.md`，并补充 `.gitignore` 防止 formal suite 运行目录与模块匹配快照误提交。
-- [doing] 检查 git 状态、分批暂存必要文件、运行 JSON/Python 校验、提交并推送远端。
-- [todo] 推送完成后回写 commit/branch/验证结果到 `plan.md` 并向用户返回同步结论。
+- [done] 已完成发布前校验：`python3 -m json.tool orion.skilltest.json` 通过；`tools/suite/run_formal_suite.py`、`tools/debug/generate_full_formal_aggregate.py`、`cucumber_test/tools/*.py` 和 `cucumber_test/runtime/features/**/*.py` 均通过 `py_compile`。
+- [done] 已按可复用颗粒度提交并推送核心资产到 `origin/main`，commit `a978a34`；提交包含 Cucumber runtime/tools/docs、Orion SkillTest JSON、references/docs、同步规则、通用 suite 入口和稳定小度用例资产，不包含运行日志/报告 bundle/音频缓存/烧录 staging。
+- [done] 本条 plan 收口记录将作为补充提交推送，保证远端仓库也记录本轮同步结论。
