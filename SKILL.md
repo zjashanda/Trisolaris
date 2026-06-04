@@ -121,7 +121,10 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 
 ## 报告与发布
 
-- Markdown 报告使用中文标题和正文，尽量保持 Windows 友好的 UTF-8。
+- Markdown 报告使用中文标题和正文，统一写入 UTF-8；面向 Windows/Excel 打开的 Markdown、CSV、TXT 优先使用 UTF-8 with BOM。
+- 任何生成的 Markdown、JSON、CSV、TXT、Gherkin Feature、用例导出文件在交付或提交前必须做编码/打开校验：用 UTF-8/UTF-8-SIG 回读成功，正文中文不得出现 Unicode replacement character、连续问号等替换乱码；JSON 还必须通过 `python3 -m json.tool`。
+- XLSX 等二进制办公文件生成后必须用对应库回读一次，确认工作表、表头和中文字段可正常读取；不能只看文件存在或脚本退出码。
+- 若发现中文乱码，必须重新生成源文件，不能在报告中保留乱码路径或把乱码文件提交到 Git。
 - 报告必须区分 PASS、FAIL、BLOCKED、TODO/manual。
 - 最终 FAIL 清单不得包含验证方案、用例设计或断言问题。
 - Git 同步必须按“其他 PC 拉取后可直接复用 skill”的颗粒度提交，不能只提交单个补丁文件。

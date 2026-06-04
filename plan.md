@@ -1514,3 +1514,9 @@
 - [done] 已完成发布前校验：`python3 -m json.tool orion.skilltest.json` 通过；`tools/suite/run_formal_suite.py`、`tools/debug/generate_full_formal_aggregate.py`、`cucumber_test/tools/*.py` 和 `cucumber_test/runtime/features/**/*.py` 均通过 `py_compile`。
 - [done] 已按可复用颗粒度提交并推送核心资产到 `origin/main`，commit `a978a34`；提交包含 Cucumber runtime/tools/docs、Orion SkillTest JSON、references/docs、同步规则、通用 suite 入口和稳定小度用例资产，不包含运行日志/报告 bundle/音频缓存/烧录 staging。
 - [done] 本条 plan 收口记录将作为补充提交推送，保证远端仓库也记录本轮同步结论。
+
+## 2026-06-04 生成文件编码校验规则
+- [done] 读取 `plan.md`，确认本轮任务：把“生成文件必须校验编码，避免其他环境打开乱码”的规则写入 skill 文档。
+- [done] 更新 `SKILL.md` 的报告与发布规则，增加 UTF-8/UTF-8-BOM、JSON/Markdown/CSV/XLSX 校验和乱码扫描要求。
+- [done] 已对本次修改的 `SKILL.md` 执行 UTF-8 回读及乱码标记扫描，未发现替换乱码；`plan.md` 仅记录本轮动作，不作为交付文档编码基线。
+
