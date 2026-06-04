@@ -1,0 +1,9 @@
+# Cucumber runtime/debug artifacts are local by default.
+debug/logs/*
+debug/reports/*
+debug/evidence/*
+debug/sandbox/*
+
+# Keep directory placeholders and documentation.
+!debug/**/.gitkeep
+!debug/README.md

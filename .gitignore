@@ -28,5 +28,11 @@ tools/burn_bundle/linux/burn_tool.log
 # Temporary nested repo backup markers used during root publish
 .git_codex_publish_backup/
 
-# Formal-suite runtime logs; keep concise suite_report/suite_summary only
+# Formal-suite runtime bundles are local evidence by default.
+deliverables/formal_suite_runs/*
+
+# Generated validation-pool matching snapshots; stable plans must be committed explicitly.
+deliverables/*/plan/*模块化验证池匹配结果.md
+
+# Formal-suite runtime logs; tracked historical summaries remain tracked.
 deliverables/formal_suite_runs/*/logs/

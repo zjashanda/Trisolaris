@@ -330,21 +330,294 @@ def command_record(result: CommandResult) -> dict[str, Any]:
 
 
 def summarize_nonpass(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
-        {
-            "case_id": item.get("case_id"),
-            "module": item.get("module"),
-            "status": item.get("status"),
-            "summary": item.get("summary"),
-            "evidence": item.get("evidence", [])[:5],
-        }
-        for item in items
-    ]
+    summarized: list[dict[str, Any]] = []
+    for item in items:
+        evidence = item.get("evidence", [])
+        if isinstance(evidence, str):
+            evidence_out: Any = evidence
+        else:
+            evidence_out = evidence[:5]
+        summarized.append(
+            {
+                "case_id": item.get("case_id"),
+                "module": item.get("module"),
+                "status": item.get("status"),
+                "summary": item.get("summary") or item.get("title") or item.get("error"),
+                "evidence": evidence_out,
+            }
+        )
+    return summarized
 
 
 def latest_summary_in_result_root(result_root: Path) -> Path | None:
     candidates = list(result_root.glob("*/summary.json"))
     return max(candidates, key=lambda p: p.stat().st_mtime) if candidates else None
+
+
+def run_cucumber_smoke(args: argparse.Namespace, profile: dict[str, Any], req_dir: Path, firmware: Path | None, suite_dir: Path) -> dict[str, Any]:
+    """Run the current executable Cucumber smoke subset through the suite entry.
+
+    This mode is intentionally opt-in. It proves the Gherkin/step/result bridge
+    without replacing the project's formal full-suite adapter.
+    """
+    env = base_env(args, req_dir, firmware)
+    runner = CommandRunner(suite_dir, env)
+    phases: list[dict[str, Any]] = []
+    classify_out = run_classify(runner, profile, req_dir, suite_dir)
+    tag_base = sanitize(args.tag or f"{profile['project_id']}_cucumber_smoke")
+    report_root = ROOT / "cucumber_test" / "debug" / "reports"
+    before_reports = set(report_root.glob("*"))
+
+    if profile["adapter"] != "xiaodu-5062":
+        raise RuntimeError(f"cucumber-smoke mode currently supports xiaodu-5062 only, got {profile['adapter']}")
+
+    cmd = [
+        "python3",
+        "cucumber_test/tools/run_xiaodu_cucumber_minimal.py",
+        "--tag",
+        tag_base,
+    ]
+    for attr, flag in [
+        ("log_port", "--log-port"),
+        ("proto_port", "--proto-port"),
+        ("ctrl_port", "--ctrl-port"),
+        ("device_key", "--device-key"),
+    ]:
+        value = getattr(args, attr, None)
+        if value:
+            cmd.extend([flag, str(value)])
+    result = runner.run("cucumber_xiaodu_minimal_smoke", cmd)
+    phases.append(command_record(result))
+
+    new_reports = [p for p in report_root.glob("*") if p not in before_reports and p.is_dir()]
+    cucumber_dir = max(new_reports, key=lambda p: p.stat().st_mtime) if new_reports else newest_matching(report_root, f"*{tag_base}")
+    if not cucumber_dir:
+        raise RuntimeError("cannot locate cucumber smoke report directory")
+    case_results = cucumber_dir / "case_results.json"
+    suite_report = cucumber_dir / "suite_report.md"
+    cucumber_json = cucumber_dir / "cucumber.json"
+    evidence_index = cucumber_dir / "scenario_evidence_index.json"
+    if not case_results.exists():
+        raise RuntimeError(f"missing cucumber case results: {case_results}")
+
+    counts = counts_from_case_results(case_results)
+    nonpass = nonpass_from_case_results(case_results)
+    return {
+        "project_id": profile["project_id"],
+        "adapter": profile["adapter"],
+        "execution_mode": "cucumber-smoke",
+        "req_dir": rel(req_dir),
+        "firmware": rel(firmware) if firmware else None,
+        "classification": rel(classify_out) if classify_out else None,
+        "phases": phases,
+        "artifacts": {
+            "feature": "cucumber_test/runtime/features/xiaodu_minimal.feature",
+            "cucumber_json": rel(cucumber_json),
+            "cucumber_case_results": rel(case_results),
+            "cucumber_suite_report": rel(suite_report),
+            "cucumber_evidence_index": rel(evidence_index),
+        },
+        "counts": counts,
+        "nonpass": summarize_nonpass(nonpass),
+        "note": "Cucumber smoke 是可选验证模式，仅证明 Gherkin/step/硬件桥接；正式 72 条全集仍使用默认 formal 模式。",
+    }
+
+
+def run_cucumber_formal(args: argparse.Namespace, profile: dict[str, Any], req_dir: Path, firmware: Path | None, suite_dir: Path) -> dict[str, Any]:
+    """Run the project formal fullflow with Cucumber as the top-level driver."""
+    env = base_env(args, req_dir, firmware)
+    runner = CommandRunner(suite_dir, env)
+    phases: list[dict[str, Any]] = []
+    classify_out = run_classify(runner, profile, req_dir, suite_dir)
+    tag_base = sanitize(args.tag or f"{profile['project_id']}_cucumber_formal")
+    report_root = ROOT / "cucumber_test" / "debug" / "reports"
+    before_reports = set(report_root.glob("*"))
+
+    if profile["adapter"] != "xiaodu-5062":
+        raise RuntimeError(f"cucumber-formal mode currently supports xiaodu-5062 only, got {profile['adapter']}")
+
+    cmd = [
+        "python3",
+        "cucumber_test/tools/run_xiaodu_cucumber_fullflow.py",
+        "--tag",
+        tag_base,
+    ]
+    for attr, flag in [
+        ("log_port", "--log-port"),
+        ("proto_port", "--proto-port"),
+        ("ctrl_port", "--ctrl-port"),
+        ("burn_port", "--burn-port"),
+        ("device_key", "--device-key"),
+        ("pre_burn_wait_ms", "--pre-burn-wait-ms"),
+    ]:
+        value = getattr(args, attr, None)
+        if value:
+            cmd.extend([flag, str(value)])
+    result = runner.run("cucumber_xiaodu_formal_fullflow", cmd)
+    phases.append(command_record(result))
+
+    new_reports = [p for p in report_root.glob("*") if p not in before_reports and p.is_dir()]
+    cucumber_dir = max(new_reports, key=lambda p: p.stat().st_mtime) if new_reports else newest_matching(report_root, f"*{tag_base}")
+    if not cucumber_dir:
+        raise RuntimeError("cannot locate cucumber formal report directory")
+    case_results = cucumber_dir / "case_results.json"
+    suite_report = cucumber_dir / "suite_report.md"
+    cucumber_json = cucumber_dir / "cucumber.json"
+    formal_meta = cucumber_dir / "formal_fullflow_meta.json"
+    if not case_results.exists():
+        raise RuntimeError(f"missing cucumber formal case results: {case_results}")
+
+    payload = load_json(case_results)
+    counts = payload.get("counts") or counts_from_case_results(case_results)
+    cucumber_scenario_counts = payload.get("cucumber_scenario_counts") or {}
+    nonpass = [item for item in payload.get("case_results", []) if item.get("status") != "PASS"]
+    formal_meta_payload = load_json(formal_meta) if formal_meta.exists() else {}
+    return {
+        "project_id": profile["project_id"],
+        "adapter": profile["adapter"],
+        "execution_mode": "cucumber-formal",
+        "req_dir": rel(req_dir),
+        "firmware": rel(firmware) if firmware else None,
+        "classification": rel(classify_out) if classify_out else None,
+        "phases": phases,
+        "artifacts": {
+            "feature": "cucumber_test/runtime/features/xiaodu_formal_fullflow.feature",
+            "cucumber_json": rel(cucumber_json),
+            "cucumber_case_results": rel(case_results),
+            "cucumber_suite_report": rel(suite_report),
+            "formal_meta": rel(formal_meta),
+            "inner_suite_dir": formal_meta_payload.get("inner_suite_dir"),
+            "aggregate_case_results": formal_meta_payload.get("aggregate_case_results"),
+            "aggregate_report": formal_meta_payload.get("aggregate_report"),
+        },
+        "counts": counts,
+        "cucumber_scenario_counts": cucumber_scenario_counts,
+        "nonpass": summarize_nonpass(nonpass),
+        "note": "Cucumber formal 以 Feature/Examples 为顶层用例入口，step 调用已收敛的项目 runner/adapter；新增用例优先改 Feature，不改 step 执行逻辑。",
+    }
+
+
+def run_cucumber_native(args: argparse.Namespace, profile: dict[str, Any], req_dir: Path, firmware: Path | None, suite_dir: Path) -> dict[str, Any]:
+    """Run Cucumber scenarios that directly drive hardware primitives.
+
+    This mode does not call the legacy formal fullflow runner. Feature steps
+    drive audio playback, serial capture, protocol injection and assertions
+    through the Cucumber native step library.
+    """
+    env = base_env(args, req_dir, firmware)
+    runner = CommandRunner(suite_dir, env)
+    phases: list[dict[str, Any]] = []
+    classify_out = run_classify(runner, profile, req_dir, suite_dir)
+    tag_base = sanitize(args.tag or f"{profile['project_id']}_cucumber_native")
+    report_root = ROOT / "cucumber_test" / "debug" / "reports"
+    before_reports = set(report_root.glob("*"))
+
+    if profile["adapter"] != "xiaodu-5062":
+        raise RuntimeError(f"cucumber-native mode currently supports xiaodu-5062 only, got {profile['adapter']}")
+
+    cmd = [
+        "python3",
+        "cucumber_test/tools/run_xiaodu_cucumber_native_core.py",
+        "--tag",
+        tag_base,
+    ]
+    for attr, flag in [
+        ("log_port", "--log-port"),
+        ("proto_port", "--proto-port"),
+        ("ctrl_port", "--ctrl-port"),
+        ("device_key", "--device-key"),
+    ]:
+        value = getattr(args, attr, None)
+        if value:
+            cmd.extend([flag, str(value)])
+    # Behave returns non-zero when a requirement assertion fails. Keep running
+    # the suite wrapper so FAIL can be reported as a validation result instead
+    # of being collapsed into a dispatcher ERROR.
+    result = runner.run("cucumber_xiaodu_native_core", cmd, allow_nonzero=True)
+    phases.append(command_record(result))
+
+    new_reports = [p for p in report_root.glob("*") if p not in before_reports and p.is_dir()]
+    cucumber_dir = max(new_reports, key=lambda p: p.stat().st_mtime) if new_reports else newest_matching(report_root, f"*{tag_base}")
+    if not cucumber_dir:
+        raise RuntimeError("cannot locate cucumber native report directory")
+    case_results = cucumber_dir / "case_results.json"
+    suite_report = cucumber_dir / "suite_report.md"
+    cucumber_json = cucumber_dir / "cucumber.json"
+    evidence_index = cucumber_dir / "scenario_evidence_index.json"
+    if not case_results.exists():
+        raise RuntimeError(f"missing cucumber native case results: {case_results}")
+
+    counts = counts_from_case_results(case_results)
+    nonpass = nonpass_from_case_results(case_results)
+    return {
+        "project_id": profile["project_id"],
+        "adapter": profile["adapter"],
+        "execution_mode": "cucumber-native",
+        "req_dir": rel(req_dir),
+        "firmware": rel(firmware) if firmware else None,
+        "classification": rel(classify_out) if classify_out else None,
+        "phases": phases,
+        "artifacts": {
+            "feature": "cucumber_test/runtime/features/xiaodu_native_core.feature",
+            "cucumber_json": rel(cucumber_json),
+            "cucumber_case_results": rel(case_results),
+            "cucumber_suite_report": rel(suite_report),
+            "cucumber_evidence_index": rel(evidence_index),
+        },
+        "counts": counts,
+        "nonpass": summarize_nonpass(nonpass),
+        "note": "Cucumber native 由 Scenario step 直接驱动声卡、日志串口、协议串口和断言；当前覆盖小度核心链路，后续新增场景优先改 Feature/Examples 和通用 DSL。",
+    }
+
+
+def run_cucumber_all(args: argparse.Namespace, profile: dict[str, Any], req_dir: Path, firmware: Path | None, suite_dir: Path) -> dict[str, Any]:
+    """Run all currently migrated Cucumber validation surfaces in one suite.
+
+    Native scenarios run first to prove direct hardware execution. The formal
+    Cucumber feature then drives the 72-case fullflow status matrix. The final
+    PASS/FAIL/TODO/BLOCKED counts are the formal requirement counts, while the
+    native counts remain attached as execution-coverage evidence.
+    """
+    if profile["adapter"] != "xiaodu-5062":
+        raise RuntimeError(f"cucumber-all mode currently supports xiaodu-5062 only, got {profile['adapter']}")
+
+    native_args = argparse.Namespace(**vars(args))
+    native_args.tag = f"{sanitize(args.tag or profile['project_id'])}_native_core"
+    native = run_cucumber_native(native_args, profile, req_dir, firmware, suite_dir)
+
+    formal_args = argparse.Namespace(**vars(args))
+    formal_args.tag = f"{sanitize(args.tag or profile['project_id'])}_formal_72"
+    formal = run_cucumber_formal(formal_args, profile, req_dir, firmware, suite_dir)
+
+    artifacts: dict[str, Any] = {}
+    for key, value in (native.get("artifacts") or {}).items():
+        artifacts[f"native_{key}"] = value
+    for key, value in (formal.get("artifacts") or {}).items():
+        artifacts[f"formal_{key}"] = value
+    if native.get("classification"):
+        artifacts["native_classification"] = native["classification"]
+    if formal.get("classification"):
+        artifacts["formal_classification"] = formal["classification"]
+
+    return {
+        "project_id": profile["project_id"],
+        "adapter": profile["adapter"],
+        "execution_mode": "cucumber-all",
+        "req_dir": rel(req_dir),
+        "firmware": rel(firmware) if firmware else None,
+        "classification": formal.get("classification") or native.get("classification"),
+        "phases": [*(native.get("phases") or []), *(formal.get("phases") or [])],
+        "artifacts": artifacts,
+        "counts": formal.get("counts") or {},
+        "native_counts": native.get("counts") or {},
+        "native_nonpass": native.get("nonpass") or [],
+        "formal_cucumber_scenario_counts": formal.get("cucumber_scenario_counts") or {},
+        "nonpass": formal.get("nonpass") or [],
+        "note": (
+            "Cucumber-all 先执行 native 场景，Scenario 直接驱动硬件原语；再执行 72 条正式 Cucumber Feature。"
+            "最终需求统计以正式 72 条为准，native 场景作为直接硬件执行覆盖证据。"
+        ),
+    }
 
 
 def run_script_pipeline(args: argparse.Namespace, profile: dict[str, Any], req_dir: Path, firmware: Path | None, suite_dir: Path) -> dict[str, Any]:
@@ -382,10 +655,11 @@ def write_suite_report(suite_dir: Path, summary: dict[str, Any]) -> None:
     counts = summary.get("counts") or {}
     nonpass = summary.get("nonpass") or []
     lines = [
-        "# Trisolaris 正式全集执行报告",
+        "# Trisolaris 验证执行报告",
         "",
         f"- 项目：`{summary.get('project_id')}`",
         f"- Adapter：`{summary.get('adapter')}`",
+        f"- 执行模式：`{summary.get('execution_mode', 'formal')}`",
         f"- 需求目录：`{summary.get('req_dir')}`",
         f"- 固件：`{summary.get('firmware')}`",
         f"- 结果目录：`{rel(suite_dir)}`",
@@ -393,6 +667,16 @@ def write_suite_report(suite_dir: Path, summary: dict[str, Any]) -> None:
     if counts:
         lines.append(
             f"- 统计：`PASS={counts.get('PASS', 0)} / FAIL={counts.get('FAIL', 0)} / TODO={counts.get('TODO', 0)} / BLOCKED={counts.get('BLOCKED', 0)} / TOTAL={counts.get('TOTAL', 0)}`"
+        )
+    native_counts = summary.get("native_counts") or {}
+    if native_counts:
+        lines.append(
+            f"- Native Cucumber：`PASS={native_counts.get('PASS', 0)} / FAIL={native_counts.get('FAIL', 0)} / BLOCKED={native_counts.get('BLOCKED', 0)} / TOTAL={native_counts.get('TOTAL', 0)}`"
+        )
+    scenario_counts = summary.get("formal_cucumber_scenario_counts") or summary.get("cucumber_scenario_counts") or {}
+    if scenario_counts:
+        lines.append(
+            f"- Formal Cucumber 场景：`passed={scenario_counts.get('passed', 0)} / failed={scenario_counts.get('failed', 0)} / blocked={scenario_counts.get('blocked', 0)} / total={scenario_counts.get('total', 0)}`"
         )
     lines.extend(["", "## 关键产物", ""])
     for key, value in (summary.get("artifacts") or {}).items():
@@ -406,6 +690,12 @@ def write_suite_report(suite_dir: Path, summary: dict[str, Any]) -> None:
             lines.append(f"| `{item.get('case_id')}` | `{item.get('status')}` | {item.get('summary')} |")
     else:
         lines.append("- 无")
+    native_nonpass = summary.get("native_nonpass") or []
+    if native_nonpass:
+        lines.extend(["", "## Native Cucumber 非 PASS 项", ""])
+        lines.extend(["| 用例ID | 状态 | 结论 |", "| --- | --- | --- |"])
+        for item in native_nonpass:
+            lines.append(f"| `{item.get('case_id')}` | `{item.get('status')}` | {item.get('summary') or item.get('error') or ''} |")
     lines.extend(["", "## 阶段日志", ""])
     for phase in summary.get("phases", []):
         lines.append(f"- `{phase['name']}` rc={phase['returncode']} log=`{phase['log_path']}`")
@@ -437,6 +727,12 @@ def main() -> int:
     parser.add_argument("--device-key")
     parser.add_argument("--pre-burn-wait-ms", type=int, default=6000)
     parser.add_argument("--skip-burn", action="store_true")
+    parser.add_argument(
+        "--execution-mode",
+        choices=["formal", "cucumber-smoke", "cucumber-formal", "cucumber-native", "cucumber-all"],
+        default="formal",
+        help="formal runs the project full-suite adapter; cucumber-smoke runs the Gherkin bridge smoke subset; cucumber-formal wraps the formal suite from Cucumber; cucumber-native drives hardware directly from Cucumber steps; cucumber-all runs native scenarios plus the 72-case Cucumber fullflow.",
+    )
     args = parser.parse_args()
 
     req_dir = args.req_dir.expanduser().resolve()
@@ -451,7 +747,15 @@ def main() -> int:
         return 2
     firmware = resolve_firmware(req_dir, profile, args.firmware_bin)
     try:
-        if profile["adapter"] == "xiaodu-5062":
+        if args.execution_mode == "cucumber-smoke":
+            summary = run_cucumber_smoke(args, profile, req_dir, firmware, suite_dir)
+        elif args.execution_mode == "cucumber-formal":
+            summary = run_cucumber_formal(args, profile, req_dir, firmware, suite_dir)
+        elif args.execution_mode == "cucumber-native":
+            summary = run_cucumber_native(args, profile, req_dir, firmware, suite_dir)
+        elif args.execution_mode == "cucumber-all":
+            summary = run_cucumber_all(args, profile, req_dir, firmware, suite_dir)
+        elif profile["adapter"] == "xiaodu-5062":
             summary = run_xiaodu_5062(args, profile, req_dir, firmware, suite_dir)
         elif profile["adapter"] == "script-pipeline":
             summary = run_script_pipeline(args, profile, req_dir, firmware, suite_dir)

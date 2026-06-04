@@ -1,4 +1,4 @@
-﻿# Plan
+# Plan
 
 ## 2026-04-19 Current Round
 - [completed] Read `plan.md` and reload the current repo / requirement / fullflow state.
@@ -1341,3 +1341,175 @@
 - [done] 已提交本轮更新，提交 `199a81d feat: add unified formal suite runner`，包含删除 `mars-moon/`、新增通用正式全集执行器、项目 profile、README/SKILL/workflow 更新和小度统一全集结果摘要。
 - [doing] 准备推送远程；推送前追加本轮同步记录到 `plan.md` 并单独提交。
 - [done] 已推送远程 `origin/main`，范围 `87aaf26..9965e8c`。
+
+## 2026-04-30 两项目结果回传
+- [done] 读取 `plan.md`，确认本轮用户只需要回传此前两个项目的最终执行结果。
+- [done] 汇总好太太晾衣机与 CSK5062 小度风扇的最终 PASS/FAIL/TODO/BLOCKED 结果及证据路径。
+- [done] 将简版结果发给用户。
+
+## 2026-05-13 Cucumber 概念说明
+- [done] 读取 `plan.md`。
+- [done] 本轮任务是回答用户是否了解 Cucumber，并结合当前测试验证场景解释其用途。
+- [done] 向用户给出简要说明。
+
+## 2026-05-13 Cucumber 适配方案归档
+- [done] 读取 `plan.md`，确认本轮目标是先输出 Cucumber 适配方案，不执行改造或硬件验证。
+- [done] 盘点当前 skill 的需求解析、验证池、项目 profile、全集执行器、报告链路，判断哪些适合 Cucumber、哪些不适合。
+- [done] 在 `cucumber_test/` 下按分类沉淀方案、目录规划、样例 Feature、步骤映射和迁移计划。
+- [done] 回传归档路径给用户审阅。
+
+## 2026-05-13 小度设备可用性轻量检查
+- [done] 读取 `plan.md`，确认本轮任务是检查当前本地小度 5062 设备是否还能正常使用。
+- [done] 执行非破坏性轻量 gate：串口枚举、声卡探测、日志/协议采集、播放小度唤醒和最小命令。
+- [done] 汇总当前设备是否可用、卡点和证据路径：`result/csk5062_xiaodu_fan/20260513_140547_device_health_light_gate/summary.json`。
+
+## 2026-05-13 Cucumber 状态确认
+- [done] 读取 `plan.md`。
+- [done] 用户询问 Cucumber 相关方案是否已实现完成；当前需要区分“方案归档完成”和“可执行 Cucumber 链路未落地”。
+- [done] 向用户说明当前完成范围、未完成范围和下一步可实现内容。
+
+## 2026-05-13 Cucumber 文件格式说明
+- [done] 读取 `plan.md`。
+- [done] 用户询问 Cucumber 用例文件格式；需要说明 `.feature` 是用例源文件，JSON 通常是执行结果或中间报告。
+- [done] 向用户给出当前 skill 推荐落地格式。
+
+## 2026-05-13 小度 Cucumber 最小验证闭环
+- [done] 读取 `plan.md`，确认本轮目标是用小度项目跑通 Cucumber/Gherkin 最小验证闭环。
+- [done] 检查本地 Cucumber/behave 可用性：系统无 `behave`，已用 `pip --user --break-system-packages` 安装 `behave 1.3.3`；未改正式链路。
+- [done] 编写小度最小 Feature、step/adapter 和执行器，覆盖声卡/串口 gate、默认唤醒协议、打开风扇协议。
+- [done] 使用当前小度设备执行验证，输出 cucumber JSON、Trisolaris `case_results.json` 和中文报告；结果 `3 PASS / 0 FAIL / 0 BLOCKED`。
+- [done] 将结果和证据路径回传给用户。
+
+## 2026-05-13 小度 Cucumber 接入通用 Suite
+- [done] 读取 `plan.md`，确认用户要求继续推进小度 Cucumber 验证。
+- [done] 将已跑通的 P2 Cucumber smoke 接入 `tools/suite/run_formal_suite.py` 的可选执行模式，避免影响默认 72 条正式全集。
+- [done] 用小度当前设备通过通用 suite 入口执行 Cucumber smoke，结果 `PASS=3 / FAIL=0 / BLOCKED=0 / TOTAL=3`。
+- [done] 汇总 suite 层结果、Cucumber 结果和证据路径：`deliverables/formal_suite_runs/20260513_154302_xiaodu5062_cucumber_suite_smoke_r1/suite_report.md`。
+
+## 2026-05-13 小度正式全链路全集执行
+- [done] 读取 `plan.md`，确认用户要求开始正式所有全链路执行。
+- [done] 使用 `tools/suite/run_formal_suite.py` 默认 `formal` 模式执行小度 5062 正式 72 条全集，端口 `/dev/ttyACM0`、`/dev/ttyACM2`、`/dev/ttyACM4`，声卡 `VID_8765&PID_5678:USB_0_4_3_1_0`。
+- [done] 对执行中 raw FAIL/BLOCKED 做收敛：`REG-WAKE-001` 为聚合断言窗口问题，已修正并复聚合为 PASS；`CFG-VOL-001` 保留为固件默认值或需求错误。
+- [done] 输出最终正式全集统计：`PASS=70 / FAIL=1 / TODO=1 / BLOCKED=0 / TOTAL=72`；报告 `deliverables/formal_suite_runs/20260513_160550_xiaodu5062_formal_fullflow_20260513_r1/suite_report.md`。
+
+## 2026-05-13 正式执行模式说明
+- [done] 读取 `plan.md`。
+- [done] 用户询问刚才正式全链路是否按 Cucumber 用例执行；需要明确区分默认 `formal` 和可选 `cucumber-smoke`。
+- [done] 向用户说明当前正式 72 条不是按 Cucumber 执行，Cucumber 当前只跑了 3 条 smoke。
+
+## 2026-05-13 小度正式全链路 Cucumber 化
+- [done] 读取 `plan.md`，确认用户要求正式全链路改为 Cucumber 执行，并支持后续新增用例只改用例不改执行逻辑。
+- [done] 落地 `cucumber-formal` 执行模式：Feature/Examples 驱动正式全集，step 调用通用 formal suite 并按 case table 统一断言。
+- [done] 生成小度 72 条正式用例的 Cucumber Feature，并实现通用 case-status step 和结果转换。
+- [done] 通过 Cucumber Feature 执行小度正式全链路；内部 formal suite 完整跑完并聚合 72 条。
+- [done] 收敛执行/断言问题，输出最终 Cucumber 全链路结果：正式用例 `70 PASS / 1 FAIL / 1 TODO / 0 BLOCKED`，Cucumber 场景 `72 passed / 1 failed / 0 blocked`；正式 Cucumber 报告 `cucumber_test/debug/reports/20260513_211323_xiaodu5062_cucumber_formal_fullflow_r1/suite_report.md`。
+
+## 2026-05-14 Cucumber 执行器架构澄清
+- [done] 读取 `plan.md`。
+- [done] 用户询问当前是否只是 Cucumber 用例、执行仍是旧 runner，且没有根据 Cucumber 生成对应执行器。
+- [done] 准备明确说明当前实现边界，并给出下一阶段真正 Cucumber-native 执行器落地方向。
+
+## 2026-05-14 Cucumber Native 执行器落地
+- [done] 读取 `plan.md`，确认用户要求从“Cucumber 外壳 + 旧 runner”升级为“Cucumber Scenario 直接驱动执行”。
+- [doing] 设计并实现 Cucumber-native step library：按 Feature/Examples 的动作 DSL 调用硬件原语，避免每新增用例都写新 runner。
+- [todo] 先用小度项目迁移一批正式链路场景，覆盖 gate、唤醒、主动协议、负例、播报/语音开关、音量探测的 native 执行闭环。
+- [todo] 运行 Cucumber-native 验证，修复执行/断言问题，输出结果和下一步迁移边界。
+
+## 2026-05-14 Cucumber Native 执行器实跑收敛
+- [done] 再次读取 `plan.md` 并确认用户认可当前判断：之前 `cucumber-formal` 只是 Cucumber 用例外壳，执行仍依赖旧 formal runner，需要升级为 Scenario 直接驱动硬件动作。
+- [doing] 使用小度 5062 设备执行 `cucumber_test/runtime/features/xiaodu_native_core.feature`，验证 native step 能直接完成声卡播放、串口采集、协议注入、日志断言与负向断言。
+- [todo] 对 native 执行中出现的失败逐条判断：执行/方案/断言问题必须修复并复跑，最终失败只能保留固件问题或需求问题。
+- [todo] 将可复用的 Cucumber-native 执行入口、步骤 DSL 和报告口径沉淀到当前 skill，避免后续新增用例需要新增专用 runner。
+- [done] Cucumber-native r1 已完成真实硬件执行：14 条中 `13 PASS / 1 FAIL`，失败为 `NATIVE-PASSIVE-REPORT-001`，证据显示协议/日志均 0 字节，属于 native step 通过第二个串口句柄注入导致被动协议未真正进入同一采集链路的执行器问题，不归固件。
+- [done] 已修正 native 串口采集层：`SerialCapture` 暴露同一串口句柄写入能力，日志命令与协议注入均复用当前采集串口，避免“一边采集一边另开串口写入”的验证链路问题。
+- [doing] 使用修正后的 native step 重新执行小度核心 Cucumber 场景，确认失败是否收敛。
+- [done] r2 仍为 `NATIVE-PASSIVE-REPORT-001` 失败；手工同串口句柄最小探针验证 `A5 FB 12 CC` 可触发 `receive msg`、`play id : 18`，因此不是固件问题。
+- [done] 进一步定位为 native 场景重启后未统一打开 `loglevel 4`，主动协议用例依赖协议口仍 PASS，但被动播报用例依赖日志口，详细接收/播报日志不可见导致误判。
+- [done] 已修正 native 采集开始与 reboot 后的日志级别设置：每个 Scenario 启动采集后统一下发 `loglevel 4`，reboot 后再补一次。
+- [doing] 重新执行 Cucumber-native r3，确认 `NATIVE-PASSIVE-REPORT-001` 是否收敛。
+- [done] Cucumber-native r3 已收敛通过：`14 PASS / 0 FAIL / 0 BLOCKED`，证明 Scenario 已直接驱动声卡播放、串口采集、协议注入、日志/协议断言，未调用旧 formal runner。
+- [done] 已把 native 执行模式接入通用 suite：`tools/suite/run_formal_suite.py --execution-mode cucumber-native`，并修正 native runner 在 behave 失败时必须返回非 0，避免失败被转换器吞掉。
+- [done] 已补充 native 表驱动 DSL：`Native 执行动作表` 和 `Native 断言表应满足`，支持新增同类用例只改 Feature 的 Scenario/Examples/动作表/断言表。
+- [done] 已将被动播报用例改为动作表/断言表执行，并通过通用 suite 实跑验证：`deliverables/formal_suite_runs/20260514_095525_xiaodu5062_cucumber_native_table_suite_r1/suite_report.md`，结果 `PASS=14 / FAIL=0 / BLOCKED=0`。
+- [done] 已同步文档和 skill 口径：`cucumber-formal` 明确为旧 runner wrapper，`cucumber-native` 才是 Scenario 直接驱动硬件；后续 native 迁移不能混淆。
+- [todo] 后续若用户要求 72 条全部 native，需要按迁移路线继续补会话超时、持久化、音量边界探测、语音注册等 native DSL/step；未迁移部分继续由 formal adapter 执行，不能冒充 native。
+
+## 2026-05-14 全量 Cucumber 闭环继续执行
+- [done] 读取 `plan.md`，确认用户要求：不能只停在 14 条 native core，也不能用旧 runner 外壳冒充全部 Cucumber；需要自行把全链路跑通、问题自行收敛后再停。
+- [doing] 设计全量 Cucumber 执行闭环：用 Cucumber 作为统一入口和用例源，执行必须能覆盖正式 72 条结果；已 native 化的场景直接由 Scenario 驱动硬件，暂未 native 化的复杂专项必须明确在 Cucumber 执行链路内可追踪，不得混淆为 native。
+- [todo] 实现全量 Cucumber suite 入口、结果聚合和报告，优先消除 wrapper/native 命名混乱；如果存在执行/断言问题，修复后复跑。
+- [todo] 使用当前小度设备运行全量 Cucumber 链路，最终输出 PASS/FAIL/TODO/BLOCKED；最终 FAIL 只允许保留固件或需求问题。
+- [done] 已新增 `--execution-mode cucumber-all`：同一 suite 内先跑 Cucumber-native core，再跑 72 条正式 Cucumber Feature，最终需求统计以正式 72 条为准，native core 作为直接硬件执行覆盖证据。
+- [done] 已修正 suite 报告：同时展示正式 72 条统计、native Cucumber 统计、formal Cucumber 场景统计，避免再把 wrapper/native 混为一类。
+- [doing] 开始用当前小度 5062 设备跑 `cucumber-all` 全链路；执行中 raw FAIL 先判断是否为执行/断言问题，能修就修并复跑。
+- [done] `cucumber-all` 全链路 r1 已执行完成：报告 `deliverables/formal_suite_runs/20260514_112136_xiaodu5062_cucumber_all_fullchain_r1/suite_report.md`。
+- [done] 本轮全量结果：正式 72 条 `PASS=70 / FAIL=1 / TODO=1 / BLOCKED=0`；Native Cucumber core `PASS=14 / FAIL=0 / BLOCKED=0`；Formal Cucumber 场景 `passed=72 / failed=1 / blocked=0 / total=73`。
+- [done] Cucumber 唯一失败场景为 `CFG-VOL-001`，场景失败原因与正式聚合一致：烧录后探测默认音量档位=2，需求=3，属于固件默认值与需求不一致或需求错误，不是 Cucumber/断言/执行问题。
+- [done] `SESS-001` 仍为 `TODO`：当前仅有启动日志和后续可交互证据，欢迎语/待机听感仍按人工项处理，未伪造成 PASS 或固件 FAIL。
+- [done] 已同步 `cucumber-all` 入口到 `SKILL.md`、`README.md`、`references/modular-validation-workflow.md` 和 `cucumber_test/` 相关说明文档。
+
+## 2026-05-14 当前完整流程解释
+- [done] 读取 `plan.md`，确认本轮任务是面向小白解释当前 Trisolaris + Cucumber 全链路流程。
+- [done] 复核 `SKILL.md`、`references/modular-validation-workflow.md` 与 `cucumber_test/README.md` 中的当前入口、执行模式和结果口径。
+- [doing] 用非专业视角整理“输入是什么、系统做什么、怎么烧录/测试/判断、报告怎么看、FAIL 如何归因”的完整说明。
+- [done] 用户要求查看 `CFG-VOL-001` 默认音量测试用例、执行和断言逻辑，且不展示原始代码。
+- [done] 已定位当前用例口径：烧录前清配置、烧录后首启抓 `Running Config`，再用单边到上边界 + 双边全档位探测推导默认档位，最后与需求默认 `3档` 比对。
+
+## 2026-05-14 展示默认音量 Cucumber 用例
+- [done] 读取 `plan.md`，确认用户要看 Cucumber 中默认音量验证用例本身。
+- [done] 定位当前正式执行 Feature：`cucumber_test/runtime/features/xiaodu_formal_fullflow.feature` 中 `CFG-VOL-001` 作为 72 条正式状态校验 Examples 的一行。
+- [done] 定位默认音量设计样例 Feature：`cucumber_test/04_examples/features/xiaodu_volume_default.feature` 中有完整的 `CFG-VOL-001 默认音量应符合需求值` 场景。
+
+## 2026-05-14 展示默认音量 Cucumber 用例补充
+- [done] 按 AGENTS 要求读取 `plan.md` 并确认本轮只需要展示默认音量验证的 Cucumber 用例。
+- [done] 复核当前 runtime 正式执行入口：`cucumber_test/runtime/features/xiaodu_formal_fullflow.feature` 中 `CFG-VOL-001` 目前是正式全集状态校验行。
+- [done] 复核默认音量完整 Gherkin 样例：`cucumber_test/04_examples/features/xiaodu_volume_default.feature` 中已有 `CFG-VOL-001 默认音量应符合需求值` 场景。
+- [todo] 后续若要彻底 Cucumber-native，需要把 `CFG-VOL-001` 从 examples 迁入 runtime，并让 step 直接调用音量边界探测执行器，而不是只校验 formal 聚合状态。
+
+## 2026-05-14 运行状态确认
+- [done] 读取 `plan.md`，确认最近一次完整运行是 `20260514_112136_xiaodu5062_cucumber_all_fullchain_r1`，已经结束。
+- [done] 确认刚才展示默认音量 Cucumber 用例时没有启动新的全链路运行。
+- [todo] 若用户要求继续推进，应优先把 `CFG-VOL-001` 默认音量用例迁入 runtime/native，再执行一次 Cucumber 全链路闭环。
+
+## 2026-05-14 后续优化项梳理
+- [done] 读取 `plan.md`，确认用户询问当前是否还有后续优化空间。
+- [done] 基于当前 `cucumber-all` 执行结果和已落地能力，区分“现在可交付使用”和“仍建议继续优化”的边界。
+- [todo] 优先级 1：把 `CFG-VOL-001` 默认音量从 examples 迁入 runtime/native，形成真正 Cucumber step 直驱的数值探测用例。
+- [todo] 优先级 2：逐步把 72 条正式用例从 formal adapter 迁移到 native DSL，重点覆盖会话超时、持久化、音量边界、语音注册等复杂专项。
+- [todo] 优先级 3：增强新需求接入能力：需求解析 -> 验证池匹配 -> Feature 生成 -> 断言生成 -> 执行报告 -> 反哺验证池的闭环自动化。
+
+## 2026-05-14 CFG-VOL-001 Native 迁移与全链路复跑
+- [done] 读取 `plan.md`，确认用户要求继续推进且中间问题自行闭环，不再只停留在说明层。
+- [doing] 梳理当前 Cucumber/native 执行器和小度默认音量探测逻辑，目标是把 `CFG-VOL-001` 从 examples/formal 状态校验迁入 runtime/native。
+- [todo] 实现 native Feature/step/adapter：Cucumber 场景直接触发清配置、重启/烧录后首启观测、音量边界探测和需求值断言。
+- [todo] 运行小度 `cucumber-all` 或等价全集，收敛执行/方案/断言问题，最终 FAIL 只保留固件或需求问题。
+- [todo] 将稳定逻辑同步到 skill 文档和 plan，必要时提交/同步 git。
+- [done] 已新增 `CFG-VOL-001` runtime/native 场景：Cucumber step 直接执行清配置、烧录、启动配置提取、音量边界探测和需求值断言。
+- [done] 已调整 native suite 包装：behave 出现需求 FAIL 时不再中断 dispatcher，而是保留为 Native Cucumber 非 PASS 项并继续汇总。
+- [doing] 开始执行小度 Cucumber 全链路复跑，验证新 native 默认音量场景与正式 72 条聚合结果是否一致。
+- [done] 首轮全链路已跑完但 native 发现两个执行层问题：`CFG-VOL-001` 过早因 burn.log 未含 Running Config 中断，导致默认音量未进入探测；紧随其后的 active-open 场景在设备刚启动窗口误 FAIL。
+- [done] 已修正 native 方案：默认音量场景移到 native core 末尾，避免影响其他核心场景；烧录成功后不再强依赖 burn.log 中必须含 Running Config，而是进入真实音量探测后再断言默认档位。
+- [doing] 先复跑 `cucumber-native`，确认 native 层只剩 `CFG-VOL-001` 真实默认音量 FAIL。
+- [done] Native r2 复跑结果已收敛：15 条 `PASS=14 / FAIL=1 / BLOCKED=0`，唯一 FAIL 为 `CFG-VOL-001`，原因已变成真实探测默认档位 `2` vs 需求 `3`。
+- [done] 已补充 post-burn 默认配置捕获兜底：烧录工具日志不含 `Running Config` 时，native step 通过烧录后重启窗口捕获 `volume` 辅助证据，不再输出 raw missing。
+- [doing] 使用修正后的 native 默认音量逻辑重新执行小度 `cucumber-all` 全链路，产出最终结果。
+- [done] 修正后 `cucumber-all` r3 已完整执行完成：正式 72 条 `PASS=70 / FAIL=1 / TODO=1 / BLOCKED=0`；native 15 条 `PASS=14 / FAIL=1 / BLOCKED=0`；Formal Cucumber 场景 `passed=72 / failed=1 / total=73`。
+- [done] r3 唯一自动化 FAIL 已双路径收敛为 `CFG-VOL-001`：native 直接探测默认档位 `2`、需求 `3`、启动 raw `volume=1`、总档位 `5`；formal 聚合同样为默认音量 FAIL。
+- [done] 已更新 Cucumber 文档和 skill 口径：默认音量已进入 runtime/native，`cucumber-all` 说明改为 native 场景 + 72 条正式 Feature。
+
+## 2026-06-04 Orion SkillTest 平台模块 JSON
+- [done] 读取 `plan.md` 并确认本轮任务：根据 `references/docs` 的 Orion SkillTest 资料规范，为当前 skill 生成平台可展示/调用的功能模块 JSON，并把同步规则写入 `SKILL.md`。
+- [done] 检查用户给定路径 `/home/bszheng/.openclaw/skills/mars-belt/references/docs`，当前机器不存在该 skill 目录；已使用当前 skill 内同名规范文件 `references/docs/orion-skilltest-profile-framework.md` 和示例 `references/docs/orion.skilltest.json` 作为生成依据。
+- [done] 梳理 `references/validation-pool/` 当前支持的测试平台功能模块，生成根目录 `orion.skilltest.json`。
+- [done] 在 `SKILL.md` 写入后续同步规则：验证池/项目模块/执行入口更新时，必须同步更新 `orion.skilltest.json`。
+- [done] 校验 JSON 结构并回传产物路径。
+- [done] 已生成根目录 `orion.skilltest.json`，覆盖 16 个当前平台化测试能力模块。
+- [done] 已把 Orion SkillTest 平台资料同步规则写入 `SKILL.md`：验证池模块、执行入口、项目 profile、Cucumber/native 模式或模块用例更新时必须同步更新 `orion.skilltest.json`。
+- [done] 已执行 JSON 校验：`python3 -m json.tool orion.skilltest.json >/tmp/orion.skilltest.validated.json`。
+
+## 2026-06-04 Git 同步与可复用颗粒度
+- [done] 读取 `plan.md`，确认本轮任务：把当前 skill 更新同步到 git，并保证其他 PC 拉取后不缺关键源码/文档/配置即可正常使用。
+- [done] 按 skill 发布口径梳理应提交文件：核心源码、Cucumber runtime、Orion SkillTest JSON、docs/spec、README/SKILL 规则、验证池/工作流文档；排除运行日志、历史报告、音频缓存、烧录 staging 和临时产物。
+- [done] 把“git 同步必须保证完整可复用颗粒度”的规则写入 `SKILL.md`、`README.md` 和 `references/repo-workflow.md`，并补充 `.gitignore` 防止 formal suite 运行目录与模块匹配快照误提交。
+- [doing] 检查 git 状态、分批暂存必要文件、运行 JSON/Python 校验、提交并推送远端。
+- [todo] 推送完成后回写 commit/branch/验证结果到 `plan.md` 并向用户返回同步结论。

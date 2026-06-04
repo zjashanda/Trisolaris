@@ -1,0 +1,1081 @@
+{
+  "schema": "orion.skilltest.v1",
+  "skill_id": "trisolaris",
+  "name": "Trisolaris 多项目离线语音验证",
+  "summary": "读取多文件项目需求和固件，按模块化验证池生成测试方案/自然语言用例，完成烧录、门禁、声卡播放、串口协议/日志采集、Cucumber/正式全集执行、FAIL 收敛和证据归档。",
+  "version": "1.0.0",
+  "flow": [
+    "选择 Agent 节点",
+    "选择或导入项目需求目录和设备配置",
+    "选择一个或多个待测功能模块",
+    "基于验证池生成模块化测试方案",
+    "生成自然语言测试用例和执行断言",
+    "测试人员确认用例、副作用和硬件风险",
+    "烧录固件并执行最小可测性门禁",
+    "下发到 Agent 执行并收集串口/声卡/协议证据",
+    "收敛 raw FAIL 并输出最终 PASS/FAIL/TODO/BLOCKED 报告"
+  ],
+  "call_method": "python3 tools/suite/run_formal_suite.py --req-dir <需求目录> --project <profile> --execution-mode <formal|cucumber-native|cucumber-all> --env-file <env>",
+  "required_config": [
+    "目标 Agent 在线且可访问 skill 目录",
+    "项目需求目录包含需求文档、词表/协议表、tone/play id 或固件等输入",
+    "日志/烧录串口、协议串口、控制/boot 串口配置可用",
+    "播放声卡 device key 或默认声卡可用",
+    "烧录工具和目标固件可用，execute 前确认真实设备动作风险",
+    "如项目需要 MCU ready/心跳/回包，需提供真实 MCU 或测试夹具仿真口径"
+  ],
+  "generation": {
+    "mode": "server-llm",
+    "planner": "codex",
+    "prompt": "根据选中的 Trisolaris 能力模块、项目需求目录、设备配置和用户补充说明，生成项目级测试方案、自然语言测试用例、执行顺序、断言与证据规则；同名功能必须按当前项目变体选择，不得直接套用旧项目断言。",
+    "output_schema": "orion.skilltest.plan.v1",
+    "artifacts": [
+      "plan.json",
+      "cases.json",
+      "cases.md",
+      "run_config.json",
+      "suite_report.md"
+    ]
+  },
+  "capabilities": [
+    {
+      "id": "requirement_ingestion",
+      "module": "planning",
+      "name": "多文件需求解析与功能点建模",
+      "summary": "解析需求文档、词表、协议表、tone、流程图和固件，形成当前有效需求和模块映射。",
+      "requirement": "输入新项目或需求变更后，先生成可追溯的功能点清单、删除项/人工项/歧义项和验证池匹配结果。",
+      "logic": "读取项目输入目录，抽取动作、协议、播报、状态、数值和保存约束，映射到 validation-pool 模块并生成项目级方案骨架。",
+      "modes": [
+        "plan-only",
+        "dry-run"
+      ],
+      "recommended_mode": "plan-only",
+      "runner": "codex",
+      "task": "tools/pool/validation_pool.py classify",
+      "requires": [
+        "需求目录",
+        "词表/协议表",
+        "固件或配置文件",
+        "references/validation-pool/INDEX.md"
+      ],
+      "side_effects": [
+        "读取项目资料",
+        "生成方案和用例草稿"
+      ],
+      "risk_level": "low",
+      "test_cases": [
+        {
+          "id": "REQ-INGEST-001",
+          "title": "需求输入解析和模块映射",
+          "objective": "确认项目输入能被拆解成可执行验证模块。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "枚举项目需求目录中的文档、表格、图片和固件。",
+            "提取功能点、默认配置、协议方向、播报和状态机约束。",
+            "匹配验证池模块并标记采用/不采用原因。",
+            "输出当前有效需求清单和模块映射结果。"
+          ],
+          "expected_results": [
+            "每个自动化功能点都有来源文档和模块标签。",
+            "删除项、人工项和歧义项被单独标记。",
+            "没有把旧项目结论直接作为新项目断言。"
+          ],
+          "evidence": [
+            "需求清单",
+            "模块匹配文档",
+            "plan.json/cases.md"
+          ],
+          "pass_criteria": "所有可测功能点均可追溯并完成模块映射。",
+          "fail_criteria": "需求解析遗漏关键功能、来源不可追溯或误套旧项目断言。",
+          "blocked_conditions": [
+            "需求目录不存在",
+            "关键文档无法读取",
+            "输入格式无法解析"
+          ],
+          "estimated_minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "burn_and_gates",
+      "module": "environment",
+      "name": "烧录、健康检查和最小可测性门禁",
+      "summary": "烧录固件、控制上下电/boot，确认日志、协议、声卡和设备 ready 后再执行正式用例。",
+      "requirement": "固件烧录闭环必须成功，设备必须通过最小可测性门禁，否则不得下正式功能结论。",
+      "logic": "按项目 profile 和统一烧录时序执行 config.clear、烧录、版本确认、power-cycle、loglevel、协议/唤醒 smoke 和 ready 检查。",
+      "modes": [
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode formal",
+      "requires": [
+        "固件 bin",
+        "日志/烧录串口",
+        "控制/boot 串口",
+        "协议串口",
+        "烧录工具",
+        "声卡"
+      ],
+      "side_effects": [
+        "可能擦写固件",
+        "上下电设备",
+        "播放唤醒音频",
+        "读取/写入串口"
+      ],
+      "risk_level": "high",
+      "test_cases": [
+        {
+          "id": "GATE-BURN-001",
+          "title": "烧录与最小门禁",
+          "objective": "确认目标固件可被烧录且设备进入可测试状态。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "执行支持的配置清除动作并重启。",
+            "复制固件到烧录工具目录并执行完整 boot 时序。",
+            "检查烧录成功 marker 和启动版本。",
+            "打开日志级别并执行最小唤醒/基础命令 smoke。"
+          ],
+          "expected_results": [
+            "烧录成功 marker 完整。",
+            "启动日志版本匹配目标固件。",
+            "日志/协议/声卡链路可用，设备 ready。"
+          ],
+          "evidence": [
+            "burn.log",
+            "burn_tool.log",
+            "启动日志",
+            "gate smoke 串口证据"
+          ],
+          "pass_criteria": "烧录、启动和最小交互全部成功。",
+          "fail_criteria": "烧录失败、启动版本不符、持续 not ready 或最小 smoke 不闭环。",
+          "blocked_conditions": [
+            "端口映射错误",
+            "控制口不能上下电",
+            "声卡不可用",
+            "烧录工具缺失"
+          ],
+          "estimated_minutes": 10
+        }
+      ]
+    },
+    {
+      "id": "wake_session",
+      "module": "wake",
+      "name": "唤醒、会话和超时",
+      "summary": "验证默认唤醒、会话窗口、未唤醒阻断、超时值和重唤醒恢复。",
+      "requirement": "唤醒和会话行为必须满足当前需求定义的时长、协议、阻断和恢复规则。",
+      "logic": "播放唤醒和命令音频，采集日志/协议 marker，用同源日志时间差测超时，负例必须证明采集有效。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode cucumber-all",
+      "requires": [
+        "唤醒词音频",
+        "日志串口",
+        "协议串口",
+        "声卡",
+        "会话超时需求"
+      ],
+      "side_effects": [
+        "播放唤醒/命令音频",
+        "读取串口日志"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "WAKE-SESSION-001",
+          "title": "唤醒会话闭环验证",
+          "objective": "确认默认唤醒、会话超时和重唤醒恢复符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "从干净基线播放默认唤醒词。",
+            "播放基础命令并捕获协议/日志。",
+            "等待并测量 TIME_OUT/MODE=0。",
+            "超时后直说命令做阻断反例，再重唤醒确认恢复。"
+          ],
+          "expected_results": [
+            "唤醒和命令均有有效证据。",
+            "实测超时符合需求容差。",
+            "未唤醒/超时后命令被阻断，重唤醒后恢复。"
+          ],
+          "evidence": [
+            "日志串口",
+            "协议帧",
+            "超时统计 JSON",
+            "报告"
+          ],
+          "pass_criteria": "所有唤醒、超时、阻断和恢复断言通过。",
+          "fail_criteria": "无唤醒、超时超差、未唤醒仍执行或重唤醒不能恢复。",
+          "blocked_conditions": [
+            "声卡不可用",
+            "串口无日志",
+            "唤醒音频缺失"
+          ],
+          "estimated_minutes": 8
+        }
+      ]
+    },
+    {
+      "id": "active_protocol",
+      "module": "protocol",
+      "name": "主动协议输出验证",
+      "summary": "验证语音命令识别后设备主动向 MCU/外部控制器发送的协议帧。",
+      "requirement": "词表中每个可执行语音命令必须产生需求定义的主动协议，方向和码值正确。",
+      "logic": "建立 ready 状态，播放唤醒和命令，协议 UART 捕获原始帧；播报/本地状态按需求转入对应模块。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "cucumber_test/runtime/features/xiaodu_native_core.feature",
+      "requires": [
+        "命令词音频",
+        "协议表",
+        "协议串口",
+        "日志串口",
+        "声卡"
+      ],
+      "side_effects": [
+        "播放命令音频",
+        "读取协议串口"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "ACTIVE-PROTO-001",
+          "title": "主动协议命令验证",
+          "objective": "确认选中命令能输出正确主动协议。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "进入可测基线并开始日志/协议采集。",
+            "播放唤醒词和目标命令词。",
+            "在协议串口中查找目标主动帧。",
+            "如有别名，按同一需求行补充别名探测。"
+          ],
+          "expected_results": [
+            "协议 UART 出现目标主动帧。",
+            "帧方向和码值与需求一致。",
+            "没有异常重启或邻近意图误触发。"
+          ],
+          "evidence": [
+            "协议原始帧",
+            "日志辅助 send msg",
+            "播放记录"
+          ],
+          "pass_criteria": "所有目标命令主动帧正确输出。",
+          "fail_criteria": "目标帧缺失、方向错误、码值错误或误触发其他意图。",
+          "blocked_conditions": [
+            "协议口不可读",
+            "TTS 语料缺失",
+            "设备未 ready"
+          ],
+          "estimated_minutes": 4
+        }
+      ]
+    },
+    {
+      "id": "passive_protocol",
+      "module": "protocol",
+      "name": "被动协议注入与响应验证",
+      "summary": "验证 MCU/外部协议注入后的接收、播报、状态改变或窗口内响应。",
+      "requirement": "被动协议必须按需求被设备接收并产生对应播报、状态或无响应行为。",
+      "logic": "在正确窗口/前置状态下注入 MCU->CSK 帧，确认 receive marker，再断言 play id、配置刷新、保存或业务效果。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/debug/run_htt_handshake_formal_suite.py",
+      "requires": [
+        "被动协议表",
+        "协议串口 TX",
+        "日志串口",
+        "ready/心跳口径"
+      ],
+      "side_effects": [
+        "向协议串口写入帧",
+        "可能改变设备状态或触发布报"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "PASSIVE-PROTO-001",
+          "title": "被动协议接收与响应",
+          "objective": "确认设备能正确处理选中被动协议。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "建立需求要求的前置状态或响应窗口。",
+            "通过协议串口注入被动帧。",
+            "检查日志接收 marker。",
+            "按需求断言播报、状态、保存或静默。"
+          ],
+          "expected_results": [
+            "设备明确收到被动帧。",
+            "响应行为符合需求。",
+            "窗口外反例如有需求则不生效。"
+          ],
+          "evidence": [
+            "协议 TX/RX 记录",
+            "receive msg 日志",
+            "play id/配置刷新日志"
+          ],
+          "pass_criteria": "接收和响应均符合需求。",
+          "fail_criteria": "未接收、响应错误、窗口外误生效或状态不一致。",
+          "blocked_conditions": [
+            "协议 TX 不可用",
+            "设备未 ready",
+            "心跳/回包缺失"
+          ],
+          "estimated_minutes": 5
+        }
+      ]
+    },
+    {
+      "id": "active_passive_closed_loop",
+      "module": "protocol",
+      "name": "主动上报与 MCU 回包闭环",
+      "summary": "验证主动上报后需等待 MCU 回包才改变本地状态或播报的闭环逻辑。",
+      "requirement": "如果需求/词表有主动发送和 MCU 回复对照，不能只凭主动帧断言本地状态。",
+      "logic": "先捕获主动帧，再按词表或探测候选回包注入 MCU 回复，最后验证配置、播报和后续业务效果。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/debug/run_htt_voice_switch_state_machine_probe.py",
+      "requires": [
+        "主动协议",
+        "MCU 回包表",
+        "协议串口 RX/TX",
+        "日志串口"
+      ],
+      "side_effects": [
+        "播放语音命令",
+        "写入 MCU 回包",
+        "可能改变设备状态"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "CLOSED-LOOP-001",
+          "title": "主动/被动闭环状态验证",
+          "objective": "确认主动命令经过 MCU 回包后才产生正确本地状态。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "播放目标主动命令并捕获主动协议。",
+            "按对照表注入 MCU 回包。",
+            "观察配置刷新、play id 和后续业务效果。",
+            "必要时使用候选回包做最小探测。"
+          ],
+          "expected_results": [
+            "主动帧和 MCU 回包链路完整。",
+            "本地状态和后续业务与需求一致。",
+            "缺失回包时不误判固件本地副作用失败。"
+          ],
+          "evidence": [
+            "主动协议帧",
+            "MCU 回包帧",
+            "配置刷新日志",
+            "后续业务证据"
+          ],
+          "pass_criteria": "闭环后状态/播报/业务均正确。",
+          "fail_criteria": "回包后状态错误、回包不生效或需求对照表矛盾。",
+          "blocked_conditions": [
+            "协议口不能双向通信",
+            "回包码值缺失",
+            "前置状态不稳定"
+          ],
+          "estimated_minutes": 6
+        }
+      ]
+    },
+    {
+      "id": "broadcast_play_id",
+      "module": "audio",
+      "name": "播报、tone 和 play id 验证",
+      "summary": "验证播报文案、tone、play id、提示音、成功/失败提示和不播报规则。",
+      "requirement": "自动化结论必须基于 play id/play start/play stop 等日志证据，不能只靠人耳。",
+      "logic": "限定目标动作后的播报窗口，过滤前置/恢复动作污染，按需求比对播报、静默或提示音。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/debug/run_htt_active_passive_playid_sweep.py",
+      "requires": [
+        "tone/play id 表",
+        "日志串口",
+        "触发命令或被动帧"
+      ],
+      "side_effects": [
+        "播放音频或注入协议",
+        "可能触发布报"
+      ],
+      "risk_level": "low",
+      "test_cases": [
+        {
+          "id": "BROADCAST-PLAYID-001",
+          "title": "目标播报和静默验证",
+          "objective": "确认触发动作后的播报行为符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "建立目标前置状态。",
+            "触发语音命令或被动协议。",
+            "采集目标窗口内 play id/play start/play stop。",
+            "过滤恢复默认、启动和前置动作产生的播报。"
+          ],
+          "expected_results": [
+            "目标播报/静默与需求一致。",
+            "没有额外污染播报。",
+            "设置失败等特殊提示按需求出现。"
+          ],
+          "evidence": [
+            "play id 日志",
+            "播报窗口切片",
+            "协议/命令证据"
+          ],
+          "pass_criteria": "播报、静默或提示音完全符合需求。",
+          "fail_criteria": "缺播、错播、多播、静默规则错误或设置结果未生效。",
+          "blocked_conditions": [
+            "日志级别不足",
+            "play id 表缺失",
+            "触发动作未成功"
+          ],
+          "estimated_minutes": 4
+        }
+      ]
+    },
+    {
+      "id": "volume_level",
+      "module": "numeric",
+      "name": "音量档位、默认值和边界验证",
+      "summary": "验证默认音量、总档位数、最大/最小边界、上下溢播报和音量保存。",
+      "requirement": "默认音量不能直接用 raw 编码等同用户档位，必须用单边/双边边界探测推断。",
+      "logic": "清配置/恢复出厂后，从默认位单边探边界，再双边获取总档位；保存项需等待保存闭环后重启验证。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "cucumber_test/runtime/features/xiaodu_native_core.feature",
+      "requires": [
+        "音量命令音频",
+        "日志串口",
+        "协议串口",
+        "默认音量需求",
+        "档位数需求"
+      ],
+      "side_effects": [
+        "播放音量调节语音",
+        "可能改变设备音量",
+        "可能触发边界播报"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "VOLUME-LEVEL-001",
+          "title": "音量默认值与边界探测",
+          "objective": "确认默认音量和总档位数符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "清配置/恢复出厂并建立默认态。",
+            "从默认位连续调大到上边界并统计有效 step。",
+            "从上边界调小到下边界，再从下边界调大到上边界。",
+            "用总档位和边界 step 推导默认档位。"
+          ],
+          "expected_results": [
+            "实测总档位数符合需求。",
+            "推导默认档位符合需求。",
+            "边界后继续调节有正确上/下溢证据。"
+          ],
+          "evidence": [
+            "运行时音量日志",
+            "play id/边界播报",
+            "音量探测 JSON",
+            "报告"
+          ],
+          "pass_criteria": "默认档位、总档位和边界行为均符合需求。",
+          "fail_criteria": "默认档位不符、档位数不符、边界越界或保存行为错误。",
+          "blocked_conditions": [
+            "音量命令不识别",
+            "日志无音量 marker",
+            "前序音量状态污染"
+          ],
+          "estimated_minutes": 8
+        }
+      ]
+    },
+    {
+      "id": "persistence_config",
+      "module": "config",
+      "name": "配置默认值、掉电保存和恢复出厂",
+      "summary": "验证默认配置、保存开关、恢复出厂、config.clear 和重启/断电后配置。",
+      "requirement": "保存类需求必须先看到保存闭环或等待策略，再重启/断电验证。",
+      "logic": "先测默认态，设置非默认值，等待保存证据，power-cycle/reboot 后读取启动配置和行为效果。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode formal",
+      "requires": [
+        "配置字段",
+        "保存需求",
+        "日志串口",
+        "控制口",
+        "恢复出厂/清配置命令"
+      ],
+      "side_effects": [
+        "写入配置或播放设置命令",
+        "上下电/重启设备",
+        "可能恢复出厂"
+      ],
+      "risk_level": "high",
+      "test_cases": [
+        {
+          "id": "CONFIG-PERSIST-001",
+          "title": "配置保存和默认值验证",
+          "objective": "确认配置项默认值和掉电保存符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "读取清配置/烧录后的默认启动配置。",
+            "设置配置项为非默认值并等待保存闭环。",
+            "执行重启或断电再上电。",
+            "读取启动配置并验证后续行为。"
+          ],
+          "expected_results": [
+            "默认值符合需求。",
+            "保存开启时重启后保持，保存关闭时恢复默认。",
+            "恢复出厂后回到需求默认态。"
+          ],
+          "evidence": [
+            "启动 Running Config",
+            "保存日志",
+            "power-cycle 日志",
+            "后续行为证据"
+          ],
+          "pass_criteria": "默认、保存和恢复出厂行为均符合需求。",
+          "fail_criteria": "默认值错误、未保存、错误保持或恢复出厂不完整。",
+          "blocked_conditions": [
+            "控制口不能断电",
+            "保存 marker 缺失且无法确定等待时间",
+            "配置字段不可见"
+          ],
+          "estimated_minutes": 8
+        }
+      ]
+    },
+    {
+      "id": "state_machine_settings",
+      "module": "state-machine",
+      "name": "设置窗口、模式状态和普通词干扰",
+      "summary": "验证进入设置窗口、目标值设置、模式生效、窗口外反例和普通词干扰。",
+      "requirement": "设置成功播报不是最终结论，必须补后置行为验证状态确实生效。",
+      "logic": "自建前置模式，进入设置窗口，执行目标值，验证后置行为；同时测试窗口外候选词和普通词干扰。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode formal",
+      "requires": [
+        "设置入口词",
+        "候选目标值",
+        "模式状态需求",
+        "日志/协议串口",
+        "声卡"
+      ],
+      "side_effects": [
+        "播放设置语音",
+        "改变设备工作模式或设置状态"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "SETTING-STATE-001",
+          "title": "设置窗口和模式生效验证",
+          "objective": "确认设置窗口、目标值和后置行为符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "建立默认状态并确认基础功能可用。",
+            "播放设置入口词进入窗口。",
+            "播放目标候选值并捕获成功反馈。",
+            "用模式敏感命令验证状态生效，并执行窗口外反例。"
+          ],
+          "expected_results": [
+            "设置入口和目标值识别正确。",
+            "后置行为证明模式生效。",
+            "窗口外候选词和普通词干扰行为符合需求。"
+          ],
+          "evidence": [
+            "设置窗口日志",
+            "播报/play id",
+            "协议帧",
+            "后置行为日志"
+          ],
+          "pass_criteria": "设置和状态机行为均符合当前需求变体。",
+          "fail_criteria": "设置仅播报但不生效、窗口外误生效或普通词干扰规则错误。",
+          "blocked_conditions": [
+            "设置窗口 marker 不可见",
+            "候选音频缺失",
+            "需求未定义普通词规则"
+          ],
+          "estimated_minutes": 7
+        }
+      ]
+    },
+    {
+      "id": "voice_switch_state_machine",
+      "module": "state-machine",
+      "name": "语音开关和受限状态机",
+      "summary": "验证关闭语音、打开语音、受限命令、受限窗口、提示音和恢复业务。",
+      "requirement": "语音关闭后允许唤醒不等于业务恢复，普通业务协议必须按受限态规则阻断。",
+      "logic": "按当前会话/超时后分支执行关闭语音，测普通命令阻断、提示音次数、受限窗口和打开语音恢复。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/debug/run_htt_voice_switch_state_machine_probe.py",
+      "requires": [
+        "语音开关命令",
+        "主动/被动协议表",
+        "受限窗口需求",
+        "日志/协议串口"
+      ],
+      "side_effects": [
+        "播放语音开关命令",
+        "可能关闭设备语音功能",
+        "可能注入 MCU 回包"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "VOICE-SWITCH-001",
+          "title": "语音关闭受限和恢复验证",
+          "objective": "确认语音开关状态机符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "确认默认语音可用。",
+            "执行关闭语音并完成必要 MCU 回包闭环。",
+            "在当前会话和超时后分支测试普通命令阻断。",
+            "执行打开语音并确认基础业务恢复。"
+          ],
+          "expected_results": [
+            "关闭后普通业务按需求阻断。",
+            "受限窗口和提示音规则正确。",
+            "打开后业务协议和超时恢复正常。"
+          ],
+          "evidence": [
+            "主动/被动协议帧",
+            "play id/提示音日志",
+            "受限窗口计时",
+            "恢复业务证据"
+          ],
+          "pass_criteria": "关闭、受限、提示和恢复均符合需求。",
+          "fail_criteria": "关闭后业务未阻断、打开后不能恢复、受限窗口或提示次数错误。",
+          "blocked_conditions": [
+            "回包对照表缺失",
+            "协议口不能注入",
+            "会话起点无法识别"
+          ],
+          "estimated_minutes": 9
+        }
+      ]
+    },
+    {
+      "id": "voice_register",
+      "module": "voice-register",
+      "name": "语音注册、学习、删除和冲突拦截",
+      "summary": "验证命令词/唤醒词学习、删除、退出删除、失败重试、冲突词、模板满和掉电保存。",
+      "requirement": "学习/删除成功播报不是最终结论，必须后验学习词可用或删除后失效。",
+      "logic": "按需求支持范围执行学习、失败、冲突、删除和模板满分支，重启后复测保存。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/debug/run_remaining_voice_reg_batch.py",
+      "requires": [
+        "语音注册需求",
+        "候选学习词音频",
+        "日志/协议串口",
+        "声卡",
+        "控制口"
+      ],
+      "side_effects": [
+        "播放学习/删除语音",
+        "可能写入自定义词",
+        "可能重启/断电"
+      ],
+      "risk_level": "high",
+      "test_cases": [
+        {
+          "id": "VOICE-REG-001",
+          "title": "语音注册学习删除闭环",
+          "objective": "确认语音注册全链路符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "确认产品支持语音注册并清理基线。",
+            "执行命令词或唤醒词学习流程。",
+            "用学习词后验触发目标功能。",
+            "执行删除/退出删除/冲突/模板满/重启保存分支。"
+          ],
+          "expected_results": [
+            "学习词保存后可用。",
+            "删除后失效，退出删除后保留。",
+            "冲突词被拒绝且原功能不被篡改。",
+            "模板满和掉电保存符合需求。"
+          ],
+          "evidence": [
+            "学习流程日志",
+            "协议帧",
+            "保存闭环",
+            "重启后复测证据"
+          ],
+          "pass_criteria": "学习、删除、冲突、模板满和保存分支均符合需求。",
+          "fail_criteria": "学习不生效、删除不失效、冲突词污染原功能或保存错误。",
+          "blocked_conditions": [
+            "需求未支持语音注册",
+            "学习音频缺失",
+            "模板状态无法清理"
+          ],
+          "estimated_minutes": 25
+        }
+      ]
+    },
+    {
+      "id": "multi_wake",
+      "module": "wake",
+      "name": "多唤醒、切换和掉电保持",
+      "summary": "验证多个唤醒词、当前词切换、查询/恢复默认、非当前词阻断和保存。",
+      "requirement": "切换成功播报不等于当前唤醒词隔离正确，必须做当前词和非当前词双向验证。",
+      "logic": "构建多个唤醒词，执行切换/查询/恢复默认，验证当前词可用、非当前词阻断和重启后保存策略。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode formal",
+      "requires": [
+        "多唤醒词音频",
+        "切换命令",
+        "保存需求",
+        "日志/协议串口",
+        "声卡"
+      ],
+      "side_effects": [
+        "播放多个唤醒词",
+        "可能切换当前唤醒词",
+        "可能保存配置"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "MULTI-WAKE-001",
+          "title": "多唤醒切换与保存验证",
+          "objective": "确认唤醒词切换、查询、恢复和保存符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "确认默认词可唤醒。",
+            "切换到目标唤醒词并用当前词触发基础命令。",
+            "用非当前词做阻断反例。",
+            "查询/恢复默认并执行重启保存验证。"
+          ],
+          "expected_results": [
+            "当前词可用，非当前词行为符合需求。",
+            "默认词常驻/非当前阻断符合当前变体。",
+            "重启后保持或恢复默认符合保存开关。"
+          ],
+          "evidence": [
+            "唤醒日志",
+            "协议帧",
+            "播报/play id",
+            "重启后配置/行为证据"
+          ],
+          "pass_criteria": "切换、查询、恢复和保存分支均符合需求。",
+          "fail_criteria": "当前词不可用、非当前词误唤醒、查询错误或掉电保存错误。",
+          "blocked_conditions": [
+            "唤醒词音频缺失",
+            "随机唤醒不稳定",
+            "保存策略未定义"
+          ],
+          "estimated_minutes": 12
+        }
+      ]
+    },
+    {
+      "id": "negative_abnormal",
+      "module": "negative",
+      "name": "负例、异常和系统性风险",
+      "summary": "验证未唤醒阻断、删除词条失效、模式外无效、非法协议和异常重启等风险。",
+      "requirement": "负例必须证明采集链路有效，不能因为空采集直接判 PASS。",
+      "logic": "先建立正向有效链路和负例前置，再执行不应响应的动作，断言无目标协议/播报/状态变化；异常重启优先级最高。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "agent_shell",
+      "task": "tools/suite/run_formal_suite.py --execution-mode cucumber-all",
+      "requires": [
+        "负例需求",
+        "日志/协议串口",
+        "声卡",
+        "非法协议样本"
+      ],
+      "side_effects": [
+        "播放不应响应语音",
+        "注入非法或窗口外协议",
+        "可能触发设备异常"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "NEG-ABNORMAL-001",
+          "title": "负例和异常验证",
+          "objective": "确认不应响应的动作被阻断且系统无异常。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "先执行一个正向命令证明采集和设备有效。",
+            "建立负例前置状态。",
+            "执行未唤醒命令、旧词条、窗口外协议或非法协议。",
+            "检查目标协议/播报/状态和异常重启。"
+          ],
+          "expected_results": [
+            "负例无目标业务输出。",
+            "采集链路有效。",
+            "没有异常重启、卡死或串口断链。"
+          ],
+          "evidence": [
+            "正向链路证据",
+            "负例窗口日志",
+            "协议帧",
+            "重启/异常标记"
+          ],
+          "pass_criteria": "所有负例按需求阻断且系统稳定。",
+          "fail_criteria": "负例误响应、空采集误判或出现非预期重启。",
+          "blocked_conditions": [
+            "无法建立正向基线",
+            "异常协议样本缺失",
+            "设备已不稳定"
+          ],
+          "estimated_minutes": 6
+        }
+      ]
+    },
+    {
+      "id": "packaging_config_matrix",
+      "module": "platform",
+      "name": "平台打包、配置矩阵和控制变量复测",
+      "summary": "验证平台参数打包、支持矩阵、边界/中值包、依赖参数和控制变量复测。",
+      "requirement": "只测试当前产品支持或可编辑项，不支持项透明披露，不计 FAIL。",
+      "logic": "查询支持矩阵，设计最少包数覆盖参数边界和依赖，先做配置断言，再做烧录/运行态验证，失败后控制变量复测。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "plan-only",
+      "runner": "codex",
+      "task": "references/validation-pool/packaging-config-matrix.md",
+      "requires": [
+        "平台支持矩阵",
+        "产品/模块/语言/版本",
+        "配置项和值域",
+        "打包工具"
+      ],
+      "side_effects": [
+        "可能生成多个固件包",
+        "execute 时可能多次烧录"
+      ],
+      "risk_level": "high",
+      "test_cases": [
+        {
+          "id": "PKG-MATRIX-001",
+          "title": "配置矩阵和控制变量验证",
+          "objective": "确认平台打包参数进入固件并运行态符合需求。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "读取平台支持矩阵并裁剪不支持项。",
+            "生成中值包、边界包和依赖开关包。",
+            "逐包检查配置断言路径。",
+            "烧录可运行包并执行对应运行态验证；组合失败后做控制变量复测。"
+          ],
+          "expected_results": [
+            "支持项配置正确入包。",
+            "边界/依赖组合符合需求。",
+            "失败项能被最小控制变量复现。"
+          ],
+          "evidence": [
+            "支持矩阵",
+            "包配置 JSON",
+            "烧录/运行日志",
+            "控制变量复测报告"
+          ],
+          "pass_criteria": "配置入包、运行态和控制变量均闭环。",
+          "fail_criteria": "配置未入包、支持矩阵误判、组合失败无法归因。",
+          "blocked_conditions": [
+            "打包工具不可用",
+            "支持矩阵缺失",
+            "目标产品不支持该功能"
+          ],
+          "estimated_minutes": 30
+        }
+      ]
+    },
+    {
+      "id": "fault_convergence",
+      "module": "quality",
+      "name": "raw FAIL 收敛和最终归因",
+      "summary": "对 raw FAIL/BLOCKED 做控制变量排查，修复验证路径，最终只保留固件或需求问题。",
+      "requirement": "验证方案、断言、采集、环境、状态污染、TTS、MCU 回包等问题必须先收敛后复跑。",
+      "logic": "按门禁、采集、断言、状态、音频、协议、回包、控制口和配置矩阵逐项排查，修复后重跑并输出归因。",
+      "modes": [
+        "plan-only",
+        "dry-run",
+        "execute"
+      ],
+      "recommended_mode": "dry-run",
+      "runner": "codex",
+      "task": "references/validation-pool/fault-convergence.md",
+      "requires": [
+        "失败用例",
+        "需求期望",
+        "证据路径",
+        "前置状态",
+        "复测能力"
+      ],
+      "side_effects": [
+        "可能重跑用例",
+        "可能调整断言或执行时序",
+        "可能再次烧录/上下电"
+      ],
+      "risk_level": "medium",
+      "test_cases": [
+        {
+          "id": "FAIL-CONVERGE-001",
+          "title": "失败收敛与归因",
+          "objective": "确认最终 FAIL 只剩固件问题或需求问题。",
+          "preconditions": [
+            "项目需求已完成输入识别或模块选择。",
+            "设备配置、串口、声卡和固件路径已确认。",
+            "execute 前已确认真实设备动作和副作用。"
+          ],
+          "steps": [
+            "收集 raw FAIL 的需求、现象和证据路径。",
+            "检查是否为门禁、采集、状态污染、TTS、回包或断言问题。",
+            "修复验证路径并定向复测。",
+            "将稳定复现问题归为固件或需求问题并写入报告。"
+          ],
+          "expected_results": [
+            "执行/方案/断言类问题被修复并复跑。",
+            "最终 FAIL 有清晰证据和归因。",
+            "TODO/BLOCKED 与 FAIL 口径分离。"
+          ],
+          "evidence": [
+            "失败证据",
+            "控制变量复测日志",
+            "修复后的报告",
+            "归因清单"
+          ],
+          "pass_criteria": "所有非固件/非需求问题均已收敛。",
+          "fail_criteria": "把验证问题留作最终 FAIL，或缺少复测证据。",
+          "blocked_conditions": [
+            "设备不可用",
+            "证据缺失",
+            "需求关键点无法澄清"
+          ],
+          "estimated_minutes": 10
+        }
+      ]
+    }
+  ]
+}

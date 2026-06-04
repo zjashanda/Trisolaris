@@ -78,6 +78,8 @@
 
 - 串口采集不能并发占用。
 - 正式全集执行必须优先走通用入口 `tools/suite/run_formal_suite.py`；该入口负责项目识别、模块匹配、烧录/gate、分组隔离、补充专项和最终聚合，对外只输出一次全集结果。
+- Cucumber/Gherkin 可作为可选用例表达层接入：`--execution-mode cucumber-smoke` 运行最小场景；`--execution-mode cucumber-formal` 只表示 Cucumber 包装旧 formal runner 做正式用例状态断言；`--execution-mode cucumber-native` 才表示 Scenario step 直接驱动硬件原语；`--execution-mode cucumber-all` 是当前全量 Cucumber 交付入口，组合 native 场景与 72 条正式 Feature。
+- 当用户要求“Cucumber 直接执行”时，必须走 native step/Feature：声卡播放、串口采集、协议注入、日志/协议断言都由 Scenario 调用；不能再通过 Feature 调旧 runner 冒充 native。
 - 通用入口不能写死某个项目的协议码值或断言；项目差异必须放在 `references/project-profiles/*.json` 和对应 adapter / 项目 runner 中。
 - 内部可以按模块分阶段执行，但最终报告必须是正式用例全集视角，不能让用户手工拼接“主 fullflow + 补充用例 + 聚合”。
 - raw FAIL 先按 `fault-convergence.md` 排查。

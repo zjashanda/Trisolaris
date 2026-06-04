@@ -12,6 +12,8 @@ Trisolaris 是离线语音项目的多项目本地验证 skill 仓库。当前�
 - 新项目或需求变更的完整方法：`references/fullflow-validation-method.md`
 - 模块化需求解析和验证池工作流：`references/modular-validation-workflow.md`
 - 功能拆解、方案、用例和断言池：`references/validation-pool/INDEX.md`
+- 平台能力结构化资料：`orion.skilltest.json`
+- 平台资料格式说明：`references/docs/orion-skilltest-profile-framework.md`
 - 项目识别与执行适配：`references/project-profiles/`
 - 证据与归因规则：`references/evidence-rules.md`
 - 仓库和运行产物规则：`references/repo-workflow.md`
@@ -37,6 +39,10 @@ Trisolaris 是离线语音项目的多项目本地验证 skill 仓库。当前�
 - profile 目录：`references/project-profiles/`
 - 入口职责：项目识别、验证池匹配、烧录/gate、分组执行、targeted overlay、全集聚合和统一报告。
 - 项目差异必须写在 profile/adapter 或项目 runner 里，不能写死到通用入口。
+- 可选 Cucumber smoke：`--execution-mode cucumber-smoke`，用于验证 Gherkin/step/硬件桥接。
+- 可选 Cucumber formal：`--execution-mode cucumber-formal`，Cucumber 包装旧正式 runner/adapter 完成 72 条状态断言，不属于 native。
+- 可选 Cucumber native：`--execution-mode cucumber-native`，Scenario step 直接驱动声卡、串口、协议注入、烧录后数值探测和断言；新增同类用例优先改 `.feature` 的 Scenario/Examples/动作表/断言表。
+- 可选 Cucumber all：`--execution-mode cucumber-all`，同一报告内先执行 native 场景，再执行 72 条正式 Cucumber Feature；这是当前“小度全链路都走 Cucumber 相关”的首选入口。
 
 示例：
 
@@ -44,6 +50,62 @@ Trisolaris 是离线语音项目的多项目本地验证 skill 仓库。当前�
 python3 tools/suite/run_formal_suite.py \
   --req-dir 项目需求/CSK5062小度风扇需求 \
   --project csk5062_xiaodu_fan \
+  --log-port /dev/ttyACM0 \
+  --proto-port /dev/ttyACM2 \
+  --ctrl-port /dev/ttyACM4 \
+  --device-key 'VID_8765&PID_5678:USB_0_4_3_1_0'
+```
+
+
+小度 Cucumber all 全链路示例：
+
+```bash
+python3 tools/suite/run_formal_suite.py \
+  --req-dir 项目需求/CSK5062小度风扇需求 \
+  --project csk5062_xiaodu_fan \
+  --execution-mode cucumber-all \
+  --log-port /dev/ttyACM0 \
+  --proto-port /dev/ttyACM2 \
+  --ctrl-port /dev/ttyACM4 \
+  --burn-port /dev/ttyACM0 \
+  --device-key 'VID_8765&PID_5678:USB_0_4_3_1_0' \
+  --pre-burn-wait-ms 6000
+```
+
+小度 Cucumber smoke 示例：
+
+```bash
+python3 tools/suite/run_formal_suite.py \
+  --req-dir 项目需求/CSK5062小度风扇需求 \
+  --project csk5062_xiaodu_fan \
+  --execution-mode cucumber-smoke \
+  --log-port /dev/ttyACM0 \
+  --proto-port /dev/ttyACM2 \
+  --ctrl-port /dev/ttyACM4 \
+  --device-key 'VID_8765&PID_5678:USB_0_4_3_1_0'
+```
+
+
+小度 Cucumber native 示例：
+
+```bash
+python3 tools/suite/run_formal_suite.py \
+  --req-dir 项目需求/CSK5062小度风扇需求 \
+  --project csk5062_xiaodu_fan \
+  --execution-mode cucumber-native \
+  --log-port /dev/ttyACM0 \
+  --proto-port /dev/ttyACM2 \
+  --ctrl-port /dev/ttyACM4 \
+  --device-key 'VID_8765&PID_5678:USB_0_4_3_1_0'
+```
+
+小度 Cucumber formal 示例：
+
+```bash
+python3 tools/suite/run_formal_suite.py \
+  --req-dir 项目需求/CSK5062小度风扇需求 \
+  --project csk5062_xiaodu_fan \
+  --execution-mode cucumber-formal \
   --log-port /dev/ttyACM0 \
   --proto-port /dev/ttyACM2 \
   --ctrl-port /dev/ttyACM4 \
@@ -116,3 +178,10 @@ python3 tools/suite/run_formal_suite.py \
 - `tools/burn_bundle/*/burn.log`
 - `tools/burn_bundle/*/burn_tool.log`
 - `__pycache__/`、`.venv/`、临时固件压缩包和解压目录
+
+Git 同步必须保证其他 PC 拉取后可复用：
+
+- 必须同步：`SKILL.md`、`README.md`、`plan.md`、`orion.skilltest.json`、`references/docs/`、`references/validation-pool/`、`references/project-profiles/`、`tools/`、`cucumber_test/` runtime/tools/docs、稳定的 `deliverables/<project_key>/plan|cases|archive`。
+- 新增功能模块、项目 profile、Cucumber/native step、烧录/gate 逻辑或断言规则时，必须同时提交对应文档、Feature/用例、执行入口和 `orion.skilltest.json` 更新。
+- 提交前至少执行 JSON 校验和相关 Python 编译校验，并用 `git diff --cached --name-only` 检查暂存粒度。
+- 不提交运行目录、原始证据、日志、音频缓存、烧录 staging、Cucumber debug 报告和 formal suite run bundle；这些只作为本地调试证据。

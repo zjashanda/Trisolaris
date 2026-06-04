@@ -22,6 +22,14 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 - 新项目进入时，优先新增独立 `deliverables/<project_key>/`；只有共享 runner 无法安全参数化时，才新增项目专用 runner。
 - 通用验证逻辑只写入 `references/validation-pool/`；项目特定码值、报告和结论只写入对应 `deliverables/<project_key>/`。
 
+## Orion SkillTest 平台资料
+
+- 根目录 `orion.skilltest.json` 是平台扫描 skill 时读取的结构化能力资料，格式遵循 `references/docs/orion-skilltest-profile-framework.md`，示例见 `references/docs/orion.skilltest.json`。
+- 该 JSON 的 `capabilities` 必须覆盖当前 `references/validation-pool/INDEX.md` 中对外支持的平台化测试模块；每个 capability 至少包含模块说明、依赖资源、副作用、风险等级和自然语言测试用例。
+- 后续只要新增、删除或重命名 `references/validation-pool/*.md` 模块，或改变模块的执行入口、执行模式、风险/副作用、用例模板，就必须同步更新 `orion.skilltest.json`。
+- 后续只要新增项目 profile、Cucumber/native 执行模式、烧录/门禁入口或可由平台选择的测试模块，也必须同步检查 `orion.skilltest.json` 是否需要新增 capability 或更新 `call_method` / `required_config`。
+- 更新后必须运行 `python3 -m json.tool orion.skilltest.json >/tmp/orion.skilltest.validated.json` 校验 JSON；若更新了模块清单，还要对照 `references/validation-pool/INDEX.md` 确认可展示 capability 没有漏项。
+
 ## 当前项目画像
 
 ### CSK5062 小度风扇
@@ -79,6 +87,10 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 3. 按当前需求选择模块变体；同一功能在不同项目实现不同，禁止直接复制旧项目 deliverables 的断言。
 4. 为当前项目生成或刷新测试方案和正式用例。
 5. 正式全集执行优先使用 `tools/suite/run_formal_suite.py`；它按 `references/project-profiles/*.json` 识别项目并选择 adapter，对外只输出一次全集结果。
+   - `--execution-mode cucumber-smoke` 只验证 Gherkin/step/硬件桥接。
+   - `--execution-mode cucumber-formal` 是 Cucumber 顶层包装旧 formal runner，用于 72 条正式用例状态断言；不得把它宣称为 Cucumber-native。
+   - `--execution-mode cucumber-native` 由 Scenario step 直接驱动声卡、日志串口、协议串口、协议注入、烧录后数值探测和断言；后续新增 native 用例优先改 `.feature` 的 Scenario/Examples/动作表/断言表，不为单条功能新增专用 runner。
+   - `--execution-mode cucumber-all` 是当前全量 Cucumber 闭环入口：先跑 native 场景，再跑 72 条正式 Cucumber Feature；最终结果以正式用例全集统计为准，同时报告 native 直接硬件执行覆盖。
 6. 烧录固件，并先完成最小可测性门禁，再进入全量执行。
 7. 串行执行验证；同一组协议/日志串口不能被多个采集任务并发占用。
 8. 每个执行批次完成后聚合项目用例状态；内部可分组，最终报告必须是正式用例全集视角，不能让用户手工拼接主链路和补充链路。
@@ -99,7 +111,7 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 
 - 唤醒超时：从响应播报结束或 `0x0001/Wakeup` 到 `TIME_OUT/MODE=0` 测真实时间，再比对需求；纯唤醒和唤醒后命令两条路径都要一致。
 - 音量档位：先锚定最小/最大边界，再做 min->max、max->min 双向探测，用运行时 `mini player set vol` 阶梯判断档位对称性。
-- 默认音量：`config.clear -> reboot -> burn` 后抓首启 `Running Config`，从默认位单边探到边界，再双边探总档位，用边界步数反推默认档位。
+- 默认音量：`config.clear -> reboot -> burn` 后抓启动 `Running Config`，从默认位单边探到边界，再双边探总档位，用边界步数反推默认档位；小度 `CFG-VOL-001` 已迁入 Cucumber native，最终 FAIL 只能是固件默认值或需求值不一致。
 - 音量持久化：等待 `refresh config volume=` 或保存闭环后再重启；重启后和当前需求比对，不和写死默认值比对。
 - HTT 主动命令若只是上报 MCU，本地副作用必须等 MCU 被动确认后再断言；例如主动音量 `0x0041/0x0042` 需要回同码被动协议。语音开关当前实测口径为主动关闭 `0x0016 -> 0x0036`、主动打开 `0x0017 -> 0x0037`，被动 `0x0012` 是 MCU 直接关闭语音的独立入口。
 - HTT 全链路命令覆盖中，单个 TTS 短语若稳定误打到同表邻近意图，先使用同一需求行的官方别名做探测收敛；别名通过时不得把 TTS 选择问题留成最终 FAIL。
@@ -112,6 +124,9 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 - Markdown 报告使用中文标题和正文，尽量保持 Windows 友好的 UTF-8。
 - 报告必须区分 PASS、FAIL、BLOCKED、TODO/manual。
 - 最终 FAIL 清单不得包含验证方案、用例设计或断言问题。
-- 发布前运行相关 `py_compile` 或 skill 校验，检查 `git status --short`。
-- 不提交运行证据、音频缓存、烧录临时文件、日志、`__pycache__`。
+- Git 同步必须按“其他 PC 拉取后可直接复用 skill”的颗粒度提交，不能只提交单个补丁文件。
+- 发布前必须检查并提交必要复用资产：`SKILL.md`、`README.md`、`plan.md`、`orion.skilltest.json`、`references/docs/`、`references/validation-pool/`、`references/project-profiles/`、`references/modular-validation-workflow.md`、`tools/`、`cucumber_test/` 的 runtime/tools/docs，以及稳定的 `deliverables/<project_key>/plan|cases|archive` 资产。
+- 新增或修改功能模块、执行入口、Cucumber/native step、项目 profile、烧录/gate 逻辑时，必须同时提交对应文档、profile、用例/Feature、断言规则和平台能力 JSON；避免另一台 PC 缺少上下文而无法运行。
+- 发布前运行相关 `py_compile` 或 skill 校验，检查 `git status --short` 和 `git diff --cached --name-only`，确认没有漏掉必需文件，也没有误提交运行产物。
+- 不提交运行证据、音频缓存、烧录临时文件、日志、`__pycache__`、`.pyc`、临时固件压缩包/解压目录、Cucumber debug 报告或 formal suite 运行目录。
 - 合并或发布时不得删除其他项目资产；多项目内容要按目录融合。

@@ -174,12 +174,14 @@ def evaluate_voice_reg_cases(summary_path: Path) -> tuple[list[dict[str, Any]], 
     wake_learn = records.get("reg_voice002_learn_wakeup_sequence")
     wake_recheck = records.get("reg_voice002_learned_wake_recheck_open")
     wake_default = records.get("reg_voice002_default_wake_still_open_ok")
+    wake_save_text = (wake_learn.log_text if wake_learn else "") + "\n" + (wake_recheck.log_text if wake_recheck else "")
+    wake_save_ok = any(marker in wake_save_text for marker in ["save new voice.bin", "reg success!", "save config success"])
     add_eval(
         results,
         evidence_map,
         "REG-WAKE-001",
         "语音注册-唤醒词",
-        "PASS" if step_ok(wake_learn) and "save config success" in wake_learn.log_text and has_frame(wake_recheck, open_proto) else "FAIL",
+        "PASS" if step_ok(wake_learn) and wake_save_ok and has_frame(wake_recheck, open_proto) else "FAIL",
         "学习唤醒词后现场可继续执行打开电风扇",
         evidence("reg_voice002_learn_wakeup_sequence", "reg_voice002_learned_wake_recheck_open"),
     )

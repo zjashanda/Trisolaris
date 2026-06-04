@@ -87,3 +87,14 @@
 - `tools/burn_bundle/linux/burn.log`
 - `tools/burn_bundle/linux/burn_tool.log`
 - `__pycache__/`、`.venv/`、临时固件压缩包和解压副本
+
+## Git 同步颗粒度
+
+同步到远端时必须保证另一台 PC 拉取仓库后具备完整 skill 能力：
+
+- 必须提交核心入口和规则：`SKILL.md`、`README.md`、`plan.md`、`orion.skilltest.json`、`references/docs/`、`references/fullflow-validation-method.md`、`references/modular-validation-workflow.md`、`references/evidence-rules.md`、`references/repo-workflow.md`。
+- 必须提交可复用能力池和适配资料：`references/validation-pool/`、`references/project-profiles/`、稳定的 `deliverables/<project_key>/plan/`、`deliverables/<project_key>/cases/`、`deliverables/<project_key>/archive/`。
+- 必须提交可执行资产：`tools/`、`cucumber_test/README.md`、`cucumber_test/runtime/`、`cucumber_test/tools/`、`cucumber_test/00_assessment/` 到 `06_migration/` 的设计说明。
+- 新增或修改功能模块、执行入口、项目 profile、Cucumber/native step、烧录/gate 逻辑或断言规则时，必须同步更新对应文档、Feature/用例、profile 和 `orion.skilltest.json`。
+- 不提交本地运行证据：`result/`、`audio_cache/`、`deliverables/*/reports/`、`deliverables/formal_suite_runs/`、Cucumber debug reports、日志、烧录 staging、临时固件包和 Python 缓存。
+- 发布前至少运行 `python3 -m json.tool orion.skilltest.json >/tmp/orion.skilltest.validated.json`，并对改动的 Python 文件运行 `python3 -m py_compile ...`；最后用 `git status --short` 和 `git diff --cached --name-only` 核对没有遗漏必需文件。
