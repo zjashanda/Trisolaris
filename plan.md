@@ -482,7 +482,7 @@
   - 全仓搜索后发现历史增强样本 `result/csk3022_htt_clothes_airer/audio_boost_test_assets/wake_boost6dB.wav` 与 `.../open_light_boost6dB.wav`；
   - 用新脚本支持 `--audio-file` 后，已执行 `result/csk3022_htt_clothes_airer/20260423_133602_htt_pyaudio_route_probe_wasapi22_boost6db_ctrl_light/`，把 `capture 27` 的 `ch1` 峰值抬到约 `12899`，但仍没有 `Wakeup:` / `0x0001`；
   - 另尝试 `slow_huihui_wake` 旧样本配增强命令词，目录 `result/csk3022_htt_clothes_airer/20260423_133759_htt_pyaudio_route_probe_wasapi22_slowwake_boostcmd_ctrl_light/`，仍未恢复主动识别。
-- [done] 已尝试在线生成更自然的 Edge TTS 音频，但当前环境访问 `edge-tts` 服务返回 `403/timeout`，未能形成可用替代样本；证据目录 `result/csk3022_htt_clothes_airer/20260423_edge_tts_assets/`。
+- [done] 已尝试在线生成更自然的 Edge TTS 音频，但当前环境访问 `edge-tts` 服务返回 `403/timeout`，未能形成可用替代样本；证据目录 `result/csk3022_htt_clothes_airer/20260423_edge_tts_assets/`。（历史记录：该通道已于 2026-11-06 移除。）
 - [done] 已复核 shell 诊断命令：
   - `help` / `help factory` 已重新抓到，确认可用诊断仍主要是 `factory connect/version/gpio/uart/mic/adc`、`adconf`、`classd` 等；
   - `factory mic` 在 idle 和 `factory connect` 后重试都快速返回 `mic test failed` / `outRet:17`，目前还不能直接拿它证明 ASR 输入是否正常。
@@ -810,7 +810,7 @@
 - [done] 检查合并状态：当前无 unmerged paths，冲突标记扫描未发现真实冲突标记，仅剩历史 stash 待最终确认后清理。
 - [done] 已重新生成小度风扇静态测试方案/正式用例，并对小度、好太太关键 runner/helper 执行 `py_compile`，语法校验通过。
 - [doing] 准备按 Linux 设备映射执行小度风扇全链路：log/burn `/dev/ttyACM0`，protocol `/dev/ttyACM2`，control `/dev/ttyACM4`，audio `VID_8765&PID_5678:USB_0_4_3_1_0`。
-- [done] 发现 Linux 环境无 `powershell` 导致 TTS 生成失败；已修复 `tools/audio/fan_validation_helper.py`，增加 `edge-tts`/`espeak` fallback，当前使用 `TRISOLARIS_TTS_ENGINE=edge` 生成小度中文语音。
+- [done] 发现 Linux 环境无 `powershell` 导致 TTS 生成失败；已修复 `tools/audio/fan_validation_helper.py`，增加 `edge-tts`/`espeak` fallback，当前使用 `TRISOLARIS_TTS_ENGINE=edge` 生成小度中文语音。（历史记录：2026-11-06 起已改为 lstts，全部兜底引擎已移除，本条仅作考古。）
 - [doing] 重新执行小度风扇主 fullflow。
 - [doing] 主 fullflow 已进入中段执行；当前已确认烧录、可测性门禁、超时、被动播报、音量档位、部分会话/音量用例完成，继续等待全量主流程结束。
 - [done] 小度风扇主 fullflow 完成：`deliverables/csk5062_xiaodu_fan/reports/20260424_182524_linux_acm_fullflow_merge_r2`；主流程中默认音量仍为 FAIL，`REG-CFG-005` 保持 BLOCKED，其余已执行主项按当前输出通过/待人工。
@@ -1520,3 +1520,10 @@
 - [done] 更新 `SKILL.md` 的报告与发布规则，增加 UTF-8/UTF-8-BOM、JSON/Markdown/CSV/XLSX 校验和乱码扫描要求。
 - [done] 已对本次修改的 `SKILL.md` 执行 UTF-8 回读及乱码标记扫描，未发现替换乱码；`plan.md` 仅记录本轮动作，不作为交付文档编码基线。
 
+## 2026-11-06 合成通道统一为 lstts
+- [done] 读取 `plan.md`，确认本轮任务：把运行时语音合成从旧通道（Edge / PowerShell SAPI / espeak 回退链）统一到 `lstts`(IndexTTS)，保留 `run_tts` 函数名、参数与产物路径。
+- [done] 重写 `tools/audio/fan_validation_helper.py` 的 TTS 段：只走 `lstts_core.synthesize_one`，删除全部兜底引擎与 `TRISOLARIS_TTS_ENGINE` 选路；失败直接抛错，不再回退。
+- [done] 新增 `config/tts.json`（音色映射、默认音色、采样率、超时）；历史音色名 `Microsoft Huihui Desktop` 等自动映射到 lstts 音色，未知名称原样透传。
+- [done] 产物仍为 16 kHz / 单声道 / 16-bit WAV；lstts 返回 24 kHz 时用 ffmpeg 转码，缺 ffmpeg 直接报错。
+- [done] 新增 `tests/test_tts_lstts.py`（11 个离线用例，桩替换 `lstts_core`，不访问网络），`python -m unittest discover -s tests` 通过。
+- [done] `SKILL.md` 与 `README.md` 增加 lstts 通道说明、安装/更新命令与示例。

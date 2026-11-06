@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import time
+import wave
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -19,152 +20,118 @@ from listenai_play_repo import resolve_listenai_play
 ROOT = Path(__file__).resolve().parents[2]
 AUDIO_CACHE_DIR = ROOT / "audio_cache" / "tts"
 MANIFEST_PATH = ROOT / "audio_cache" / "manifest.json"
+TTS_CONFIG_PATH = ROOT / "config" / "tts.json"
+DEFAULT_TTS_CONFIG = {
+    "engine": "lstts",
+    "default_voice": "付小春",
+    "sample_rate": 16000,
+    "request_timeout_s": 60,
+    "voice_map": {},
+}
+
+
+def load_tts_config() -> dict:
+    """读取 config/tts.json；文件缺失时退回内置默认值，老调用方不受影响。"""
+    payload = dict(DEFAULT_TTS_CONFIG)
+    payload["voice_map"] = {}
+    if TTS_CONFIG_PATH.is_file():
+        loaded = json.loads(TTS_CONFIG_PATH.read_text(encoding="utf-8-sig") or "{}")
+        if not isinstance(loaded, dict):
+            raise ValueError(f"TTS config must be a JSON object: {TTS_CONFIG_PATH}")
+        payload.update(loaded)
+    if not isinstance(payload.get("voice_map"), dict):
+        raise ValueError(f"tts.voice_map must be an object: {TTS_CONFIG_PATH}")
+    return payload
+
+
+def resolve_tts_voice(voice: str, config: dict) -> str:
+    """把历史调用方的系统 TTS / 在线音色名映射成 lstts 音色；未知名称原样透传。"""
+    name = (voice or "").strip()
+    mapping = config.get("voice_map") or {}
+    if name in mapping:
+        return str(mapping[name])
+    lowered = name.lower()
+    if not name or lowered.startswith("microsoft ") or lowered.startswith("zh-cn-"):
+        return str(config.get("default_voice") or DEFAULT_TTS_CONFIG["default_voice"])
+    return name
+
+
+def read_wav_format(path: Path) -> tuple[int, int, int]:
+    with wave.open(str(path), "rb") as handle:
+        return handle.getframerate(), handle.getnchannels(), handle.getsampwidth()
+
+
+def normalize_wav(source: Path, target: Path, sample_rate: int) -> None:
+    """把 lstts 输出归一化为设备要求的 16 kHz 单声道 16-bit；已合规时直接改名。"""
+    rate, channels, width = read_wav_format(source)
+    if rate == sample_rate and channels == 1 and width == 2:
+        source.replace(target)
+        return
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError(
+            f"ffmpeg is required to convert {rate}Hz/{channels}ch/{width * 8}bit audio to {sample_rate}Hz mono"
+        )
+    completed = subprocess.run(
+        [ffmpeg, "-y", "-loglevel", "error", "-i", str(source), "-ar", str(sample_rate), "-ac", "1", str(target)],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
+    )
+    source.unlink(missing_ok=True)
+    if completed.returncode != 0:
+        target.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"ffmpeg convert failed: {completed.returncode}; "
+            f"stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
+        )
 
 
 def run_tts(text: str, out_path: Path, voice: str, rate: int) -> None:
+    """用 lstts(IndexTTS) 合成一条 WAV，保留原函数名、参数与产物路径。
+
+    只走 lstts 一条通道：失败直接抛错，不再回退任何本地兜底引擎，
+    避免兜底把 lstts 故障掩盖成"能播就算过"。
+    `rate` 仅为兼容旧调用方保留（lstts 不支持语速参数）。
+    """
+    del rate
+    if not (text or "").strip():
+        raise ValueError("text cannot be empty")
+    config = load_tts_config()
+    target_voice = resolve_tts_voice(voice, config)
+    sample_rate = int(config.get("sample_rate") or 16000)
+    timeout_s = float(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S") or config.get("request_timeout_s") or 60)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    errors: list[str] = []
+    raw_path = out_path.with_suffix(".lstts.wav")
 
-    def validate_output() -> None:
-        if not out_path.is_file() or out_path.stat().st_size <= 44:
-            raise RuntimeError(f"TTS output missing or too small: {out_path}")
+    try:
+        from lstts_core import load_config as load_lstts_config
+        from lstts_core import synthesize_one
+    except ImportError as error:
+        raise RuntimeError(
+            "lstts_core is required for TTS. Install with: "
+            'pip install "lstts-core @ git+https://github.com/zjashanda/lstts.git@main"'
+        ) from error
 
-    def try_powershell_tts() -> bool:
-        if not shutil.which("powershell"):
-            errors.append("PowerShell TTS skipped: powershell not found")
-            return False
-        ps_text = text.replace("'", "''")
-        ps_out = str(out_path).replace("'", "''")
-        ps_voice = voice.replace("'", "''")
-        ps = (
-            "Add-Type -AssemblyName System.Speech; "
-            "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
-            f"$s.SelectVoice('{ps_voice}'); "
-            f"$s.Rate = {rate}; "
-            f"$s.SetOutputToWaveFile('{ps_out}'); "
-            f"$s.Speak('{ps_text}'); "
-            "$s.Dispose();"
-        )
-        completed = subprocess.run(
-            ["powershell", "-NoProfile", "-Command", ps],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
-        )
-        if completed.returncode != 0:
-            errors.append(
-                f"PowerShell TTS failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
-            )
-            return False
-        validate_output()
-        return True
+    service_config = load_lstts_config("index_tts.json")
+    try:
+        synthesize_one(text, raw_path, voice=target_voice, config=service_config, timeout_s=timeout_s)
+    except Exception as error:
+        raw_path.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"lstts synthesis failed for voice={target_voice!r}: {type(error).__name__}: {error}"
+        ) from error
 
-    def try_edge_tts() -> bool:
-        ffmpeg = shutil.which("ffmpeg")
-        if not ffmpeg:
-            errors.append("edge-tts skipped: ffmpeg not found")
-            return False
-        edge_voice = os.environ.get("TRISOLARIS_EDGE_TTS_VOICE", "zh-CN-XiaoxiaoNeural")
-        edge_rate = os.environ.get("TRISOLARIS_EDGE_TTS_RATE", f"{rate:+d}%")
-        mp3_path = out_path.with_suffix(".edge.mp3")
-        script = (
-            "import asyncio, sys, edge_tts\n"
-            "async def main():\n"
-            "    communicate = edge_tts.Communicate(sys.argv[1], voice=sys.argv[3], rate=sys.argv[4])\n"
-            "    await communicate.save(sys.argv[2])\n"
-            "asyncio.run(main())\n"
-        )
-        completed = subprocess.run(
-            [sys.executable, "-c", script, text, str(mp3_path), edge_voice, edge_rate],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
-        )
-        if completed.returncode != 0 or not mp3_path.is_file() or mp3_path.stat().st_size <= 0:
-            errors.append(
-                f"edge-tts failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
-            )
-            mp3_path.unlink(missing_ok=True)
-            return False
-        converted = subprocess.run(
-            [ffmpeg, "-y", "-loglevel", "error", "-i", str(mp3_path), "-ar", "16000", "-ac", "1", str(out_path)],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
-        )
-        mp3_path.unlink(missing_ok=True)
-        if converted.returncode != 0:
-            errors.append(
-                f"edge-tts ffmpeg convert failed: {converted.returncode}; stdout={converted.stdout.strip()}; stderr={converted.stderr.strip()}"
-            )
-            return False
-        validate_output()
-        return True
+    try:
+        normalize_wav(raw_path, out_path, sample_rate)
+    except Exception:
+        raw_path.unlink(missing_ok=True)
+        out_path.unlink(missing_ok=True)
+        raise
 
-    def try_espeak_tts() -> bool:
-        espeak = shutil.which("espeak-ng") or shutil.which("espeak")
-        ffmpeg = shutil.which("ffmpeg")
-        if not espeak:
-            errors.append("espeak TTS skipped: espeak-ng/espeak not found")
-            return False
-        temp_path = out_path.with_suffix(".espeak.wav")
-        voice_name = os.environ.get("TRISOLARIS_ESPEAK_VOICE", "cmn")
-        speed = int(os.environ.get("TRISOLARIS_ESPEAK_SPEED", str(max(120, 160 + rate * 10))))
-        completed = subprocess.run(
-            [espeak, "-v", voice_name, "-s", str(speed), "-w", str(temp_path), text],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
-        )
-        if completed.returncode != 0 or not temp_path.is_file() or temp_path.stat().st_size <= 44:
-            errors.append(
-                f"espeak TTS failed: {completed.returncode}; stdout={completed.stdout.strip()}; stderr={completed.stderr.strip()}"
-            )
-            temp_path.unlink(missing_ok=True)
-            return False
-        if ffmpeg:
-            converted = subprocess.run(
-                [ffmpeg, "-y", "-loglevel", "error", "-i", str(temp_path), "-ar", "16000", "-ac", "1", str(out_path)],
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=int(os.environ.get("TRISOLARIS_TTS_TIMEOUT_S", "60")),
-            )
-            temp_path.unlink(missing_ok=True)
-            if converted.returncode != 0:
-                errors.append(
-                    f"espeak ffmpeg convert failed: {converted.returncode}; stdout={converted.stdout.strip()}; stderr={converted.stderr.strip()}"
-                )
-                return False
-        else:
-            temp_path.replace(out_path)
-        validate_output()
-        return True
-
-    preferred = os.environ.get("TRISOLARIS_TTS_ENGINE", "").strip().lower()
-    engines = {
-        "powershell": try_powershell_tts,
-        "edge": try_edge_tts,
-        "edge-tts": try_edge_tts,
-        "espeak": try_espeak_tts,
-        "espeak-ng": try_espeak_tts,
-    }
-    ordered = [engines[preferred]] if preferred in engines else []
-    for engine in [try_powershell_tts, try_edge_tts, try_espeak_tts]:
-        if engine not in ordered:
-            ordered.append(engine)
-    for engine in ordered:
-        try:
-            if engine():
-                return
-        except Exception as exc:
-            errors.append(f"{engine.__name__} raised {type(exc).__name__}: {exc}")
-            out_path.unlink(missing_ok=True)
-    raise RuntimeError("TTS failed on all engines:\n" + "\n".join(errors))
+    if not out_path.is_file() or out_path.stat().st_size <= 44:
+        raise RuntimeError(f"TTS output missing or too small: {out_path}")
 
 
 def load_manifest() -> dict:
@@ -245,12 +212,15 @@ def ensure_cached_tts(text: str, voice: str, rate: int, label: str) -> tuple[Pat
     AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     out_path = preferred_path
     run_tts(text, out_path, voice, rate)
+    tts_config = load_tts_config()
     entries[key] = {
         "text": text,
         "voice": voice,
         "rate": rate,
         "label": label,
         "path": str(out_path.relative_to(ROOT)),
+        "engine": tts_config.get("engine", "lstts"),
+        "sample_rate": int(tts_config.get("sample_rate") or 16000),
         "created_at": datetime.now().isoformat(timespec="seconds"),
     }
     save_manifest(manifest)
@@ -547,18 +517,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Small helper for CSK5062 fan voice validation.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_tts = sub.add_parser("tts", help="Generate a wav file with local Windows TTS.")
+    p_tts = sub.add_parser("tts", help="Generate a 16 kHz mono wav with lstts(IndexTTS).")
     p_tts.add_argument("--text", required=True)
     p_tts.add_argument("--out", required=True)
-    p_tts.add_argument("--voice", default="Microsoft Huihui Desktop")
-    p_tts.add_argument("--rate", type=int, default=0)
+    p_tts.add_argument("--voice", default="付小春", help="lstts voice name; legacy voice names are mapped in config/tts.json")
+    p_tts.add_argument("--rate", type=int, default=0, help="kept for compatibility; lstts ignores it")
     p_tts.set_defaults(func=cmd_tts)
 
-    p_cache = sub.add_parser("tts-cache", help="Generate or reuse a cached wav file.")
+    p_cache = sub.add_parser("tts-cache", help="Generate or reuse a cached wav file (lstts).")
     p_cache.add_argument("--text", required=True)
     p_cache.add_argument("--label", default="tts")
-    p_cache.add_argument("--voice", default="Microsoft Huihui Desktop")
-    p_cache.add_argument("--rate", type=int, default=0)
+    p_cache.add_argument("--voice", default="付小春", help="lstts voice name; legacy voice names are mapped in config/tts.json")
+    p_cache.add_argument("--rate", type=int, default=0, help="kept for compatibility; lstts ignores it")
     p_cache.set_defaults(func=cmd_tts_cache)
 
     p_probe = sub.add_parser("probe-play", help="Play an audio file and capture serial logs.")

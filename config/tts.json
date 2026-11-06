@@ -1,0 +1,11 @@
+{
+  "engine": "lstts",
+  "default_voice": "付小春",
+  "sample_rate": 16000,
+  "request_timeout_s": 60,
+  "voice_map": {
+    "Microsoft Huihui Desktop": "付小春",
+    "zh-CN-XiaoxiaoNeural": "付小春",
+    "zh-CN-YunxiNeural": "小宁"
+  }
+}

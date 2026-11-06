@@ -136,6 +136,14 @@ python3 tools/suite/run_formal_suite.py \
 - 后续缺陷复测：`tools/debug/run_htt_followup_checks.py`
 - 协议握手仿真：`tools/serial/fan_proto_handshake_probe.py`
 
+## 语音合成与语料
+
+- 唯一合成通道：`lstts`（IndexTTS），入口 `python tools/audio/fan_validation_helper.py tts|tts-cache`。
+- 产物：`16 kHz` / 单声道 / `16-bit` WAV，路径由调用方指定；运行态缓存写 `audio_cache/tts/`，不进仓库。
+- 音色映射与超时配置：`config/tts.json`；token 只从 `LSTTS_TTS_TOKEN` 读取。
+- 安装：`pip install "lstts-core @ git+https://github.com/zjashanda/lstts.git@main"`。
+- 合成失败不回退其他引擎，直接报错并保留错误信息。
+
 ## 验证口径
 
 - 每轮先读写 `plan.md`，保持 done / doing / todo 同步。

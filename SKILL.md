@@ -80,6 +80,35 @@ description: Trisolaris 多项目离线语音验证 skill。用于读取项目�
 - 若设备支持 `config.clear` 或等价全配置清除，验证固件默认值前必须执行 `config.clear -> reboot -> burn`。
 - 烧录闭环不能只看工具退出码，必须同时确认烧录成功标记和日志口启动版本。
 
+## 语音合成通道（lstts / IndexTTS）
+
+- 本仓库只有一条合成通道：`lstts`（IndexTTS）。不再使用任何旧在线 TTS 通道（原 Edge 通道已移除）、系统 SAPI 或其他在线 TTS，也没有兜底引擎；合成失败直接抛错，不允许用别的引擎把失败掩盖成"能播就算过"。
+- 入口：`tools/audio/fan_validation_helper.py tts` / `tts-cache`，函数入口 `run_tts(text, out_path, voice, rate)` 与产物路径保持不变。
+- 产物固定为 `16 kHz`、单声道、`16-bit` WAV；lstts 返回 24 kHz 时由 ffmpeg 转码，缺 ffmpeg 会直接报错，不回退。
+- 音色：`config/tts.json` 的 `voice_map` 把历史音色名映射成 lstts 音色（例如 `Microsoft Huihui Desktop` → `付小春`），未知名称原样透传。
+- 凭据：只允许 `LSTTS_TTS_TOKEN`（兼容旧 `LSTEST_TTS_TOKEN`）环境变量；token 不写进仓库、日志、命令示例。
+
+安装 / 更新：
+
+```bash
+pip install "lstts-core @ git+https://github.com/zjashanda/lstts.git@main"
+pip install -U --force-reinstall --no-cache-dir "lstts-core @ git+https://github.com/zjashanda/lstts.git@main"
+python -c "import lstts_core; print(lstts_core.__version__)"
+```
+
+示例：
+
+```bash
+python tools/audio/fan_validation_helper.py tts --text "打开风扇" --out result/tts/open_fan.wav
+python tools/audio/fan_validation_helper.py tts-cache --text "打开风扇" --label probe
+```
+
+离线测试（桩替换 lstts_core，不访问网络）：
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## 验证流程
 
 1. 解析需求文档、协议表、词表、流程图、固件和用户最新澄清，拆成可测试功能点。
